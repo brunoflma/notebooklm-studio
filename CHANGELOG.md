@@ -1,6 +1,8 @@
 ## v2.13
 - Studio: verificação de credenciais movida para dentro do processo de conexão — o terminal só abre se as credenciais estiverem válidas. Se expiradas, a tela de setup exibe as instruções completas de renovação sem entrar no Studio
 - Guia: exemplo do bloco de contexto substituído por dados genéricos fictícios — removidas todas as referências a casos e nomes reais
+- release.py: token do GitHub nunca mais hardcoded — lido de arquivo `.github_config` local (gitignored) ou variável de ambiente. Estrutura do zip corrigida para manter subpastas `studio/` e `guia/`
+- .gitignore: adicionados `.github_config` e `github.txt` para garantir que credenciais nunca sejam commitadas
 
 ## v2.12
 - Removida seção "Outros notebooks disponíveis" do bloco de contexto — não agrega ao Claude que trabalha em um caso específico; a troca de notebook é função do Studio
