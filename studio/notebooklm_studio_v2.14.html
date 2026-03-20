@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#1c1c24">
-<meta name="description" content="NotebookLM Studio v2.5 — Terminal visual para notebooklm-py via Google Colab">
+<meta name="description" content="NotebookLM Studio v2.14 — Terminal visual para notebooklm-py via Google Colab">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="NLM Studio">
-<title>NotebookLM Studio v2.5</title>
+<title>NotebookLM Studio v2.14</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#1c1c24;height:100vh;display:flex;flex-direction:column;color:#cdd0d8;overflow:hidden}
@@ -19,13 +19,30 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 #topbar-title{font-size:15px;font-weight:700;color:#e8e8e8;display:flex;align-items:center;gap:10px}
 #topbar-name{letter-spacing:-.01em}
 #version-badge{font-size:11px;font-weight:600;color:#2a9d8f;background:#1a2e2d;padding:2px 9px;border-radius:10px;border:1px solid #1e3d3a;letter-spacing:.03em}
+#nb-indicator{display:none;font-size:12px;color:#888;background:#1e1e2a;border:1px solid #2a2a38;border-radius:8px;padding:2px 12px;max-width:320px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+#nb-indicator:hover{border-color:#2a9d8f;color:#cdd0d8}
+#nb-indicator .nb-label{font-size:10px;color:#555;margin-right:4px}
 #topbar-right{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.top-btn{font-size:13px;color:#888;background:none;border:1px solid #2a2a38;border-radius:7px;padding:5px 12px;cursor:pointer;transition:all .15s;white-space:nowrap}
-.top-btn:hover{color:#e0e0e8;background:#25253a;border-color:#444}
-.ctx-style{background:#1a2e2d;border-color:#2a9d8f;color:#7fd3cc;font-weight:600}
-.ctx-style:hover{background:#1e3a38;color:#a0e8e0}
-.danger-btn{border-color:#4a1e1e;color:#f87171}
-.danger-btn:hover{background:#2a1a1a;border-color:#8b2020;color:#fca5a5}
+.top-btn{font-size:12px;color:#888;background:none;border:none;border-radius:8px;padding:5px 10px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.top-btn:hover{color:#e0e0e8;background:#25253a}
+.icon-btn{display:flex;align-items:center;gap:5px;padding:6px 10px;border:1px solid #252535;border-radius:8px}
+.icon-btn svg{stroke:#888;transition:stroke .15s;flex-shrink:0}
+.icon-btn:hover{background:#1e2035;border-color:#363655}
+.icon-btn:hover svg{stroke:#cdd0d8}
+.icon-btn span{font-size:12px;color:#888;transition:color .15s}
+.icon-btn:hover span{color:#cdd0d8}
+.ctx-btn-style{background:#1a2e2d;border-color:#2a9d8f}
+.ctx-btn-style svg{stroke:#2a9d8f}
+.ctx-btn-style span{color:#7fd3cc;font-weight:600}
+.ctx-btn-style:hover{background:#1e3a38;border-color:#3abfb1}
+.ctx-btn-style:hover svg{stroke:#7fd3cc}
+.ctx-btn-style:hover span{color:#a0e8e0}
+.danger-icon-btn{border-color:#3a1e1e}
+.danger-icon-btn svg{stroke:#f87171}
+.danger-icon-btn span{color:#f87171}
+.danger-icon-btn:hover{background:#2a1a1a;border-color:#8b2020}
+.danger-icon-btn:hover svg{stroke:#fca5a5}
+.danger-icon-btn:hover span{color:#fca5a5}
 
 /* PWA INSTALL */
 #pwa-btn{display:none;background:#1a2e2d;border-color:#2a9d8f;color:#7fd3cc;animation:pulse-pwa 2s ease-in-out 3}
@@ -135,9 +152,9 @@ code{font-family:monospace;font-size:11px;background:#1f1f1f;padding:1px 5px;bor
 .pal-btn.hidden{display:none}
 
 /* NOTEBOOK SWITCHER */
-#nb-switcher{display:none;background:#191921;border-bottom:1px solid #272735;flex-shrink:0;max-height:200px;overflow-y:auto}
-#nb-switcher-header{padding:7px 12px;font-size:10px;font-weight:600;color:#2a9d8f;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;justify-content:space-between}
-#nb-switcher-close{background:none;border:none;color:#555;cursor:pointer;font-size:14px;line-height:1}
+#nb-switcher{display:none;position:fixed;top:50px;right:auto;background:#21212d;border:1px solid #2e2e3d;border-radius:10px;min-width:260px;max-width:340px;max-height:280px;overflow-y:auto;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+#nb-switcher-header{padding:10px 14px;font-size:11px;font-weight:600;color:#2a9d8f;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #2e2e3d;flex-shrink:0}
+#nb-switcher-close{background:none;border:none;color:#555;cursor:pointer;font-size:16px;line-height:1}
 #nb-switcher-close:hover{color:#aaa}
 .nb-switch-item{width:100%;padding:6px 12px;background:none;border:none;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:1px;transition:background .1s}
 .nb-switch-item:hover{background:#22222e}
@@ -177,6 +194,39 @@ code{font-family:monospace;font-size:11px;background:#1f1f1f;padding:1px 5px;bor
 #cred-warn{display:none;margin-left:auto;padding:2px 10px;background:#3a1a1a;border:1px solid #8b2020;border-radius:10px;color:#f87171;font-size:11px;cursor:pointer}
 #cred-warn:hover{background:#4a2020}
 @keyframes pulse-dot{0%,100%{opacity:.6}50%{opacity:1}}
+
+/* DEBUG PANEL */
+#debug-panel{display:none;position:fixed;right:16px;bottom:80px;width:540px;max-height:480px;background:#15151e;border:1px solid #2e2e3d;border-radius:10px;z-index:51;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,.6)}
+#debug-panel.show{display:flex}
+#debug-header{padding:10px 14px;border-bottom:1px solid #2e2e3d;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:10px}
+#debug-title{font-size:13px;font-weight:600;color:#e8e8e8}
+#debug-hbtns{display:flex;gap:6px}
+#debug-hbtns button{font-size:11px;padding:3px 9px;background:#21212d;border:1px solid #363648;border-radius:5px;color:#888;cursor:pointer}
+#debug-hbtns button:hover{color:#fff;border-color:#555}
+#debug-close{background:none;border:none;color:#555;cursor:pointer;font-size:16px;padding:0 4px}
+#debug-tabs{display:flex;border-bottom:1px solid #1e1e2a;flex-shrink:0}
+.debug-tab{padding:7px 16px;font-size:12px;color:#555;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+.debug-tab.active{color:#2a9d8f;border-bottom-color:#2a9d8f}
+.debug-tab:hover{color:#aaa}
+#debug-content{flex:1;overflow-y:auto;padding:10px}
+.de{margin-bottom:8px;border:1px solid #1e1e2a;border-radius:6px;overflow:hidden}
+.de-head{padding:5px 10px;background:#1e1e2a;font-size:11px;display:flex;gap:8px;align-items:center}
+.de-cmd{font-family:monospace;color:#2a9d8f;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.de-ts{color:#444;font-size:10px;flex-shrink:0}
+.de-rc{padding:1px 7px;border-radius:10px;font-size:10px;font-weight:600;flex-shrink:0}
+.de-ok{background:#1a3a1a;color:#4ade80}
+.de-err{background:#3a1a1a;color:#f87171}
+.de-dur{background:#1a2535;color:#60a5fa}
+.de-raw{font-family:monospace;font-size:11px;color:#f87171;white-space:pre-wrap;padding:6px 10px;max-height:80px;overflow-y:auto}
+
+/* PLAYBOOK */
+.pal-pb{width:100%;padding:7px 14px 7px 18px;background:none;border:none;text-align:left;cursor:pointer;transition:all .12s;display:flex;align-items:center;gap:8px;border-left:2px solid transparent}
+.pal-pb:hover{background:#22222e;border-left-color:#f59e0b}
+.pal-pb .pb-name{font-size:13px;color:#c8d0dc;font-weight:500;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pal-pb .pb-n{font-size:10px;color:#555;flex-shrink:0}
+.pal-pb:hover .pb-name{color:#fff}
+.pb-del{background:none;border:none;color:#444;cursor:pointer;font-size:12px;padding:2px 4px;flex-shrink:0;border-radius:3px}
+.pb-del:hover{color:#f87171;background:#2a1a1a}
 @keyframes slideDown{from{transform:translateX(-50%) translateY(-20px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
 
 /* CONTEXT MODAL */
@@ -205,17 +255,43 @@ code{font-family:monospace;font-size:11px;background:#1f1f1f;padding:1px 5px;bor
 <div id="topbar">
   <div id="topbar-title">
     📓 <span id="topbar-name">NotebookLM Studio</span>
-    <span id="version-badge">v2.5</span>
+    <span id="version-badge">v2.14</span>
+    <span id="nb-indicator" onclick="run('status')" title="Clique para ver status completo"><span class="nb-label">notebook:</span><span id="nb-indicator-name">—</span></span>
     <span id="queue-badge"><span id="queue-count">0</span> na fila</span>
   </div>
   <div id="topbar-right">
-    <button class="top-btn ctx-style" id="ctx-btn" onclick="showContext()" style="display:none">📋 copiar contexto</button>
-    <button class="top-btn" id="hist-btn" onclick="toggleHistory()" style="display:none">⏱ histórico</button>
-    <button class="top-btn" id="nb-btn" onclick="toggleNbSwitcher()" style="display:none">⇄ trocar notebook</button>
-    <button class="top-btn" id="clear-btn" onclick="clearOutput()" style="display:none">🗑 limpar</button>
-    <button class="top-btn" id="pwa-btn" onclick="installPWA()" title="Instalar como app" style="display:none">📲 instalar</button>
-    <button class="top-btn" onclick="showHelp()">? ajuda</button>
-    <button class="top-btn danger-btn" id="disconnect-btn" onclick="disconnect()" style="display:none">✕ desconectar</button>
+    <button class="top-btn icon-btn ctx-btn-style" id="ctx-btn" onclick="showContext()" style="display:none" title="Copiar contexto para o Claude">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+      <span>Contexto</span>
+    </button>
+    <button class="top-btn icon-btn" id="hist-btn" onclick="toggleHistory()" style="display:none" title="Histórico">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>Histórico</span>
+    </button>
+    <button class="top-btn icon-btn" id="nb-btn" onclick="toggleNbSwitcher()" style="display:none" title="Trocar notebook">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+      <span>Notebook</span>
+    </button>
+    <button class="top-btn icon-btn" id="clear-btn" onclick="clearOutput()" style="display:none" title="Limpar terminal">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+      <span>Limpar</span>
+    </button>
+    <button class="top-btn icon-btn" id="pwa-btn" onclick="installPWA()" style="display:none" title="Instalar como app">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <span>Instalar</span>
+    </button>
+    <button class="top-btn icon-btn" onclick="showHelp()" title="Ajuda">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span>Ajuda</span>
+    </button>
+    <button class="top-btn icon-btn" id="debug-btn" onclick="toggleDebug()" style="display:none" title="Debug">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span>Debug</span>
+    </button>
+    <button class="top-btn icon-btn danger-icon-btn" id="disconnect-btn" onclick="disconnect()" style="display:none" title="Desconectar">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <span>Sair</span>
+    </button>
   </div>
 </div>
 
@@ -243,15 +319,6 @@ code{font-family:monospace;font-size:11px;background:#1f1f1f;padding:1px 5px;bor
 
 <!-- MAIN -->
 <div id="main">
-  <!-- NOTEBOOK SWITCHER -->
-  <div id="nb-switcher">
-    <div id="nb-switcher-header">
-      <span>Trocar notebook</span>
-      <button id="nb-switcher-close" onclick="toggleNbSwitcher()">✕</button>
-    </div>
-    <div id="nb-list-items"></div>
-  </div>
-
   <!-- PALETTE -->
   <div id="palette">
     <div id="palette-title">Comandos</div>
@@ -340,6 +407,14 @@ code{font-family:monospace;font-size:11px;background:#1f1f1f;padding:1px 5px;bor
       <button class="pal-btn" onclick="run('download audio ./podcast.mp3')">
         <span class="cmd">↓ podcast</span>
         <span class="desc">Salvar .mp3</span>
+      </button>
+    </div>
+    <div class="pal-section" id="pal-playbooks">
+      <div class="pal-label">🎯 Playbooks</div>
+      <div id="playbook-list"></div>
+      <button class="pal-btn" onclick="openSavePlaybook()">
+        <span class="cmd">+ novo playbook</span>
+        <span class="desc">Salvar sequencia do historico</span>
       </button>
     </div>
   </div>
@@ -438,6 +513,26 @@ code{font-family:monospace;font-size:11px;background:#1f1f1f;padding:1px 5px;bor
 <!-- NOTIFICATION BADGE -->
 <div id="notif-badge"></div>
 
+<!-- NOTEBOOK SWITCHER DROPDOWN -->
+<div id="nb-switcher">
+  <div id="nb-switcher-header">
+    <span>Trocar notebook</span>
+    <button id="nb-switcher-close" onclick="toggleNbSwitcher()">✕</button>
+  </div>
+  <div id="nb-list-items"></div>
+</div>
+
+<!-- DEBUG PANEL -->
+<div id="debug-panel">
+  <div id="debug-header">
+    <span id="debug-title">&#128269; Debug — Ultimos comandos</span>
+    <div id="debug-hbtns"><button onclick="refreshDebug()">&#8635; atualizar</button><button onclick="copyDebugAll()">&#128203; copiar</button></div>
+    <button id="debug-close" onclick="toggleDebug()">&#10005;</button>
+  </div>
+  <div id="debug-tabs"><div class="debug-tab active" onclick="setDebugTab('log')" id="dtab-log">Comandos</div><div class="debug-tab" onclick="setDebugTab('raw')" id="dtab-raw">JSON bruto</div></div>
+  <div id="debug-content"></div>
+</div>
+
 <!-- HISTORY PANEL -->
 <div id="hist-panel">
   <div id="hist-header">
@@ -464,36 +559,85 @@ async function connect(){
   const url=document.getElementById('url-input').value.trim().replace(/\/$/,'');
   if(!url)return;
   const btn=document.getElementById('setup-btn');
-  btn.disabled=true;btn.textContent='Conectando...';
   const err=document.getElementById('setup-err');
+  btn.disabled=true;btn.textContent='Conectando...';
   err.style.display='none';
   document.getElementById('url-input').classList.remove('err');
+
   try{
+    // Passo 1 — verificar se o servidor Flask está respondendo
     const r=await fetch(`${url}/health`,{headers:H});
     const d=await r.json();
-    if(d.status==='ok'){
-      URL_BASE=url;
-      document.getElementById('setup').style.display='none';
-      document.getElementById('main').style.display='flex';
-      document.getElementById('disconnect-btn').style.display='block';
-      document.getElementById('copy-all-btn').style.display='block';
-  document.getElementById('ctx-btn').style.display='block';
-  document.getElementById('clear-btn').style.display='block';
-  document.getElementById('hist-btn').style.display='block';
-  document.getElementById('nb-btn').style.display='block';
-  requestNotifPermission();
-  startKeepAlive();
-  document.getElementById('status-row').style.display='flex';
-      info(`✅ Conectado em ${url}`);
-      info('💡 Use a paleta à esquerda ou digite comandos abaixo. Copie os resultados e cole no chat do Claude para interpretar.');
-      sep();
-      document.getElementById('cmd-input').focus();
-    }else{showErr('Servidor respondeu com status inesperado.');}
+    if(d.status!=='ok'){showErr('Servidor respondeu com status inesperado.');btn.disabled=false;btn.textContent='Conectar';return;}
+
+    // Passo 2 — verificar credenciais do NotebookLM antes de entrar no terminal
+    btn.textContent='Verificando credenciais...';
+    let credOk=true;
+    try{
+      const cr=await fetch(`${url}/execute`,{method:'POST',headers:H,body:JSON.stringify({command:'list --json'})});
+      const cd=await cr.json();
+      const combined=(cd.stdout||'')+(cd.stderr||'');
+      const expired=combined.toLowerCase().includes('authentication expired')||
+                    (combined.toLowerCase().includes('redirected to')&&combined.toLowerCase().includes('accounts.google.com'))||
+                    combined.toLowerCase().includes('invalid session')||
+                    (combined.toLowerCase().includes('403')&&combined.toLowerCase().includes('forbidden'));
+      if(expired){ credOk=false; }
+    }catch(e){ /* se falhou a probe, assume credencial OK e deixa o usuário tentar */ }
+
+    if(!credOk){
+      // Credenciais expiradas — mostrar aviso detalhado na tela de setup, sem entrar no terminal
+      btn.disabled=false;btn.textContent='Conectar';
+      err.innerHTML=
+        '<div style="background:#1e1414;border:1px solid #8b2020;border-radius:8px;padding:14px 16px;margin-top:4px;font-size:13px;line-height:1.9;color:#f0c0c0;text-align:left">'+
+        '<div style="font-size:14px;font-weight:600;color:#f87171;margin-bottom:8px">⚠ Credenciais do Google expiradas</div>'+
+        'O servidor está online, mas as credenciais do NotebookLM expiraram. Renove antes de continuar:<br>'+
+        '<ol style="padding-left:18px;margin-top:8px;color:#e0a0a0;line-height:2.1">'+
+        '<li>No seu <strong>computador local</strong>, execute: <code style="background:#2a1a1a;padding:1px 7px;border-radius:3px;color:#fca5a5">notebooklm login</code></li>'+
+        '<li>Faça login na janela do Chrome que abrir</li>'+
+        '<li>Localize o arquivo renovado em <code style="background:#2a1a1a;padding:1px 7px;border-radius:3px;color:#fca5a5">~/.notebooklm/storage_state.json</code></li>'+
+        '<li>Execute a célula de setup no Colab e faça upload do novo arquivo</li>'+
+        '<li>Reinicie a célula do servidor e tente conectar novamente</li>'+
+        '</ol></div>';
+      err.style.display='block';
+      document.getElementById('url-input').classList.add('err');
+      return;
+    }
+
+    // Passo 3 — credenciais OK, liberar o terminal
+    URL_BASE=url;
+    _credExpired=false;
+    document.getElementById('setup').style.display='none';
+    document.getElementById('main').style.display='flex';
+    document.getElementById('disconnect-btn').style.display='block';
+    document.getElementById('copy-all-btn').style.display='block';
+    document.getElementById('ctx-btn').style.display='block';
+    document.getElementById('clear-btn').style.display='block';
+    document.getElementById('hist-btn').style.display='block';
+    document.getElementById('nb-btn').style.display='block';
+    requestNotifPermission();
+    startKeepAlive();
+    document.getElementById('status-row').style.display='flex';
+    document.getElementById('nb-indicator').style.display='flex';
+    document.getElementById('debug-btn').style.display='block';
+    info(`✅ Conectado em ${url}`);
+    info('💡 Use a paleta à esquerda ou digite comandos abaixo. Copie os resultados e cole no chat do Claude para interpretar.');
+    sep();
+    document.getElementById('cmd-input').focus();
+
   }catch(e){
     showErr(`Não foi possível conectar. Verifique se a célula do servidor está rodando.\n${e.message}`);
     document.getElementById('url-input').classList.add('err');
   }
   btn.disabled=false;btn.textContent='Conectar';
+}
+
+// _checkCredsOnConnect mantido como fallback para reconexões via keepalive
+async function _checkCredsOnConnect(){
+  try{
+    const r=await fetch(`${URL_BASE}/execute`,{method:'POST',headers:H,body:JSON.stringify({command:'list --json'})});
+    const d=await r.json();
+    checkForCredExpiry(d.stdout||'',d.stderr||'');
+  }catch(e){}
 }
 
 function showErr(msg){const e=document.getElementById('setup-err');e.textContent='⚠ '+msg;e.style.display='block';}
@@ -513,6 +657,10 @@ function disconnect(){
   document.getElementById('hist-panel').classList.remove('show');
   stopKeepAlive();
   document.getElementById('status-row').style.display='none';
+  document.getElementById('nb-indicator').style.display='none';
+  document.getElementById('debug-btn').style.display='none';
+  document.getElementById('debug-panel').classList.remove('show');
+  document.getElementById('nb-indicator-name').textContent='—';
   document.getElementById('url-input').value='';
 }
 
@@ -676,6 +824,21 @@ function addBlock(cmd,stdout,stderr,code){
     if(stdout){const d=document.createElement('div');d.className='block-out';d.textContent=stdout.trimEnd();block.appendChild(d);}
     if(stderr){const d=document.createElement('div');d.className='block-err';d.textContent=stderr.trimEnd();block.appendChild(d);}
     if(!stdout&&!stderr){const d=document.createElement('div');d.className='block-out';d.style.color='#555';d.textContent='(comando executado sem output)';block.appendChild(d);}
+  }
+  // Update active notebook indicator
+  if(stdout){
+    // Detect 'use <id>' command — matched notebook title
+    const matchedLine = stdout.match(/Matched:[^\n]*\(([^)]+)\)/);
+    if(matchedLine){
+      const el=document.getElementById('nb-indicator-name');
+      if(el) el.textContent=matchedLine[1].trim().substring(0,28)+(matchedLine[1].trim().length>28?'…':'');
+    }
+    // Detect status output — "Title | Notebook Title"
+    const titleLine = stdout.match(/Title\s*│\s*([^│\n]+)/);
+    if(titleLine){
+      const el=document.getElementById('nb-indicator-name');
+      if(el) el.textContent=titleLine[1].trim().substring(0,28)+(titleLine[1].trim().length>28?'…':'');
+    }
   }
   // Check for credential expiry in every response
   if(checkForCredExpiry(stdout||'', stderr||'')) {
@@ -1081,6 +1244,13 @@ function toggleNbSwitcher(){
   const sw=document.getElementById('nb-switcher');
   const isVisible=sw.style.display==='block';
   if(isVisible){sw.style.display='none';return;}
+  // Position dropdown below the nb-btn button
+  const btn=document.getElementById('nb-btn');
+  if(btn){
+    const rect=btn.getBoundingClientRect();
+    sw.style.top=(rect.bottom+6)+'px';
+    sw.style.right=(window.innerWidth-rect.right)+'px';
+  }
   sw.style.display='block';
   if(!_notebooks.length) loadNbList();
 }
@@ -1139,14 +1309,14 @@ let _kaFails=0;
 
 function startKeepAlive(){
   stopKeepAlive();
-  updateKaStatus(true, 'Keep-alive ativo — ping a cada 25 min');
+  updateKaStatus(true, 'Conectado');
   _kaTimer=setInterval(async()=>{
     try{
       const r=await fetch(`${URL_BASE}/health`,{headers:H});
       const d=await r.json();
       if(d.status==='ok'){
         _kaFails=0;
-        updateKaStatus(true,'Colab ativo — último ping: '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}));
+        updateKaStatus(true,'Conectado — '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}));
       } else { handleKaFail(); }
     }catch(e){ handleKaFail(); }
   }, 25*60*1000); // ping a cada 25 min
@@ -1173,6 +1343,8 @@ function updateKaStatus(alive, txt){
 }
 
 // ── CREDENTIAL EXPIRY DETECTION ─────────────────────────────────
+let _credExpired = false;
+
 function checkForCredExpiry(stdout, stderr){
   const combined=(stdout+stderr).toLowerCase();
   const expired=combined.includes('authentication expired') ||
@@ -1180,7 +1352,18 @@ function checkForCredExpiry(stdout, stderr){
                 combined.includes('invalid session') ||
                 combined.includes('403') && combined.includes('forbidden');
   const warn=document.getElementById('cred-warn');
-  if(expired && warn) warn.style.display='block';
+  if(expired){
+    _credExpired = true;
+    if(warn) warn.style.display='block';
+    // Desabilitar botão de contexto enquanto credenciais estiverem expiradas
+    const ctxBtn = document.getElementById('ctx-btn');
+    if(ctxBtn){
+      ctxBtn.disabled = true;
+      ctxBtn.title = 'Credenciais expiradas — renove antes de copiar contexto';
+      ctxBtn.style.opacity = '0.4';
+      ctxBtn.style.cursor = 'not-allowed';
+    }
+  }
   return expired;
 }
 
@@ -1209,6 +1392,12 @@ function showHelp(){document.getElementById('help-overlay').classList.add('show'
 function closeHelp(){document.getElementById('help-overlay').classList.remove('show');}
 
 async function showContext(){
+  // Bloquear se credenciais expiradas
+  if(_credExpired){
+    showCredWarning();
+    return;
+  }
+
   const modal = document.getElementById('ctx-modal');
   const loading = document.getElementById('ctx-loading');
   const textarea = document.getElementById('ctx-text');
@@ -1238,74 +1427,155 @@ async function showContext(){
     }
   };
 
-  // Collect data
+  // Collect fresh data from server
+  loadingTxt.textContent = 'Coletando dados do notebook...';
   const status = await exec('status');
-  const list   = await exec('list --json');
   const sources = await exec('source list --json');
 
-  // Parse notebook info
+  // Verificar credenciais nos resultados internos — mesmo que _credExpired ainda não tenha sido setado
+  const anyExpired = checkForCredExpiry(status.stdout, status.stderr)
+                  || checkForCredExpiry(sources.stdout, sources.stderr);
+  if(anyExpired){
+    loading.style.display = 'none';
+    modal.classList.remove('show');
+    showCredWarning();
+    return;
+  }
+
+  // ── Helpers de limpeza ──────────────────────────────────────────
+  // Remove linhas de tabela ASCII do CLI (┏ ┃ ┡ └ ━ etc.) e linhas em branco excessivas
+  function stripCliTables(text){
+    if(!text) return '';
+    return text
+      .split('\n')
+      .filter(l => !/^[\s]*[┏┗┡┘└├┤┬┴┼─━┃│╔╗╚╝╠╣╦╩╬═║]/.test(l))
+      .join('\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  }
+
+  // Extrai apenas as linhas de conteúdo de uma tabela ASCII (sem bordas)
+  // Ex: "│ Title  │ Litigância │" → "Litigância"
+  function extractTableValues(text){
+    if(!text) return {};
+    const result = {};
+    text.split('\n').forEach(line => {
+      const cells = line.split('│').map(s => s.trim()).filter(Boolean);
+      if(cells.length === 2 && !/^[━─═]+$/.test(cells[0])){
+        result[cells[0].toLowerCase()] = cells[1];
+      }
+    });
+    return result;
+  }
+
+  // Parse notebook info — extrair campos da tabela do status
   let notebookName = '(não identificado)';
   let notebookId = '';
+  let notebookCreated = '';
   try {
-    const statusLines = status.stdout;
-    const m = statusLines.match(/Title[:\s]+(.+)/i) || statusLines.match(/notebook[:\s]+"?([^"\n]+)"?/i);
-    if(m) notebookName = m[1].trim();
-    const mid = statusLines.match(/[0-9a-f]{8}-[0-9a-f]{4}/i);
-    if(mid) notebookId = mid[0];
+    const vals = extractTableValues(status.stdout);
+    notebookName = vals['title'] || notebookName;
+    notebookId   = vals['notebook id'] ? vals['notebook id'].substring(0,8) : '';
+    notebookCreated = vals['created'] || '';
+    // fallback regex se a tabela não parsear
+    if(notebookName === '(não identificado)'){
+      const m = status.stdout.match(/Title\s*│\s*([^│\n]+)/i);
+      if(m) notebookName = m[1].trim();
+    }
+    if(!notebookId){
+      const mid = status.stdout.match(/[0-9a-f]{8}-[0-9a-f]{4}/i);
+      if(mid) notebookId = mid[0].substring(0,8);
+    }
   } catch(e){}
 
-  // Parse sources
+  // Parse sources — lista limpa de nomes
   let sourcesList = '';
+  let sourcesCount = 0;
   try {
     const data = JSON.parse(sources.stdout);
     if(data.sources && data.sources.length > 0){
-      sourcesList = data.sources.map((s,i) => `  ${i+1}. ${s.title||s.id} (${s.status||'pronto'})`).join('\n');
+      sourcesCount = data.sources.length;
+      sourcesList = data.sources.map((s,i) => `  ${i+1}. ${s.title||s.id}`).join('\n');
     } else {
-      sourcesList = '  (nenhuma fonte listada)';
+      sourcesList = '  (nenhuma fonte carregada)';
     }
   } catch(e){
-    sourcesList = sources.stdout ? sources.stdout.trim() : '  (erro ao listar fontes)';
+    sourcesList = sources.stdout ? stripCliTables(sources.stdout) : '  (erro ao listar fontes)';
   }
 
-  // Parse notebooks list
-  let allNotebooks = '';
-  try {
-    const data = JSON.parse(list.stdout);
-    if(data.notebooks){
-      allNotebooks = data.notebooks.map(n =>
-        `  • ${n.title} [${n.id.substring(0,8)}...]`
-      ).join('\n');
-    }
-  } catch(e){
-    allNotebooks = '  (erro ao listar notebooks)';
+  // Parse notebooks list — não é mais incluído no contexto (irrelevante para o Claude)
+  // A troca de notebook é função do Studio, não do Claude.
+
+  // ── Capturar respostas substantivas da sessão (apenas ask) ──────
+  loadingTxt.textContent = 'Capturando respostas da sessão...';
+
+  // Comandos a ignorar: operacionais, de navegação ou de listagem
+  const SKIP_PREFIXES = ['list','use ','status','source list','artifact list','artifact wait','download ','generate '];
+  const isSkippable = cmd => SKIP_PREFIXES.some(p => cmd === p.trim() || cmd.startsWith(p));
+
+  // Limpa a saída de um bloco: remove tabelas ASCII, cabeçalhos de continuação e linhas vazias excessivas
+  function cleanOutput(raw){
+    if(!raw) return '';
+    return raw
+      .split('\n')
+      // Remove linhas de borda de tabela e linhas só com espaços
+      .filter(l => !/^[\s]*[┏┗┡┘└├┤┬┴┼─━┃│╔╗╚╝╠╣╦╩╬═║]/.test(l))
+      // Remove linhas de sistema do CLI (Continuing conversation, Resumed conversation, Started:)
+      .filter(l => !/^(Continuing conversation|Resumed conversation|Started:|Matched:)/i.test(l.trim()))
+      .join('\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
   }
+
+  let sessionEntries = [];
+  const blocks = document.querySelectorAll('#output .block');
+  blocks.forEach(block => {
+    const cmdEl = block.querySelector('.block-cmd');
+    const outEl = block.querySelector('.block-out');
+    if(!cmdEl || !outEl) return;
+
+    const cmdText = cmdEl.textContent.replace(/^\$\s*notebooklm\s*/,'').trim();
+
+    // Incluir apenas comandos ask (as únicas respostas substantivas do NotebookLM)
+    if(!cmdText.startsWith('ask ')) return;
+
+    const cleaned = cleanOutput(outEl.textContent);
+    if(!cleaned) return;
+
+    // Extrair a pergunta sem as aspas externas para exibição mais limpa
+    const questionMatch = cmdText.match(/^ask\s+"([\s\S]+)"$/i) || cmdText.match(/^ask\s+'([\s\S]+)'$/i);
+    const question = questionMatch ? questionMatch[1] : cmdText.replace(/^ask\s+/,'');
+
+    sessionEntries.push(`**Pergunta:** ${question}\n\n${cleaned}`);
+  });
+
+  const sessionLog = sessionEntries.join('\n\n---\n\n');
 
   // Build context block
   const now = new Date().toLocaleString('pt-BR');
   const ctx = `# Contexto do Projeto — NotebookLM + Claude
 Gerado em: ${now}
 
-## Configuração
-- Ferramenta: notebooklm-py via Google Colab + ngrok
-- Notebook ativo: ${notebookName}${notebookId ? ' [' + notebookId + '...]' : ''}
+## Notebook ativo
+- **Nome:** ${notebookName}
+- **ID:** ${notebookId ? notebookId+'...' : '(não disponível)'}${notebookCreated ? '\n- **Criado em:** '+notebookCreated : ''}
+- **Fontes:** ${sourcesCount > 0 ? sourcesCount+' documentos carregados' : 'nenhuma fonte'}
 
-## Fontes carregadas no notebook
+## Fontes carregadas
 ${sourcesList}
-
-## Todos os notebooks disponíveis
-${allNotebooks}
-
-## Status do servidor
-${status.stdout.trim() || '(sem informação de status)'}
+${sessionLog ? '\n## Respostas do NotebookLM nesta sessão\n\n'+sessionLog : ''}
 
 ---
-A partir desse contexto, continue a conversa normalmente. Para executar novos comandos no NotebookLM, o usuário usará o NotebookLM Studio (terminal visual) e colará os resultados aqui.`;
+Continue a conversa com base neste contexto. Para consultar os documentos, o usuário usará o NotebookLM Studio e colará os resultados aqui.`;
 
   loading.style.display = 'none';
   textarea.value = ctx;
   textarea.style.display = 'block';
   footer.style.display = 'flex';
-  subtitle.textContent = 'Pronto! Copie e cole no início de uma nova conversa com o Claude.';
+  const askCount = sessionEntries.length;
+  subtitle.textContent = askCount > 0
+    ? `Pronto! Inclui ${askCount} resposta${askCount>1?'s':''} do NotebookLM desta sessão.`
+    : 'Pronto! Cole no início de uma nova conversa com o Claude.';
 }
 
 function closeContext(){
@@ -1387,6 +1657,212 @@ async function installPWA(){
   const {outcome}=await _deferredInstall.userChoice;
   if(outcome==='accepted') _deferredInstall=null;
 }
+
+// -- PLAYBOOKS v2.14 --
+let _playbooks=JSON.parse(localStorage.getItem('nlm_playbooks')||'[]');
+function savePlaybooks(){try{localStorage.setItem('nlm_playbooks',JSON.stringify(_playbooks));}catch(e){}}
+function renderPlaybooks(){
+  const list=document.getElementById('playbook-list');if(!list)return;list.innerHTML='';
+  if(!_playbooks.length){list.innerHTML='<div style="padding:6px 14px;font-size:11px;color:#444">Nenhum playbook.</div>';return;}
+  _playbooks.forEach((pb,i)=>{
+    const row=document.createElement('div');row.style.cssText='display:flex;align-items:center;padding:0 4px 0 0;gap:2px';
+    const btn=document.createElement('button');btn.className='pal-pb';btn.style.flex='1';
+    btn.innerHTML='<span class="pb-name">'+pb.name+'</span><span class="pb-n">'+pb.cmds.length+'&#215;</span>';
+    btn.title='Clique para executar: '+pb.cmds.join(' → ');btn.onclick=()=>runPlaybook(i);
+    const editBtn=document.createElement('button');editBtn.className='pb-del';editBtn.title='Editar playbook';
+    editBtn.innerHTML='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+    editBtn.style.color='#2a9d8f';
+    editBtn.onclick=(e)=>{e.stopPropagation();openEditPlaybook(i);};
+    const del=document.createElement('button');del.className='pb-del';del.textContent='✕';del.title='Excluir playbook';
+    del.onclick=(e)=>{e.stopPropagation();if(confirm('Excluir playbook "'+pb.name+'"?')){_playbooks.splice(i,1);savePlaybooks();renderPlaybooks();}};
+    row.appendChild(btn);row.appendChild(editBtn);row.appendChild(del);list.appendChild(row);
+  });
+}
+function runPlaybook(i){
+  const pb=_playbooks[i];if(!pb)return;
+  info('Playbook "'+pb.name+'" — '+pb.cmds.length+' comandos...');sep();
+  pb.cmds.forEach(cmd=>run(cmd));
+}
+
+// ── MODAL NOVO PLAYBOOK ──────────────────────────────────────
+function openSavePlaybook(){
+  const r=hist.slice(0,15);
+  const box=document.createElement('div');box.id='pb-modal';
+  box.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:500;display:flex;align-items:center;justify-content:center';
+  box.onclick=function(e){if(e.target===box)closePbModal();};
+  const chks=r.length ? r.map((c,i)=>'<label style="display:flex;align-items:center;gap:8px;padding:4px 8px;cursor:pointer;font-size:12px;color:#888"><input type="checkbox" value="'+i+'" style="accent-color:#f59e0b"><span style="font-family:monospace">'+c.substring(0,55)+'</span></label>').join('') : '<div style="font-size:11px;color:#555;padding:4px 8px">Nenhum comando no histórico ainda.</div>';
+  box.innerHTML='<div style="background:#21212d;border:1px solid #363648;border-radius:12px;padding:22px;width:90%;max-width:500px;display:flex;flex-direction:column;gap:12px">'
+    +'<div style="font-size:14px;font-weight:600;color:#e8e8e8">Novo Playbook</div>'
+    +'<input id="pb-nm" placeholder="Nome do playbook" style="background:#15151e;border:1px solid #363648;border-radius:7px;color:#d4d4d4;font-size:14px;padding:9px 12px;outline:none;width:100%">'
+    +'<div style="font-size:11px;color:#666">Selecione do histórico <span style="color:#555">(ou adicione novos abaixo)</span>:</div>'
+    +'<div id="pb-cl" style="display:flex;flex-direction:column;gap:2px;max-height:180px;overflow-y:auto">'+chks+'</div>'
+    +'<div style="font-size:11px;color:#666">Adicionar comandos novos <span style="color:#555">(um por linha)</span>:</div>'
+    +'<textarea id="pb-new-cmds" placeholder="Ex: ask &quot;Quais os principais argumentos?&quot;" style="background:#15151e;border:1px solid #363648;border-radius:7px;color:#d4d4d4;font-size:12px;font-family:monospace;padding:8px 10px;outline:none;resize:vertical;min-height:60px;width:100%"></textarea>'
+    +'<div style="display:flex;gap:8px;justify-content:flex-end">'
+    +'<button onclick="closePbModal()" style="padding:7px 16px;background:none;border:1px solid #363648;border-radius:6px;color:#999;font-size:13px;cursor:pointer">Cancelar</button>'
+    +'<button onclick="confirmPb()" style="padding:7px 20px;background:#f59e0b;border:none;border-radius:6px;color:#1a1000;font-size:13px;font-weight:600;cursor:pointer">Salvar</button>'
+    +'</div></div>';
+  document.body.appendChild(box);
+  setTimeout(()=>{const nm=document.getElementById('pb-nm');if(nm)nm.focus();},80);
+}
+
+function closePbModal(){
+  const m=document.getElementById('pb-modal');if(m)m.remove();
+}
+
+function confirmPb(){
+  const nm=document.getElementById('pb-nm');const name=nm?nm.value.trim():'';
+  if(!name){alert('Digite um nome.');return;}
+  const fromHist=[...document.querySelectorAll('#pb-cl input:checked')].map(cb=>hist[+cb.value]).filter(Boolean);
+  const newCmdsRaw=(document.getElementById('pb-new-cmds')||{value:''}).value;
+  const fromNew=newCmdsRaw.split('\n').map(s=>s.trim()).filter(Boolean);
+  const sel=[...fromHist,...fromNew];
+  if(!sel.length){alert('Selecione pelo menos 1 comando ou adicione um novo.');return;}
+  _playbooks.push({name,cmds:sel,created:new Date().toISOString()});
+  savePlaybooks();renderPlaybooks();
+  const m=document.getElementById('pb-modal');if(m)m.remove();
+  info('Playbook "'+name+'" salvo com '+sel.length+' comando(s)!');
+}
+
+// ── MODAL EDITAR PLAYBOOK EXISTENTE ─────────────────────────
+function openEditPlaybook(idx){
+  const pb=_playbooks[idx];if(!pb)return;
+  const box=document.createElement('div');box.id='pb-edit-modal';
+  box.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:500;display:flex;align-items:center;justify-content:center';
+  box.onclick=function(e){if(e.target===box)closeEditPbModal();};
+
+  function buildCmdRows(cmds){
+    return cmds.map((c,i)=>
+      '<div id="pb-edit-row-'+i+'" style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid #1e1e2a">'
+      +'<span style="font-size:10px;color:#555;width:14px;flex-shrink:0">'+(i+1)+'</span>'
+      +'<input id="pb-edit-cmd-'+i+'" value="'+c.replace(/"/g,'&quot;')+'" style="flex:1;background:#15151e;border:1px solid #2a2a38;border-radius:5px;color:#d4d4d4;font-size:12px;font-family:monospace;padding:5px 8px;outline:none">'
+      +'<button onclick="pbEditMoveUp('+i+')" title="Subir" style="background:none;border:none;color:#555;cursor:pointer;font-size:12px;padding:2px 4px">↑</button>'
+      +'<button onclick="pbEditMoveDown('+i+')" title="Descer" style="background:none;border:none;color:#555;cursor:pointer;font-size:12px;padding:2px 4px">↓</button>'
+      +'<button onclick="pbEditRemoveRow('+i+')" title="Remover" style="background:none;border:none;color:#f87171;cursor:pointer;font-size:12px;padding:2px 5px">✕</button>'
+      +'</div>'
+    ).join('');
+  }
+
+  box.innerHTML='<div style="background:#21212d;border:1px solid #363648;border-radius:12px;padding:22px;width:90%;max-width:520px;display:flex;flex-direction:column;gap:12px;max-height:90vh;overflow-y:auto">'
+    +'<div style="font-size:14px;font-weight:600;color:#e8e8e8">Editar Playbook</div>'
+    +'<label style="font-size:11px;color:#666">Nome</label>'
+    +'<input id="pb-edit-name" value="'+pb.name.replace(/"/g,'&quot;')+'" style="background:#15151e;border:1px solid #363648;border-radius:7px;color:#d4d4d4;font-size:14px;padding:9px 12px;outline:none;width:100%">'
+    +'<label style="font-size:11px;color:#666">Comandos <span style="color:#555">(edite, reordene ou remova)</span></label>'
+    +'<div id="pb-edit-rows" style="display:flex;flex-direction:column;gap:2px;max-height:220px;overflow-y:auto;padding:4px 0">'+buildCmdRows(pb.cmds)+'</div>'
+    +'<div style="display:flex;gap:6px;align-items:center">'
+    +'<input id="pb-edit-new" placeholder="Novo comando..." style="flex:1;background:#15151e;border:1px solid #363648;border-radius:6px;color:#d4d4d4;font-size:12px;font-family:monospace;padding:7px 10px;outline:none" onkeydown="if(event.key===\'Enter\')pbEditAddRow()">'
+    +'<button onclick="pbEditAddRow()" style="padding:7px 14px;background:#1a2e2d;border:1px solid #2a9d8f;border-radius:6px;color:#7fd3cc;font-size:12px;cursor:pointer">+ Adicionar</button>'
+    +'</div>'
+    +'<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px">'
+    +'<button onclick="closeEditPbModal()" style="padding:7px 16px;background:none;border:1px solid #363648;border-radius:6px;color:#999;font-size:13px;cursor:pointer">Cancelar</button>'
+    +'<button onclick="confirmEditPb('+idx+')" style="padding:7px 20px;background:#2a9d8f;border:none;border-radius:6px;color:#fff;font-size:13px;font-weight:600;cursor:pointer">Salvar alterações</button>'
+    +'</div></div>';
+  document.body.appendChild(box);
+  setTimeout(()=>{const nm=document.getElementById('pb-edit-name');if(nm)nm.focus();},80);
+}
+
+function closeEditPbModal(){
+  const m=document.getElementById('pb-edit-modal');if(m)m.remove();
+}
+
+function _pbEditGetRows(){
+  const rows=document.querySelectorAll('#pb-edit-rows [id^="pb-edit-cmd-"]');
+  return [...rows].map(i=>i.value.trim()).filter(Boolean);
+}
+function _pbEditRebuildRows(cmds){
+  const container=document.getElementById('pb-edit-rows');
+  if(!container)return;
+  container.innerHTML=cmds.map((c,i)=>
+    '<div id="pb-edit-row-'+i+'" style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid #1e1e2a">'
+    +'<span style="font-size:10px;color:#555;width:14px;flex-shrink:0">'+(i+1)+'</span>'
+    +'<input id="pb-edit-cmd-'+i+'" value="'+c.replace(/"/g,'&quot;')+'" style="flex:1;background:#15151e;border:1px solid #2a2a38;border-radius:5px;color:#d4d4d4;font-size:12px;font-family:monospace;padding:5px 8px;outline:none">'
+    +'<button onclick="pbEditMoveUp('+i+')" title="Subir" style="background:none;border:none;color:#555;cursor:pointer;font-size:12px;padding:2px 4px">↑</button>'
+    +'<button onclick="pbEditMoveDown('+i+')" title="Descer" style="background:none;border:none;color:#555;cursor:pointer;font-size:12px;padding:2px 4px">↓</button>'
+    +'<button onclick="pbEditRemoveRow('+i+')" title="Remover" style="background:none;border:none;color:#f87171;cursor:pointer;font-size:12px;padding:2px 5px">✕</button>'
+    +'</div>'
+  ).join('');
+}
+function pbEditMoveUp(i){
+  const cmds=_pbEditGetRows();
+  if(i===0)return;
+  [cmds[i-1],cmds[i]]=[cmds[i],cmds[i-1]];
+  _pbEditRebuildRows(cmds);
+}
+function pbEditMoveDown(i){
+  const cmds=_pbEditGetRows();
+  if(i>=cmds.length-1)return;
+  [cmds[i+1],cmds[i]]=[cmds[i],cmds[i+1]];
+  _pbEditRebuildRows(cmds);
+}
+function pbEditRemoveRow(i){
+  const cmds=_pbEditGetRows();
+  cmds.splice(i,1);
+  _pbEditRebuildRows(cmds);
+}
+function pbEditAddRow(){
+  const input=document.getElementById('pb-edit-new');
+  const val=input?input.value.trim():'';
+  if(!val){if(input){input.style.border='1px solid #f87171';setTimeout(()=>input.style.border='1px solid #363648',800);}return;}
+  const cmds=_pbEditGetRows();
+  cmds.push(val);
+  _pbEditRebuildRows(cmds);
+  if(input){input.value='';input.focus();}
+}
+function confirmEditPb(idx){
+  const nameEl=document.getElementById('pb-edit-name');
+  const name=nameEl?nameEl.value.trim():'';
+  if(!name){alert('O nome não pode ficar vazio.');return;}
+  const cmds=_pbEditGetRows();
+  if(!cmds.length){alert('O playbook precisa ter pelo menos 1 comando.');return;}
+  _playbooks[idx]={..._playbooks[idx],name,cmds,updated:new Date().toISOString()};
+  savePlaybooks();renderPlaybooks();
+  closeEditPbModal();
+  info('Playbook "'+name+'" atualizado ('+cmds.length+' comandos).');
+}
+
+document.addEventListener('DOMContentLoaded',renderPlaybooks);
+
+// -- DEBUG PANEL v2.6 --
+let _dbLog=[];let _dbTab='log';
+function toggleDebug(){const p=document.getElementById('debug-panel');if(p.classList.toggle('show'))refreshDebug();}
+async function refreshDebug(){
+  const c=document.getElementById('debug-content');
+  c.innerHTML='<div style="padding:16px;color:#555;font-size:12px">Carregando...</div>';
+  try{
+    const r=await fetch(URL_BASE+'/logs?n=30',{headers:H});
+    const d=await r.json();_dbLog=d.logs||[];renderDebug();
+  }catch(e){
+    c.innerHTML='<div style="padding:16px;color:#f87171;font-size:12px">Rota /logs indisponivel. Atualize o servidor_colab.py para v2.6.</div>';
+  }
+}
+function setDebugTab(t){
+  _dbTab=t;
+  document.querySelectorAll('.debug-tab').forEach(e=>e.classList.remove('active'));
+  const el=document.getElementById('dtab-'+t);if(el)el.classList.add('active');
+  renderDebug();
+}
+function renderDebug(){
+  const c=document.getElementById('debug-content');
+  if(_dbTab==='raw'){c.innerHTML='<pre style="font-family:monospace;font-size:11px;color:#888;white-space:pre-wrap;padding:10px">'+JSON.stringify(_dbLog,null,2)+'</pre>';return;}
+  if(!_dbLog.length){c.innerHTML='<div style="padding:16px;color:#555;font-size:12px">Sem registros ainda.</div>';return;}
+  c.innerHTML='';
+  [..._dbLog].reverse().forEach(e=>{
+    const el=document.createElement('div');el.className='de';
+    const rc=e.rc===0?'<span class="de-rc de-ok">ok</span>':'<span class="de-rc de-err">rc '+e.rc+'</span>';
+    const dur='<span class="de-rc de-dur">'+e.duration+'s</span>';
+    const ts=e.ts?e.ts.substring(11,19):'';
+    el.innerHTML='<div class="de-head"><span class="de-cmd">$ notebooklm '+(e.cmd||'')+'</span>'+rc+dur+'<span class="de-ts">'+ts+'</span></div>';
+    if(e.error){const r=document.createElement('div');r.className='de-raw';r.textContent=e.error;el.appendChild(r);}
+    c.appendChild(el);
+  });
+}
+function copyDebugAll(){
+  navigator.clipboard.writeText(JSON.stringify(_dbLog,null,2)).then(()=>{
+    const b=document.querySelector('#debug-hbtns button:last-child');
+    if(b){b.textContent='copiado!';setTimeout(()=>b.textContent='copiar',1500);}
+  });
+}
+
 </script>
 </body>
 </html>

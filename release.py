@@ -115,19 +115,30 @@ def run(cmd, check=True):
 
 
 def build_zip(version):
-    """Monta o arquivo .zip mantendo a estrutura de subpastas do projeto."""
+    """
+    Monta o arquivo .zip com os arquivos que o usuário precisa para usar o projeto.
+    release.py e .gitignore são ferramentas do repositório — não entram no zip.
+    """
     zip_name = f"notebooklm_claude_v{version}.zip"
 
-    # Estrutura: (caminho_local, caminho_dentro_do_zip)
+    # Lista fechada: APENAS estes arquivos entram no zip, nada mais.
+    # Para adicionar um arquivo novo, inclua aqui E em ALLOWED_IN_ZIP.
     files = [
         (f"studio/notebooklm_studio_v{version}.html",    f"studio/notebooklm_studio_v{version}.html"),
         (f"guia/guia_notebooklm_claude_v{version}.html", f"guia/guia_notebooklm_claude_v{version}.html"),
         ("colab/servidor_colab.py",                       "colab/servidor_colab.py"),
         ("README.md",                                     "README.md"),
         ("CHANGELOG.md",                                  "CHANGELOG.md"),
-        (".gitignore",                                    ".gitignore"),
-        ("release.py",                                    "release.py"),
     ]
+
+    # Allowlist de nomes dentro do zip — qualquer arquivo fora desta lista aborta o release
+    ALLOWED_IN_ZIP = {
+        f"studio/notebooklm_studio_v{version}.html",
+        f"guia/guia_notebooklm_claude_v{version}.html",
+        "colab/servidor_colab.py",
+        "README.md",
+        "CHANGELOG.md",
+    }
 
     missing = [src for src, _ in files if not os.path.exists(src)]
     if missing:
@@ -142,8 +153,20 @@ def build_zip(version):
             zf.write(src, dest)
             print(f"   + {dest}")
 
+    # Validação: inspeciona o zip gerado e aborta se houver arquivo fora da allowlist
+    with zipfile.ZipFile(zip_name, "r") as zf:
+        names = set(zf.namelist())
+    unexpected = names - ALLOWED_IN_ZIP
+    if unexpected:
+        os.remove(zip_name)
+        print(f"\n❌ ABORTADO — o zip contém arquivos não autorizados:")
+        for f in sorted(unexpected):
+            print(f"   {f}")
+        print("\nRemova esses arquivos da lista 'files' em build_zip() e tente novamente.")
+        sys.exit(1)
+
     size_kb = os.path.getsize(zip_name) // 1024
-    print(f"   → {zip_name} ({size_kb} KB)")
+    print(f"   → {zip_name} ({size_kb} KB) — validado ✓")
     return zip_name
 
 

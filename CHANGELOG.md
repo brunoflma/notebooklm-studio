@@ -1,3 +1,6 @@
+## v2.14
+- release.py: zip validado após geração — se qualquer arquivo fora da allowlist (release.py, .gitignore, etc.) for encontrado dentro do zip, o script aborta, apaga o zip e exibe o arquivo infrator antes de publicar qualquer coisa
+
 ## v2.13
 - Studio: verificação de credenciais movida para dentro do processo de conexão — o terminal só abre se as credenciais estiverem válidas. Se expiradas, a tela de setup exibe as instruções completas de renovação sem entrar no Studio
 - Guia: exemplo do bloco de contexto substituído por dados genéricos fictícios — removidas todas as referências a casos e nomes reais

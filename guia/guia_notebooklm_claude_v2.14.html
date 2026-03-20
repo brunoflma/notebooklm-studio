@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Guia: NotebookLM + Claude v2.5</title>
+<title>Guia: NotebookLM + Claude v2.14</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f7f7f5;color:#1a1a18;line-height:1.8;font-size:17px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f7f7f5;color:#1a1a18;line-height:1.85;font-size:18px}
 a{color:#6356e8;text-decoration:none}
 a:hover{text-decoration:underline}
 
 /* HERO */
-#hero{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);padding:64px 24px;text-align:center;color:#fff}
+#hero{background:linear-gradient(135deg,#0f1923 0%,#1a2e2d 50%,#0d2820 100%);padding:64px 24px;text-align:center;color:#fff}
 #hero h1{font-size:36px;font-weight:700;margin-bottom:14px;letter-spacing:-.5px}
 #hero p{font-size:18px;color:#a0aec0;max-width:580px;margin:0 auto 20px;line-height:1.7}
 .hero-version{display:inline-block;font-size:13px;font-weight:600;color:#2a9d8f;background:rgba(42,157,143,.15);border:1px solid rgba(42,157,143,.35);padding:4px 16px;border-radius:20px;letter-spacing:.04em}
@@ -22,34 +22,32 @@ a:hover{text-decoration:underline}
 .badge-blue{background:rgba(96,165,250,.15);color:#60a5fa;border:1px solid rgba(96,165,250,.25)}
 
 /* LAYOUT */
-.container{max-width:900px;margin:0 auto;padding:0 28px}
+.container{max-width:1100px;margin:0 auto;padding:0 40px}
 
 /* TOC - single row, horizontal scroll, no wrap */
-.toc-wrap{background:#fff;border-bottom:2px solid #e8e8e4;position:sticky;top:0;z-index:50;padding:0}
-.toc{max-width:900px;margin:0 auto;display:flex;overflow-x:auto;scrollbar-width:thin;scrollbar-color:#ddd #fff;padding:0 16px}
-.toc::-webkit-scrollbar{height:3px}
-.toc::-webkit-scrollbar-track{background:#fff}
-.toc::-webkit-scrollbar-thumb{background:#ddd;border-radius:3px}
-.toc a{padding:14px 18px;font-size:15px;color:#555;white-space:nowrap;border-bottom:3px solid transparent;transition:all .15s;font-weight:500;flex-shrink:0;display:inline-block}
-.toc a:hover{color:#6356e8;text-decoration:none;background:#faf9ff}
-.toc a.active{color:#6356e8;border-bottom-color:#6356e8;font-weight:600}
+.toc-wrap{background:rgba(255,255,255,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid #e8eaed;position:sticky;top:0;z-index:50;padding:10px 24px}
+.toc{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:4px;overflow-x:auto;scrollbar-width:none;padding-right:24px}
+.toc::-webkit-scrollbar{display:none}
+.toc a{padding:7px 16px;font-size:15px;color:#666;white-space:nowrap;border-radius:20px;transition:all .18s;font-weight:500;flex-shrink:0;display:inline-block;border:1px solid transparent;line-height:1.4}
+.toc a:hover{color:#2a9d8f;background:#f0fdf9;text-decoration:none;border-color:#c6eee9}
+.toc a.active{color:#fff;background:#2a9d8f;border-color:#2a9d8f;font-weight:600;box-shadow:0 2px 8px rgba(42,157,143,.3)}
 
 /* SECTIONS */
 .section{padding:56px 0;border-bottom:1px solid #e8e8e4}
 .section:last-child{border-bottom:none}
-.section-num{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;background:#6356e8;color:#fff;border-radius:50%;font-size:16px;font-weight:700;margin-bottom:18px;flex-shrink:0}
+.section-num{display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;background:#2a9d8f;border-radius:20px;padding:3px 14px;margin-bottom:14px;letter-spacing:.04em}
 .section h2{font-size:28px;font-weight:700;color:#1a1a18;margin-bottom:10px}
-.section-desc{font-size:17px;color:#555;margin-bottom:32px;max-width:700px;line-height:1.75}
+.section-desc{font-size:18px;color:#555;margin-bottom:32px;line-height:1.75;width:100%;max-width:none;display:block;overflow-wrap:break-word}
 
 /* STEPS */
 .steps{display:flex;flex-direction:column;gap:18px}
 .step{background:#fff;border:1px solid #e8e8e4;border-radius:14px;padding:24px 26px;display:flex;gap:18px;align-items:flex-start}
-.step-num{width:32px;height:32px;background:#f0effe;color:#6356e8;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0;margin-top:2px}
+.step-num{width:34px;height:34px;background:linear-gradient(135deg,#2a9d8f,#1a7a72);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0;margin-top:2px}
 .step-body{flex:1;min-width:0;overflow-wrap:break-word;word-break:normal}
 .step-title{font-size:17px;font-weight:600;color:#1a1a18;margin-bottom:8px;overflow-wrap:break-word}
-.step-desc{font-size:16px;color:#444;line-height:1.75;overflow-wrap:break-word;word-break:normal}
+.step-desc{font-size:16px;color:#444;line-height:1.75;overflow-wrap:break-word;word-break:normal;width:100%;max-width:none}
 .step-note{margin-top:12px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px 14px;font-size:15px;color:#92400e;display:block;line-height:1.75;overflow-wrap:break-word;word-break:normal;width:100%}
-.step-tip{margin-top:12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px 14px;font-size:15px;color:#166534;display:block;line-height:1.75;overflow-wrap:break-word;word-break:normal;width:100%}
+.step-tip{margin-top:14px;background:#f0fdf9;border-left:3px solid #2a9d8f;border-radius:8px;padding:12px 14px;font-size:15px;color:#166534;display:block;line-height:1.75;overflow-wrap:break-word;word-break:normal;width:100%}
 
 /* CODE */
 .code-block{background:#1e1e1e;border-radius:10px;overflow:hidden;margin:14px 0}
@@ -67,8 +65,9 @@ pre .f{color:#dcdcaa}
 pre .n{color:#9cdcfe}
 
 /* CARDS */
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:8px}
-.card{background:#fff;border:1px solid #e8e8e4;border-radius:12px;padding:20px 22px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;margin-top:8px}
+.card{background:#f9fafb;border:1px solid #e4e8f0;border-radius:14px;padding:22px 22px}
+.card:hover{box-shadow:0 6px 20px rgba(42,157,143,.1);transform:translateY(-2px);border-color:#2a9d8f}
 .card-icon{font-size:28px;margin-bottom:12px}
 .card-title{font-size:16px;font-weight:600;color:#1a1a18;margin-bottom:8px}
 .card-desc{font-size:15px;color:#555;line-height:1.65}
@@ -96,13 +95,29 @@ pre .n{color:#9cdcfe}
 .alert-success{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534}
 .alert-icon{font-size:18px;margin-right:6px;vertical-align:middle}
 
-/* IMAGE PLACEHOLDER */
+/* COMMAND LINES - copiar por linha (seção Playbooks) */
+.cmd-lines{display:flex;flex-direction:column;gap:0;margin:14px 0;border-radius:10px;overflow:hidden;border:1px solid #2a2a2a;background:#1e1e1e}
+.cmd-line{display:flex;align-items:stretch;border-bottom:1px solid #2a2a2a}
+.cmd-line:last-child{border-bottom:none}
+.cmd-line-num{font-size:12px;color:#3a3a3a;background:#1a1a1a;padding:10px 12px;font-family:monospace;flex-shrink:0;width:34px;text-align:right;user-select:none;display:flex;align-items:center;justify-content:flex-end;border-right:1px solid #2a2a2a}
+.cmd-line.is-comment .cmd-line-num{color:#2a2a2a}
+.cmd-line-code{flex:1;font-family:'Courier New',monospace;font-size:13.5px;color:#d4d4d4;background:#1e1e1e;padding:10px 14px;line-height:1.5;overflow-x:auto;white-space:pre}
+.cmd-line-code.is-comment{color:#5a9a5a;background:#1b1f1b;font-style:italic}
+.cmd-line-copy{background:#1e1e1e;border:none;border-left:1px solid #2a2a2a;color:#555;font-size:11px;font-weight:500;padding:0 14px;cursor:pointer;transition:all .15s;flex-shrink:0;white-space:nowrap;display:flex;align-items:center;letter-spacing:.02em}
+.cmd-line-copy:hover{color:#fff;background:#2a9d8f;border-left-color:#2a9d8f}
+.cmd-line-copy.copied-line{color:#4ade80;background:#1a3a1a;border-left-color:#1a4a1a}
+.cmd-line.is-comment .cmd-line-copy{display:none}
 .img-placeholder{background:#f0effe;border:2px dashed #c4b8ff;border-radius:10px;padding:28px;text-align:center;color:#7c6ff7;font-size:15px;margin:14px 0}
 
 /* FOOTER */
 footer{background:#1a1a18;color:#666;text-align:center;padding:36px 24px;font-size:15px}
 footer strong{color:#aaa}
 
+@media(max-width:960px){
+  .container{padding:0 24px}
+  .step{padding:18px 20px}
+  .section h2{font-size:25px}
+}
 @media(max-width:700px){
   body{font-size:16px}
   #hero h1{font-size:26px}
@@ -111,7 +126,7 @@ footer strong{color:#aaa}
   .flow{flex-direction:column;align-items:flex-start}
   .flow-arrow{transform:rotate(90deg)}
   .cards{grid-template-columns:1fr}
-  .step{flex-direction:column;gap:10px}
+  .step{flex-direction:column;gap:10px;padding:16px 16px}
   .toc a{font-size:14px;padding:12px 14px}
 }
 </style>
@@ -122,7 +137,7 @@ footer strong{color:#aaa}
 <div id="hero">
   <h1>📓 NotebookLM + Claude</h1>
   <p>Guia completo: como conectar o poder de análise do Claude com a capacidade do NotebookLM de processar centenas de documentos</p>
-  <div class="hero-version">v2.5</div>
+  <div class="hero-version">v2.14</div>
 </div>
 
 <!-- TOC -->
@@ -135,9 +150,10 @@ footer strong{color:#aaa}
     <a href="#s3">4. Servidor</a>
     <a href="#s4">5. Studio</a>
     <a href="#s5">6. Uso diário</a>
-    <a href="#s8">7. Transferir contexto</a>
-    <a href="#s6">Comandos</a>
-    <a href="#s7">Problemas</a>
+    <a href="#s6">7. Comandos</a>
+    <a href="#s7">8. Problemas</a>
+    <a href="#s8">★ Transferir contexto</a>
+    <a href="#s-playbooks">&#127919; Playbooks</a>
   </nav>
 </div>
 
@@ -146,47 +162,57 @@ footer strong{color:#aaa}
 <!-- VISÃO GERAL -->
 <div class="section" id="s0">
   <div class="section-num">0</div>
-  <h2>Visão Geral: o que vamos construir</h2>
-  <p class="section-desc">Antes de começar, entenda como as peças se encaixam. São três componentes funcionando juntos.</p>
+  <h2>Visão Geral</h2>
 
-  <div class="flow">
-    <div class="flow-item"><strong>Você</strong>Chat no Claude</div>
-    <div class="flow-arrow">→</div>
-    <div class="flow-item"><strong>Studio HTML</strong>Terminal visual</div>
-    <div class="flow-arrow">→</div>
-    <div class="flow-item"><strong>ngrok</strong>Túnel público</div>
-    <div class="flow-arrow">→</div>
-    <div class="flow-item"><strong>Google Colab</strong>notebooklm-py</div>
-    <div class="flow-arrow">→</div>
-    <div class="flow-item"><strong>NotebookLM</strong>Google</div>
+  <p class="section-desc">Tudo começa no <strong>NotebookLM</strong> — você carrega seus documentos lá e ele os processa. O <strong>Studio</strong> (um arquivo HTML que abre no navegador) envia comandos ao NotebookLM via <strong>Google Colab + ngrok</strong>, que funcionam como ponte na nuvem. Os resultados voltam ao Studio, e você os repassa ao <strong>Claude</strong> para análise, redação e elaboração.</p>
+
+  <div style="display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap;margin:24px 0;padding:20px;background:linear-gradient(135deg,#f0fdf9,#f8fbff);border-radius:16px;border:1px solid #c6eee9">
+    <div style="text-align:center;padding:12px 16px">
+      <div style="font-size:28px;margin-bottom:6px">📓</div>
+      <div style="font-size:13px;font-weight:700;color:#1a1a2e">NotebookLM</div>
+      <div style="font-size:12px;color:#777;margin-top:2px">documentos</div>
+    </div>
+    <div style="font-size:22px;color:#2a9d8f;padding:0 8px;font-weight:300">⟷</div>
+    <div style="text-align:center;padding:12px 16px">
+      <div style="font-size:28px;margin-bottom:6px">☁️</div>
+      <div style="font-size:13px;font-weight:700;color:#1a1a2e">Colab + ngrok</div>
+      <div style="font-size:12px;color:#777;margin-top:2px">ponte na nuvem</div>
+    </div>
+    <div style="font-size:22px;color:#2a9d8f;padding:0 8px;font-weight:300">⟷</div>
+    <div style="text-align:center;padding:12px 16px">
+      <div style="font-size:28px;margin-bottom:6px">🖥️</div>
+      <div style="font-size:13px;font-weight:700;color:#1a1a2e">Studio</div>
+      <div style="font-size:12px;color:#777;margin-top:2px">terminal visual</div>
+    </div>
+    <div style="font-size:22px;color:#2a9d8f;padding:0 8px;font-weight:300">→</div>
+    <div style="text-align:center;padding:12px 16px">
+      <div style="font-size:28px;margin-bottom:6px">🧠</div>
+      <div style="font-size:13px;font-weight:700;color:#1a1a2e">Claude</div>
+      <div style="font-size:12px;color:#777;margin-top:2px">análise e redação</div>
+    </div>
   </div>
 
-  <div class="cards" style="margin-top:24px">
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:8px">
     <div class="card">
-      <div class="card-icon">🧠</div>
-      <div class="card-title">Claude (este chat)</div>
-      <div class="card-desc">Interpreta seus pedidos em linguagem natural, decide quais comandos executar e explica os resultados.</div>
-    </div>
-    <div class="card">
-      <div class="card-icon">🖥️</div>
-      <div class="card-title">NotebookLM Studio</div>
-      <div class="card-desc">Arquivo HTML que você abre no navegador. Terminal visual com paleta de comandos e botões de copiar.</div>
+      <div class="card-icon">📓</div>
+      <div class="card-title">NotebookLM — onde tudo começa</div>
+      <div class="card-desc">Carrega e processa seus documentos (PDFs, textos, links). Responde perguntas com citações exatas, gera relatórios, podcasts e guias de estudo diretamente do seu acervo.</div>
     </div>
     <div class="card">
       <div class="card-icon">☁️</div>
-      <div class="card-title">Google Colab + ngrok</div>
-      <div class="card-desc">O Colab executa os comandos notebooklm-py. O ngrok cria um endereço público para o Studio se conectar.</div>
+      <div class="card-title">Colab + ngrok — a ponte</div>
+      <div class="card-desc">O Google Colab executa os comandos notebooklm-py em segundo plano. O ngrok cria um endereço público para o Studio se comunicar com o Colab de qualquer lugar.</div>
     </div>
     <div class="card">
-      <div class="card-icon">📓</div>
-      <div class="card-title">NotebookLM</div>
-      <div class="card-desc">Processa seus documentos, responde perguntas, gera relatórios, podcasts e guias de estudo.</div>
+      <div class="card-icon">🖥️</div>
+      <div class="card-title">Studio — o painel de controle</div>
+      <div class="card-desc">Arquivo HTML que você abre no Chrome. Permite enviar comandos ao NotebookLM, visualizar resultados, gerar relatórios e transferir todo o contexto ao Claude com um clique.</div>
     </div>
-  </div>
-
-  <div class="alert alert-info" style="margin-top:20px">
-    <span class="alert-icon">💡</span>
-    <span><strong>Por que usar isso?</strong> O NotebookLM consegue analisar centenas de páginas de documentos simultaneamente. O Claude interpreta os resultados e responde em linguagem natural. Juntos, são uma ferramenta poderosa para pesquisa jurídica, acadêmica ou empresarial.</span>
+    <div class="card">
+      <div class="card-icon">🧠</div>
+      <div class="card-title">Claude — onde tudo termina</div>
+      <div class="card-desc">Recebe os resultados do NotebookLM via relatório ou contexto copiado. Interpreta, estrutura argumentos, redige documentos e responde em linguagem natural — sem reler os originais.</div>
+    </div>
   </div>
 </div>
 
@@ -632,6 +658,37 @@ app.run(port=5000)</pre>
   </div>
 </div>
 
+<!-- RECAPITULO -->
+<div class="section" style="background:#fff;margin:0 -24px;padding:48px 24px">
+  <div class="container" style="padding:0">
+    <div class="section-num">✓</div>
+    <h2>O que você precisa guardar</h2>
+    <p class="section-desc">Itens essenciais para retomar em qualquer sessão:</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:4px">
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:#fff;border:1px solid #e4e8f0;border-radius:10px">
+        <span style="font-size:20px;flex-shrink:0">💻</span>
+        <div><strong style="font-size:15px;color:#1a1a2e;display:block">notebooklm-py local</strong><span style="font-size:14px;color:#666">Para gerar e renovar o arquivo de credenciais quando necessário.</span></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:#fff;border:1px solid #e4e8f0;border-radius:10px">
+        <span style="font-size:20px;flex-shrink:0">🗝️</span>
+        <div><strong style="font-size:15px;color:#1a1a2e;display:block">storage_state.json</strong><span style="font-size:14px;color:#666">Credenciais do Google. Geradas localmente, enviadas ao Colab a cada sessão.</span></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:#fff;border:1px solid #e4e8f0;border-radius:10px">
+        <span style="font-size:20px;flex-shrink:0">🔑</span>
+        <div><strong style="font-size:15px;color:#1a1a2e;display:block">Token do ngrok</strong><span style="font-size:14px;color:#666">Salvo via Colab Secrets. Obtenha em <a href="https://dashboard.ngrok.com" target="_blank">dashboard.ngrok.com</a>.</span></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:#fff;border:1px solid #e4e8f0;border-radius:10px">
+        <span style="font-size:20px;flex-shrink:0">☁️</span>
+        <div><strong style="font-size:15px;color:#1a1a2e;display:block">Notebook do Colab</strong><span style="font-size:14px;color:#666">Salvo no Google Drive com os três blocos de código do servidor.</span></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:#fff;border:1px solid #e4e8f0;border-radius:10px">
+        <span style="font-size:20px;flex-shrink:0">🖥️</span>
+        <div><strong style="font-size:15px;color:#1a1a2e;display:block">notebooklm_studio.html</strong><span style="font-size:14px;color:#666">Salvo no computador. Abrir no Chrome para executar comandos.</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- PASSO 6 -->
 <div class="section" id="s5">
   <div class="section-num">6</div>
@@ -841,48 +898,7 @@ app.run(port=5000)</pre>
       <div class="step-body">
         <div class="step-title" style="color:#dc2626">Conflito ao enviar dois comandos rápido</div>
         <div class="step-desc">O Studio serializa todos os comandos em uma <strong>fila interna</strong>. O badge <em>"N na fila"</em> ao lado do título mostra quantos estão aguardando. Envie quantos quiser em sequência — serão executados um a um sem conflito.</div>
-        <div class="step-tip">&#128161; Use o painel de histórico para <strong>exportar/importar comandos em JSON</strong> ou sincronizar com Google Drive (botão &#9729;). Para instalar o Studio como <strong>app nativo</strong> no computador ou celular, use o botão &#128242; na barra superior.</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- RECAPITULO -->
-<div class="section" style="background:#fff;margin:0 -24px;padding:48px 24px">
-  <div class="container" style="padding:0">
-    <div class="section-num">✓</div>
-    <h2>Resumo do que você precisa guardar</h2>
-    <p class="section-desc">Guarde estes itens para começar do zero em qualquer momento:</p>
-    <div class="cards">
-      <div class="card">
-        <div class="card-icon">💻</div>
-        <div class="card-title">notebooklm-py local</div>
-        <div class="card-desc">Instalado no seu computador. Usado para fazer login e gerar o <code>storage_state.json</code> quando as credenciais expirarem.</div>
-      </div>
-      <div class="card">
-        <div class="card-icon">🗝️</div>
-        <div class="card-title">storage_state.json</div>
-        <div class="card-desc">Arquivo de credenciais gerado pelo <code>notebooklm login</code> no computador. Enviado diretamente ao Colab. Renove quando expirar.</div>
-      </div>
-      <div class="card">
-        <div class="card-icon">🔑</div>
-        <div class="card-title">Token do ngrok</div>
-        <div class="card-desc">Crie uma conta gratuita em ngrok.com e copie seu token em Dashboard → Your Authtoken.</div>
-      </div>
-      <div class="card">
-        <div class="card-icon">☁️</div>
-        <div class="card-title">Notebook do Colab</div>
-        <div class="card-desc">Salve no Google Drive com os códigos de instalação, upload de credenciais e servidor Flask+ngrok.</div>
-      </div>
-      <div class="card">
-        <div class="card-icon">📄</div>
-        <div class="card-title">notebooklm_studio.html</div>
-        <div class="card-desc">O terminal visual. Salve no seu computador e abra no Chrome para executar comandos.</div>
-      </div>
-      <div class="card">
-        <div class="card-icon">💬</div>
-        <div class="card-title">Este chat no Claude</div>
-        <div class="card-desc">Use para interpretar resultados, fazer análises e pedir que o Claude elabore sobre os dados.</div>
+        <div class="step-tip">&#128161; Use o painel de histórico para <strong>exportar/importar comandos em JSON</strong> ou sincronizar com Google Drive (botão &#9729;). Para instalar o Studio como <strong>app nativo</strong> no computador ou celular, use o botão &#128242; na barra superior. Os <strong>Playbooks e o Histórico</strong> ficam salvos no navegador (localStorage) — não no Colab — e sobrevivem a reinicializações do servidor.</div>
       </div>
     </div>
   </div>
@@ -934,36 +950,55 @@ source list --json    <span class="c"># confirme que as fontes estão "ready"</s
       <div class="step-num">3</div>
       <div class="step-body">
         <div class="step-title">Gere o bloco de contexto com um clique</div>
-        <div class="step-desc">No Studio, clique no botão <strong>📋 copiar contexto</strong> na barra superior. Ele vai:</div>
-        <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
-          <div style="display:flex;align-items:flex-start;gap:10px;font-size:15px;color:#444;line-height:1.6">
-            <span style="color:#2a9d8f;font-weight:700;flex-shrink:0">1.</span>
-            Executar <code>status</code>, <code>list --json</code> e <code>source list --json</code> automaticamente
-          </div>
-          <div style="display:flex;align-items:flex-start;gap:10px;font-size:15px;color:#444;line-height:1.6">
-            <span style="color:#2a9d8f;font-weight:700;flex-shrink:0">2.</span>
-            Montar um bloco estruturado com notebook ativo, todas as fontes e lista de notebooks
-          </div>
-          <div style="display:flex;align-items:flex-start;gap:10px;font-size:15px;color:#444;line-height:1.6">
-            <span style="color:#2a9d8f;font-weight:700;flex-shrink:0">3.</span>
-            Abrir um modal com o texto pronto — clique em <strong>📋 Copiar tudo</strong>
+        <div class="step-desc">No Studio, clique no botão <strong>Contexto</strong> na barra superior. Ele monta automaticamente um bloco limpo e estruturado, focado no notebook ativo — sem ruído de comandos operacionais.</div>
+
+        <div style="margin-top:14px;background:#1a1a18;border:1px solid #2e2e2a;border-radius:10px;overflow:hidden">
+          <div style="padding:8px 14px;background:#141412;border-bottom:1px solid #2e2e2a;font-size:11px;font-weight:700;color:#2a9d8f;letter-spacing:.06em;text-transform:uppercase">O que o botão coleta</div>
+          <div style="display:flex;flex-direction:column;gap:0">
+            <div style="display:flex;align-items:flex-start;gap:12px;padding:10px 14px;border-bottom:1px solid #1e1e1a;font-size:14px">
+              <span style="background:#2a9d8f;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px">1</span>
+              <span style="color:#aaa"><strong style="color:#ccc">Dados do notebook ativo</strong> — nome, ID e data de criação, extraídos diretamente do servidor</span>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:12px;padding:10px 14px;border-bottom:1px solid #1e1e1a;font-size:14px">
+              <span style="background:#2a9d8f;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px">2</span>
+              <span style="color:#aaa"><strong style="color:#ccc">Lista de fontes</strong> — apenas os nomes dos documentos, sem status técnico ou colunas de tabela</span>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:12px;padding:10px 14px;font-size:14px">
+              <span style="background:#2a9d8f;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px">3</span>
+              <span style="color:#aaa"><strong style="color:#ccc">Respostas do NotebookLM</strong> — somente os resultados dos comandos <code style="background:#252520;padding:1px 6px;border-radius:3px;color:#7fd3cc">ask</code> executados na sessão, com a pergunta e a resposta limpa. Comandos operacionais (<code style="background:#252520;padding:1px 6px;border-radius:3px;color:#7fd3cc">use</code>, <code style="background:#252520;padding:1px 6px;border-radius:3px;color:#7fd3cc">list</code>, <code style="background:#252520;padding:1px 6px;border-radius:3px;color:#7fd3cc">status</code>, <code style="background:#252520;padding:1px 6px;border-radius:3px;color:#7fd3cc">source list</code>) são automaticamente ignorados</span>
+            </div>
           </div>
         </div>
-        <div class="step-tip" style="margin-top:12px">&#128204; O bloco gerado tem este formato:<br><br>
-        <code style="font-size:12px;background:#f0f0ec;padding:6px 10px;border-radius:6px;display:block;line-height:1.8">
-        # Contexto do Projeto — NotebookLM + Claude<br>
-        Gerado em: 01/01/2026 10:00<br><br>
-        ## Configuração<br>
-        - Notebook ativo: Meu Notebook de Pesquisa [a1b2c3d4...]<br><br>
-        ## Fontes carregadas<br>
-        &nbsp;&nbsp;1. Documento Principal.pdf (ready)<br>
-        &nbsp;&nbsp;2. Referência Complementar.pdf (ready)<br>
-        &nbsp;&nbsp;3. Anotações de Pesquisa.txt (ready)<br>
-        &nbsp;&nbsp;...<br><br>
-        ## Todos os notebooks disponíveis<br>
-        &nbsp;&nbsp;• Meu Notebook de Pesquisa [a1b2c3d4...]<br>
-        &nbsp;&nbsp;• Projeto Secundário [e5f6g7h8...]
-        </code></div>
+
+        <div class="step-tip" style="margin-top:14px">&#128204; A qualidade do contexto depende das perguntas que você fizer. Antes de clicar em Contexto, execute os <code>ask</code> mais importantes — sobre fatos comprovados, contradições, argumentos centrais. Cada resposta do NotebookLM entra no bloco e enriquece o que o Claude recebe.</div>
+
+        <div style="margin-top:14px">
+          <div style="font-size:13px;color:#666;margin-bottom:8px;font-weight:600">Exemplo do bloco gerado:</div>
+          <div style="background:#f8f8f6;border:1px solid #e0e0da;border-radius:8px;padding:14px 16px;font-size:12px;font-family:monospace;line-height:1.9;color:#333;overflow-x:auto">
+            <span style="color:#777"># Contexto do Projeto — NotebookLM + Claude</span><br>
+            <span style="color:#999">Gerado em: 01/03/2026, 14:32</span><br><br>
+            <span style="color:#777">## Notebook ativo</span><br>
+            <span style="color:#333">- <strong>Nome:</strong> Análise de Contrato — Projeto X<br>
+            - <strong>ID:</strong> a1b2c3d4...<br>
+            - <strong>Fontes:</strong> 8 documentos carregados</span><br><br>
+            <span style="color:#777">## Fontes carregadas</span><br>
+            <span style="color:#333">&nbsp;&nbsp;1. Contrato Principal.pdf<br>
+            &nbsp;&nbsp;2. Aditivo 01.pdf<br>
+            &nbsp;&nbsp;3. Parecer Jurídico.docx<br>
+            &nbsp;&nbsp;4. Jurisprudência Aplicável.txt<br>
+            &nbsp;&nbsp;...</span><br><br>
+            <span style="color:#777">## Respostas do NotebookLM nesta sessão</span><br><br>
+            <span style="color:#555"><strong>Pergunta:</strong> Quais cláusulas apresentam risco para a parte contratante?</span><br>
+            <span style="color:#333">Com base nas fontes 1 e 3, as cláusulas 7.2 e 12.1 apresentam risco, pois estabelecem condições unilaterais que podem ser interpretadas como...</span><br><br>
+            <span style="color:#555"><strong>Pergunta:</strong> O parecer jurídico contradiz alguma cláusula do contrato?</span><br>
+            <span style="color:#333">Sim. O parecer (fonte 3) aponta que a cláusula 12.1 contraria o entendimento consolidado nos precedentes citados nas fontes 2 e 4, pois...</span>
+          </div>
+        </div>
+
+        <div class="alert alert-warn" style="margin-top:14px">
+          <span class="alert-icon">⚠️</span>
+          <span>O botão <strong>Contexto</strong> fica desabilitado se as credenciais do Google expirarem — o Studio detecta isso automaticamente ao conectar e ao gerar o contexto. Renove o <code>storage_state.json</code> antes de continuar.</span>
+        </div>
       </div>
     </div>
 
@@ -1029,6 +1064,175 @@ source list --json    <span class="c"># confirme que as fontes estão "ready"</s
   </div>
 </div>
 
+
+<!-- RECEITAS PRATICAS -->
+<div class="section" id="s-playbooks">
+  <div class="section-num">&#127859;</div>
+  <h2>Playbooks</h2>
+  <p class="section-desc">Sequências de comandos prontas para os casos de uso mais comuns. Execute cada comando separadamente no Studio — um de cada vez — e em seguida use o resultado no Claude.</p>
+
+  <div class="alert alert-warn" style="margin-bottom:8px">
+    <span class="alert-icon">&#9888;&#65039;</span>
+    <span><strong>Importante:</strong> cada linha é um comando independente — use o botão <strong>copiar</strong> de cada linha para colá-la no Studio individualmente. Execute um, aguarde o resultado, depois execute o próximo. Se salvar como Playbook, o Studio faz isso automaticamente pela fila.</span>
+  </div>
+
+  <div class="steps">
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Redigir uma peça jurídica</div>
+        <div class="step-desc">Use quando precisar redigir petições, manifestações ou memoriais com base nos documentos do notebook.</div>
+        <div class="cmd-lines">
+          <div class="cmd-line">
+            <span class="cmd-line-num">1</span>
+            <span class="cmd-line-code">use &lt;id-do-notebook&gt;</span>
+            <button class="cmd-line-copy" onclick="copyLine(this,'use <id-do-notebook>')">copiar</button>
+          </div>
+          <div class="cmd-line">
+            <span class="cmd-line-num">2</span>
+            <span class="cmd-line-code">generate report --format briefing-doc</span>
+            <button class="cmd-line-copy" onclick="copyLine(this,'generate report --format briefing-doc')">copiar</button>
+          </div>
+          <div class="cmd-line is-comment">
+            <span class="cmd-line-num"></span>
+            <span class="cmd-line-code is-comment"># aguarda download automático do relatorio.md</span>
+          </div>
+        </div>
+        <div class="step-desc" style="margin-top:10px">Depois, no Claude: anexe o <code>relatorio.md</code> e diga <em>"Com base neste relatorio, redija uma petição inicial contestando os calculos do exequente."</em></div>
+        <div class="step-tip">&#128161; Salve esse fluxo como Playbook no Studio. Abra o painel de Histórico, clique em <strong>Playbook</strong>, selecione os dois comandos e dê um nome. O Studio os executará um a um pela fila automaticamente.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Montar um dossie de provas</div>
+        <div class="step-desc">Ideal para mapear quais documentos comprovam cada fato relevante, com citações rastreavéis.</div>
+        <div class="cmd-lines">
+          <div class="cmd-line">
+            <span class="cmd-line-num">1</span>
+            <span class="cmd-line-code">use &lt;id-do-notebook&gt;</span>
+            <button class="cmd-line-copy" onclick="copyLine(this,'use <id-do-notebook>')">copiar</button>
+          </div>
+          <div class="cmd-line is-comment">
+            <span class="cmd-line-num"></span>
+            <span class="cmd-line-code is-comment"># passo 1 — selecionar o notebook</span>
+          </div>
+          <div class="cmd-line">
+            <span class="cmd-line-num">2</span>
+            <span class="cmd-line-code">ask "Quais fatos estão comprovados pelos documentos? Cite as fontes."</span>
+            <button class="cmd-line-copy" onclick="copyLine(this,'ask &quot;Quais fatos estão comprovados pelos documentos? Cite as fontes.&quot;')">copiar</button>
+          </div>
+          <div class="cmd-line is-comment">
+            <span class="cmd-line-num"></span>
+            <span class="cmd-line-code is-comment"># passo 2 — aguarde a resposta e use Copiar Contexto</span>
+          </div>
+          <div class="cmd-line">
+            <span class="cmd-line-num">3</span>
+            <span class="cmd-line-code">ask "Quais documentos contradizem a versao da parte contraria?"</span>
+            <button class="cmd-line-copy" onclick="copyLine(this,'ask &quot;Quais documentos contradizem a versao da parte contraria?&quot;')">copiar</button>
+          </div>
+          <div class="cmd-line is-comment">
+            <span class="cmd-line-num"></span>
+            <span class="cmd-line-code is-comment"># passo 3 — aguarde e use Copiar Contexto novamente</span>
+          </div>
+          <div class="cmd-line">
+            <span class="cmd-line-num">4</span>
+            <span class="cmd-line-code">generate report --format study-guide</span>
+            <button class="cmd-line-copy" onclick="copyLine(this,'generate report --format study-guide')">copiar</button>
+          </div>
+          <div class="cmd-line is-comment">
+            <span class="cmd-line-num"></span>
+            <span class="cmd-line-code is-comment"># passo 4 — aguarda download automático do relatorio</span>
+          </div>
+        </div>
+        <div class="step-desc" style="margin-top:10px">Cole os resultados no Claude e peça: <em>"Organize essas provas em um dossie estruturado por eixo tematico, com os numeros de citação do NotebookLM."</em></div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Revisão bibliográfica / pesquisa acadêmica</div>
+        <div class="step-desc">Para projetos com artigos, teses e relatorios — mapear argumentos, identificar lacunas e comparar posicoes.</div>
+        <div class="cmd-lines">
+          <div class="cmd-line">
+            <span class="cmd-line-num">1</span>
+            <span class="cmd-line-code">source list --json</span>
+            <button class="cmd-line-copy" onclick="copyLine(this,'source list --json')">copiar</button>
+          </div>
+          <div class="cmd-line is-comment">
+            <span class="cmd-line-num"></span>
+            <span class="cmd-line-code is-comment"># confirme que todas as fontes estao "ready"</span>
+          </div>
+          <div class="cmd-line">
+            <span class="cmd-line-num">2</span>
+            <span class="cmd-line-code">ask "Quais sao os principais argumentos de cada fonte?"</span>
+            <button class="cmd-line-copy" onclick="copyLine(this,'ask &quot;Quais sao os principais argumentos de cada fonte?&quot;')">copiar</button>
+          </div>
+          <div class="cmd-line is-comment">
+            <span class="cmd-line-num"></span>
+            <span class="cmd-line-code is-comment"># aguarde e use Copiar Contexto</span>
+          </div>
+          <div class="cmd-line">
+            <span class="cmd-line-num">3</span>
+            <span class="cmd-line-code">ask "Onde os autores divergem entre si?"</span>
+            <button class="cmd-line-copy" onclick="copyLine(this,'ask &quot;Onde os autores divergem entre si?&quot;')">copiar</button>
+          </div>
+          <div class="cmd-line is-comment">
+            <span class="cmd-line-num"></span>
+            <span class="cmd-line-code is-comment"># aguarde e use Copiar Contexto novamente</span>
+          </div>
+          <div class="cmd-line">
+            <span class="cmd-line-num">4</span>
+            <span class="cmd-line-code">generate report --format study-guide</span>
+            <button class="cmd-line-copy" onclick="copyLine(this,'generate report --format study-guide')">copiar</button>
+          </div>
+          <div class="cmd-line is-comment">
+            <span class="cmd-line-num"></span>
+            <span class="cmd-line-code is-comment"># aguarda download automático</span>
+          </div>
+        </div>
+        <div class="step-desc" style="margin-top:10px">Transfira o contexto para o Claude (botão copiar contexto) e peça: <em>"Com base na revisao do NotebookLM, escreva um referencial teorico de 3 paginas comparando as perspectivas X e Y."</em></div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">Análise de dados financeiros / relatorios empresariais</div>
+        <div class="step-desc">Para due diligence, analise de balancete, comparativo de indicadores entre periodos.</div>
+        <div class="cmd-lines">
+          <div class="cmd-line">
+            <span class="cmd-line-num">1</span>
+            <span class="cmd-line-code">ask "Quais indicadores aparecem em todos os relatorios?"</span>
+            <button class="cmd-line-copy" onclick="copyLine(this,'ask &quot;Quais indicadores aparecem em todos os relatorios?&quot;')">copiar</button>
+          </div>
+          <div class="cmd-line">
+            <span class="cmd-line-num">2</span>
+            <span class="cmd-line-code">ask "Houve queda ou crescimento ano a ano? Cite os valores exatos."</span>
+            <button class="cmd-line-copy" onclick="copyLine(this,'ask &quot;Houve queda ou crescimento ano a ano? Cite os valores exatos.&quot;')">copiar</button>
+          </div>
+          <div class="cmd-line">
+            <span class="cmd-line-num">3</span>
+            <span class="cmd-line-code">generate report --format briefing-doc</span>
+            <button class="cmd-line-copy" onclick="copyLine(this,'generate report --format briefing-doc')">copiar</button>
+          </div>
+        </div>
+        <div class="step-desc" style="margin-top:10px">Cole no Claude: <em>"Com os dados acima, redija um parecer executivo de 1 pagina apontando os 3 pontos de atencao criticos."</em></div>
+        <div class="step-tip">&#128161; Para este fluxo, o formato <code>briefing-doc</code> funciona melhor que <code>study-guide</code> — gera um resumo executivo com os dados-chave ja destacados.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="alert alert-info" style="margin-top:24px">
+    <span class="alert-icon">&#127919;</span>
+    <span><strong>Dica de produtividade — Playbooks:</strong> Salve qualquer sequência como <strong>Playbook</strong> no Studio. Abra o painel de histórico, clique em <strong>Playbook</strong>, selecione os comandos e dê um nome. Na próxima sessão, um clique na paleta executa tudo na ordem certa. <strong>Os playbooks ficam salvos no navegador</strong> (localStorage) — não no Colab. Isso significa que sobrevivem a reinicializações do Colab, trocas de URL do ngrok e fechamentos do Studio. O único caso em que se perdem é se você limpar os dados do navegador ou usar outro computador.</span>
+  </div>
+</div>
+
 <!-- HISTÓRICO DE VERSÕES -->
 <div class="section">
   <div class="section-num">&#8635;</div>
@@ -1047,9 +1251,20 @@ source list --json    <span class="c"># confirme que as fontes estão "ready"</s
     <tr><td><span class="cmd">v2.1</span></td><td class="cmd-desc">Keep-alive automático (ping 25 min) + detecção de credenciais expiradas com alerta e instruções</td></tr>
     <tr><td><span class="cmd">v2.2</span></td><td class="cmd-desc">Fila de comandos: serializa execuções, badge contador, sem conflitos em uso simultâneo</td></tr>
     <tr><td><span class="cmd">v2.3</span></td><td class="cmd-desc">Histórico: exportar JSON, importar JSON (merge dedup), sincronizar via Google Drive</td></tr>
-    <tr><td><span class="cmd">v2.5</span></td><td class="cmd-desc">PWA instalável como app nativo (desktop e mobile), service worker com cache offline</td></tr>
+    <tr><td><span class="cmd">v2.4</span></td><td class="cmd-desc">PWA instalável como app nativo (desktop e mobile), service worker com cache offline</td></tr>
+    <tr><td><span class="cmd">v2.5</span></td><td class="cmd-desc">Interface redesenhada: pills arredondados no menu, fontes maiores, paleta com ícones, botão Sair vermelho, indicador de notebook ativo na topbar</td></tr>
+    <tr><td><span class="cmd">v2.6</span></td><td class="cmd-desc">Playbooks na paleta (sequências de 1 clique), logs estruturados JSONL, timeouts diferenciados, painel Debug, botões da topbar com ícones SVG</td></tr>
+    <tr><td><span class="cmd">v2.7</span></td><td class="cmd-desc">Fix TOC (getBoundingClientRect, sem break), responsividade com breakpoint 960px, CSS defensivo em section-desc e step-desc, tabela histórico corrigida</td></tr>
+    <tr><td><span class="cmd">v2.8</span></td><td class="cmd-desc">Contexto ampliado (captura toda a sessão incluindo ask); copiar por linha nos Playbooks do guia; status "Conectado" na barra; edição de playbooks existentes; botão Contexto bloqueado com credenciais expiradas</td></tr>
+    <tr><td><span class="cmd">v2.9</span></td><td class="cmd-desc">Design dos blocos de comando (cmd-lines) corrigido: visual unificado, botão copiar visível, comentários sem fundo preto. Seção "Transferir contexto" atualizada: explica captura da sessão com ask, exemplo real do bloco gerado e aviso sobre credenciais</td></tr>
+    <tr><td><span class="cmd">v2.10</span></td><td class="cmd-desc">Verificação de credenciais ao conectar (probe silenciosa); showContext aborta e alerta se credenciais expiradas mesmo sem comando anterior; TOC com offset dinâmico (mede header real) + requestAnimationFrame + auto-scroll horizontal corrigido com getBoundingClientRect</td></tr>
+    <tr><td><span class="cmd">v2.11</span></td><td class="cmd-desc">Contexto reescrito: filtra comandos operacionais, remove tabelas ASCII do CLI, extrai apenas respostas de ask limpas. Guia: passo 3 da transferência de contexto atualizado com descrição precisa e exemplo real</td></tr>
+    <tr><td><span class="cmd">v2.12</span></td><td class="cmd-desc">Removida seção "Outros notebooks" do contexto — irrelevante para o Claude que trabalha em um caso específico. Eliminada chamada list --json desnecessária</td></tr>
+    <tr><td><span class="cmd">v2.13</span></td><td class="cmd-desc">Verificação de credenciais durante a conexão (antes de liberar o terminal). Guia: exemplo do bloco de contexto com dados genéricos. release.py: token lido de .github_config ou variável de ambiente, nunca hardcoded</td></tr>
+    <tr><td><span class="cmd">v2.14</span></td><td class="cmd-desc">zip de distribuição corrigido: contém apenas os arquivos do usuário (Studio, Guia, servidor, README, CHANGELOG) — release.py e .gitignore são ferramentas do repositório e não fazem parte do pacote</td></tr>
   </table>
 </div>
+
 
 </div><!-- /container -->
 
@@ -1066,19 +1281,72 @@ function copyCode(btn){
   });
 }
 
-// Active TOC on scroll
-const sections=document.querySelectorAll('.section[id]');
-const links=document.querySelectorAll('.toc a');
-const obs=new IntersectionObserver(entries=>{
-  entries.forEach(e=>{
-    if(e.isIntersecting){
-      links.forEach(l=>l.classList.remove('active'));
-      const link=document.querySelector(`.toc a[href="#${e.target.id}"]`);
-      if(link)link.classList.add('active');
+function copyLine(btn, text){
+  // Decodificar entidades HTML se necessário
+  const decoded = text.replace(/&quot;/g,'"').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
+  navigator.clipboard.writeText(decoded).then(()=>{
+    btn.textContent='✓';btn.classList.add('copied-line');
+    setTimeout(()=>{btn.textContent='copiar';btn.classList.remove('copied-line');},1500);
+  });
+}
+
+// Active TOC — offset dinâmico baseado na altura real do header sticky
+const tocLinks = document.querySelectorAll('.toc a');
+const tocSections = Array.from(document.querySelectorAll('.section[id]'));
+let _tocRaf = null;
+
+function getTocOffset() {
+  // Mede a altura real do banner sticky em tempo real (cobre zoom e resize)
+  const toc = document.querySelector('.toc-wrap');
+  return toc ? toc.getBoundingClientRect().bottom + 8 : 80;
+}
+
+function getActiveSection() {
+  const offset = getTocOffset();
+  let active = tocSections[0];
+  // Percorre todas as seções e guarda a última cujo topo já cruzou o ponto de referência.
+  // getBoundingClientRect().top é sempre relativo ao viewport, preciso em qualquer zoom.
+  for (const s of tocSections) {
+    if (s.getBoundingClientRect().top <= offset) active = s;
+  }
+  return active ? active.id : null;
+}
+
+function updateToc() {
+  _tocRaf = null;
+  const activeId = getActiveSection();
+  tocLinks.forEach(a => {
+    const isActive = a.getAttribute('href') === '#' + activeId;
+    if (a.classList.contains('active') === isActive) return; // sem mudança, evita reflow
+    a.classList.toggle('active', isActive);
+    if (isActive) {
+      // Scroll horizontal do nav para manter o item ativo visível
+      const nav = a.closest('nav');
+      if (nav) {
+        // offsetLeft do <a> relativo ao nav (não ao documento)
+        const navRect = nav.getBoundingClientRect();
+        const aRect   = a.getBoundingClientRect();
+        const aLeft   = aRect.left - navRect.left + nav.scrollLeft;
+        const aRight  = aLeft + aRect.width;
+        if (aLeft < nav.scrollLeft + 20) {
+          nav.scrollTo({ left: aLeft - 20, behavior: 'smooth' });
+        } else if (aRight > nav.scrollLeft + nav.offsetWidth - 20) {
+          nav.scrollTo({ left: aRight - nav.offsetWidth + 20, behavior: 'smooth' });
+        }
+      }
     }
   });
-},{threshold:.3});
-sections.forEach(s=>obs.observe(s));
+}
+
+function scheduleTocUpdate() {
+  if (_tocRaf) return; // já agendado neste frame
+  _tocRaf = requestAnimationFrame(updateToc);
+}
+
+window.addEventListener('scroll', scheduleTocUpdate, { passive: true });
+window.addEventListener('resize', scheduleTocUpdate, { passive: true });
+document.addEventListener('DOMContentLoaded', updateToc);
+updateToc();
 </script>
 </body>
 </html>
