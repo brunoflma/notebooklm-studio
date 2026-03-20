@@ -19,9 +19,9 @@ Studio HTML → ngrok → Flask/Colab → notebooklm-py → NotebookLM Google
 ```
 notebooklm-studio/
 ├── studio/
-│   └── notebooklm_studio_v2.5.html   ← Terminal visual (abrir no Chrome)
+│   └── notebooklm_studio_v2.13.html   ← Terminal visual (abrir no Chrome)
 ├── guia/
-│   └── guia_notebooklm_claude_v2.5.html ← Guia completo passo a passo
+│   └── guia_notebooklm_claude_v2.13.html ← Guia completo passo a passo
 ├── colab/
 │   └── servidor_colab.py              ← Servidor Flask para o Google Colab
 ├── README.md
@@ -55,7 +55,7 @@ Isso gera o arquivo `~/.notebooklm/storage_state.json` com suas credenciais do G
 
 ### 3. Studio
 
-1. Abra `studio/notebooklm_studio_v2.5.html` no Chrome
+1. Abra `studio/notebooklm_studio_v2.13.html` no Chrome
 2. Cole a URL do ngrok e clique em **Conectar**
 3. Use a paleta lateral para executar comandos ou digite diretamente
 
@@ -79,7 +79,7 @@ Quando quiser levar o estado do projeto para uma conversa no Claude:
 
 ## Versão atual
 
-**v2.5** — ver [CHANGELOG.md](CHANGELOG.md) para histórico completo.
+**v2.13** — ver [CHANGELOG.md](CHANGELOG.md) para histórico completo.
 
 ---
 

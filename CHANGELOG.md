@@ -1,3 +1,53 @@
+## v2.13
+- Studio: verificação de credenciais movida para dentro do processo de conexão — o terminal só abre se as credenciais estiverem válidas. Se expiradas, a tela de setup exibe as instruções completas de renovação sem entrar no Studio
+- Guia: exemplo do bloco de contexto substituído por dados genéricos fictícios — removidas todas as referências a casos e nomes reais
+
+## v2.12
+- Removida seção "Outros notebooks disponíveis" do bloco de contexto — não agrega ao Claude que trabalha em um caso específico; a troca de notebook é função do Studio
+- Eliminada chamada `list --json` interna do showContext — era usada apenas para gerar essa seção, agora desnecessária (uma chamada de rede a menos, contexto mais rápido)
+- Contexto agora focado exclusivamente no notebook ativo: dados do caso, fontes carregadas e respostas substantivas da sessão
+
+## v2.11
+- Contexto completamente reescrito — filtra comandos operacionais (use, list, status, source list, artifact list, download, generate) que não agregam ao Claude
+- Remove tabelas ASCII do CLI (┏━━━, ┃, └──) e linhas de sistema (Continuing conversation, Resumed conversation, Matched:) antes de incluir no bloco
+- Inclui apenas respostas de comandos `ask`, formatadas como "Pergunta: ... / [resposta limpa]"
+- Seção "Status do servidor" substituída por bloco "Notebook ativo" com dados parseados de forma limpa (nome, ID, data, contagem de fontes)
+- Lista de fontes sem a coluna de status técnico ("ready") — apenas os nomes dos documentos
+- Notebook ativo é excluído da lista de "Outros notebooks" para evitar duplicação
+- Guia: passo 3 da seção "Transferir contexto" atualizado com descrição precisa dos 4 itens coletados e exemplo real do bloco gerado
+
+## v2.10
+- Studio: verificação silenciosa de credenciais imediatamente após conectar — exibe alerta e desabilita botão Contexto antes de qualquer comando manual
+- Studio: `showContext()` verifica credenciais nos resultados internos de `status`/`list`/`source list` e aborta com modal de renovação se expiradas — elimina o caso de contexto vazio gerado com credencial inválida
+- Guia: TOC com offset dinâmico (`toc-wrap.getBoundingClientRect().bottom`) que se adapta a qualquer zoom, tamanho de fonte e redimensionamento de janela
+- Guia: TOC atualizado via `requestAnimationFrame` — evita múltiplas recalculações por evento scroll e garante execução após reflow do layout
+- Guia: auto-scroll horizontal do nav corrigido com `getBoundingClientRect()` relativo ao nav (era `offsetLeft` relativo ao documento, incorreto quando nav tem scroll)
+
+## v2.9
+- Design dos blocos de comando (cmd-lines) corrigido: bloco unificado com borda única, número de linha sutil, botão "copiar" totalmente visível à direita com hover teal, comentários com fundo levemente distinto sem preto puro
+- Seção "Transferir contexto" (passo 3) reescrita: explica os 3 passos internos do botão Contexto, destaca a captura de perguntas/respostas da sessão, mostra exemplo real do bloco gerado incluindo seção ask, e adiciona aviso sobre credenciais expiradas
+
+## v2.8
+- Contexto ampliado: `showContext()` agora captura toda a sessão do terminal — todos os `ask` executados e seus outputs são incluídos na seção "Perguntas e respostas desta sessão"
+- Copiar por linha nos Playbooks do guia: cada comando tem botão de cópia individual; comentários exibidos em itálico sem botão
+- Status "Conectado" na barra: substituído texto técnico de keepalive por "Conectado" e "Conectado — HH:MM"
+- Edição de playbooks existentes: botão ✎ por playbook abre modal com renomear, reordenar (↑↓), excluir linhas e adicionar comandos novos livres
+- Modal de novo playbook também aceita comandos digitados manualmente (não só do histórico)
+- Botão Contexto desabilitado enquanto credenciais estiverem expiradas — bloqueia execução e abre modal de renovação
+
+## v2.7
+- Fix TOC do guia: substituído `offsetTop + break` por `getBoundingClientRect()` — funciona corretamente em qualquer nível de zoom e em todos os navegadores
+- Fix responsividade: novo breakpoint em 960px reduz padding do container e padding dos steps, aliviando quebra prematura de texto em telas médias ou com zoom aumentado
+- CSS defensivo: `max-width:none` e `overflow-wrap:break-word` explícitos em `section-desc` e `step-desc`
+- Corrigida tabela de histórico no guia: versões v2.4 e v2.5 estavam ausentes; entrada de v2.6 tinha descrição incorreta (descrevia features do v2.4)
+
+## v2.6
+- Receitas práticas no guia: petição, dossiê, revisão bibliográfica, análise financeira
+- Logs estruturados no servidor (JSONL em /content/server_log.jsonl)
+- Timeouts diferenciados por tipo de comando (generate 10min, ask 2min)
+- Painel Debug no Studio: últimos comandos com duração, rc, raw JSON e botão copiar
+- Modo Playbook na paleta: salve sequências do histórico como rotinas de 1 clique
+
 # Changelog — NotebookLM + Claude Studio
 
 ## v2.5

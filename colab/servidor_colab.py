@@ -60,9 +60,24 @@ print("✅ Credenciais encontradas.")
 
 
 # ── Função principal de execução com retry automático ────────────────────
+# Timeouts diferenciados por tipo de comando
+TIMEOUTS = {
+    'generate': 600,   # até 10 min — geração de relatórios e podcasts
+    'artifact': 600,   # artifact wait pode demorar
+    'ask':      120,   # perguntas respondem rápido
+    'default':  180,   # outros comandos
+}
+
+def get_timeout(cmd):
+    for prefix, seconds in TIMEOUTS.items():
+        if cmd.strip().startswith(prefix):
+            return seconds
+    return TIMEOUTS['default']
+
+
 def run_notebooklm(cmd, retries=3, delay=30):
     """
-    Executa um comando notebooklm-py com retry automático.
+    Executa um comando notebooklm-py com retry automático e timeout por tipo.
     Tenta até 3 vezes em caso de rate limit do Google (GENERATION_FAILED).
     """
     with open(AUTH_FILE, 'r') as f:
@@ -70,6 +85,7 @@ def run_notebooklm(cmd, retries=3, delay=30):
 
     env = os.environ.copy()
     env['NOTEBOOKLM_AUTH_JSON'] = auth_content
+    timeout = get_timeout(cmd)
 
     for attempt in range(retries):
         result = subprocess.run(
@@ -77,7 +93,7 @@ def run_notebooklm(cmd, retries=3, delay=30):
             shell=True,
             capture_output=True,
             text=True,
-            timeout=300,
+            timeout=timeout,
             env=env
         )
         # Retry em rate limit do Google
@@ -94,19 +110,49 @@ def run_notebooklm(cmd, retries=3, delay=30):
 
 # ── Endpoints ────────────────────────────────────────────────────────────
 
+LOG_FILE = '/content/server_log.jsonl'
+
+def write_log(entry):
+    """Salva entrada de log em JSONL — nunca interrompe a execução."""
+    try:
+        with open(LOG_FILE, 'a', encoding='utf-8') as lf:
+            lf.write(json.dumps(entry, ensure_ascii=False) + '\n')
+    except Exception:
+        pass
+
+
 @app.route('/execute', methods=['POST'])
 def execute():
     """Executa um comando notebooklm-py e retorna stdout/stderr."""
     cmd = request.json.get('command', '')
+    t0 = time.time()
     try:
         result = run_notebooklm(cmd)
-        return jsonify({
-            'stdout': result.stdout,
-            'stderr': result.stderr,
-            'returncode': result.returncode
-        })
+        write_log({'ts': datetime.datetime.now().isoformat(), 'cmd': cmd,
+                   'rc': result.returncode, 'duration': round(time.time()-t0, 2), 'error': None})
+        return jsonify({'stdout': result.stdout, 'stderr': result.stderr,
+                        'returncode': result.returncode})
     except Exception as e:
+        write_log({'ts': datetime.datetime.now().isoformat(), 'cmd': cmd,
+                   'rc': -1, 'duration': round(time.time()-t0, 2), 'error': str(e)})
         return jsonify({'error': str(e)}), 500
+
+
+@app.route('/logs', methods=['GET'])
+def get_logs():
+    """Retorna as últimas N entradas do log (padrão: 50)."""
+    n = int(request.args.get('n', 50))
+    if not os.path.exists(LOG_FILE):
+        return jsonify({'logs': []})
+    with open(LOG_FILE, 'r', encoding='utf-8') as lf:
+        lines = [l.strip() for l in lf if l.strip()]
+    entries = []
+    for line in lines[-n:]:
+        try:
+            entries.append(json.loads(line))
+        except Exception:
+            pass
+    return jsonify({'logs': entries})
 
 
 @app.route('/health', methods=['GET'])
@@ -131,7 +177,7 @@ def save_history():
     path = '/content/nlm_history.json'
     with open(path, 'w') as f:
         json.dump({
-            'version': '2.5',
+            'version': '2.6',
             'synced': datetime.datetime.now().isoformat(),
             'commands': data
         }, f, indent=2)

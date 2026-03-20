@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guia: NotebookLM + Claude v2.13</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f7f7f5;color:#1a1a18;line-height:1.85;font-size:18px}
+a{color:#6356e8;text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* HERO */
+#hero{background:linear-gradient(135deg,#0f1923 0%,#1a2e2d 50%,#0d2820 100%);padding:64px 24px;text-align:center;color:#fff}
+#hero h1{font-size:36px;font-weight:700;margin-bottom:14px;letter-spacing:-.5px}
+#hero p{font-size:18px;color:#a0aec0;max-width:580px;margin:0 auto 20px;line-height:1.7}
+.hero-version{display:inline-block;font-size:13px;font-weight:600;color:#2a9d8f;background:rgba(42,157,143,.15);border:1px solid rgba(42,157,143,.35);padding:4px 16px;border-radius:20px;letter-spacing:.04em}
+.hero-badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.badge{padding:6px 16px;border-radius:20px;font-size:13px;font-weight:600;letter-spacing:.03em}
+.badge-purple{background:rgba(124,111,247,.2);color:#b39fff;border:1px solid rgba(124,111,247,.3)}
+.badge-green{background:rgba(74,222,128,.15);color:#4ade80;border:1px solid rgba(74,222,128,.25)}
+.badge-blue{background:rgba(96,165,250,.15);color:#60a5fa;border:1px solid rgba(96,165,250,.25)}
+
+/* LAYOUT */
+.container{max-width:1100px;margin:0 auto;padding:0 40px}
+
+/* TOC - single row, horizontal scroll, no wrap */
+.toc-wrap{background:rgba(255,255,255,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid #e8eaed;position:sticky;top:0;z-index:50;padding:10px 24px}
+.toc{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:4px;overflow-x:auto;scrollbar-width:none;padding-right:24px}
+.toc::-webkit-scrollbar{display:none}
+.toc a{padding:7px 16px;font-size:15px;color:#666;white-space:nowrap;border-radius:20px;transition:all .18s;font-weight:500;flex-shrink:0;display:inline-block;border:1px solid transparent;line-height:1.4}
+.toc a:hover{color:#2a9d8f;background:#f0fdf9;text-decoration:none;border-color:#c6eee9}
+.toc a.active{color:#fff;background:#2a9d8f;border-color:#2a9d8f;font-weight:600;box-shadow:0 2px 8px rgba(42,157,143,.3)}
+
+/* SECTIONS */
+.section{padding:56px 0;border-bottom:1px solid #e8e8e4}
+.section:last-child{border-bottom:none}
+.section-num{display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;background:#2a9d8f;border-radius:20px;padding:3px 14px;margin-bottom:14px;letter-spacing:.04em}
+.section h2{font-size:28px;font-weight:700;color:#1a1a18;margin-bottom:10px}
+.section-desc{font-size:18px;color:#555;margin-bottom:32px;line-height:1.75;width:100%;max-width:none;display:block;overflow-wrap:break-word}
+
+/* STEPS */
+.steps{display:flex;flex-direction:column;gap:18px}
+.step{background:#fff;border:1px solid #e8e8e4;border-radius:14px;padding:24px 26px;display:flex;gap:18px;align-items:flex-start}
+.step-num{width:34px;height:34px;background:linear-gradient(135deg,#2a9d8f,#1a7a72);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0;margin-top:2px}
+.step-body{flex:1;min-width:0;overflow-wrap:break-word;word-break:normal}
+.step-title{font-size:17px;font-weight:600;color:#1a1a18;margin-bottom:8px;overflow-wrap:break-word}
+.step-desc{font-size:16px;color:#444;line-height:1.75;overflow-wrap:break-word;word-break:normal;width:100%;max-width:none}
+.step-note{margin-top:12px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px 14px;font-size:15px;color:#92400e;display:block;line-height:1.75;overflow-wrap:break-word;word-break:normal;width:100%}
+.step-tip{margin-top:14px;background:#f0fdf9;border-left:3px solid #2a9d8f;border-radius:8px;padding:12px 14px;font-size:15px;color:#166534;display:block;line-height:1.75;overflow-wrap:break-word;word-break:normal;width:100%}
+
+/* CODE */
+.code-block{background:#1e1e1e;border-radius:10px;overflow:hidden;margin:14px 0}
+.code-header{background:#252525;padding:9px 16px;display:flex;align-items:center;justify-content:space-between}
+.code-lang{font-size:12px;color:#888;font-family:monospace;font-weight:500}
+.code-copy{font-size:12px;color:#888;background:none;border:1px solid #444;border-radius:4px;padding:3px 10px;cursor:pointer;transition:all .15s}
+.code-copy:hover{color:#fff;border-color:#888}
+.code-copy.copied{color:#4ade80;border-color:#1a3a1a}
+pre{padding:16px 18px;overflow-x:auto;font-family:'Courier New',monospace;font-size:14px;line-height:1.75;color:#d4d4d4}
+pre .c{color:#6a9955}
+.step-desc code,.step-title code,.alert code,.section-desc code{white-space:normal;word-break:break-word}
+pre .s{color:#ce9178}
+pre .k{color:#569cd6}
+pre .f{color:#dcdcaa}
+pre .n{color:#9cdcfe}
+
+/* CARDS */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;margin-top:8px}
+.card{background:#f9fafb;border:1px solid #e4e8f0;border-radius:14px;padding:22px 22px}
+.card:hover{box-shadow:0 6px 20px rgba(42,157,143,.1);transform:translateY(-2px);border-color:#2a9d8f}
+.card-icon{font-size:28px;margin-bottom:12px}
+.card-title{font-size:16px;font-weight:600;color:#1a1a18;margin-bottom:8px}
+.card-desc{font-size:15px;color:#555;line-height:1.65}
+
+/* COMMAND TABLE */
+.cmd-table{width:100%;border-collapse:collapse;margin:10px 0}
+.cmd-table th{text-align:left;padding:10px 14px;font-size:13px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:.05em;border-bottom:2px solid #e8e8e4}
+.cmd-table td{padding:12px 14px;font-size:15px;border-bottom:1px solid #f0f0ec;vertical-align:top}
+.cmd-table tr:last-child td{border-bottom:none}
+.cmd-table tr:hover td{background:#fafaf8}
+.cmd{font-family:monospace;font-size:13px;background:#f0effe;color:#6356e8;padding:3px 8px;border-radius:4px;white-space:nowrap}
+.cmd-desc{color:#333;line-height:1.6}
+.cmd-when{color:#777;font-size:14px;line-height:1.5}
+
+/* FLOW */
+.flow{display:flex;align-items:center;gap:0;flex-wrap:wrap;margin:20px 0}
+.flow-item{background:#fff;border:1px solid #e8e8e4;border-radius:10px;padding:12px 16px;font-size:14px;color:#333;text-align:center;min-width:120px}
+.flow-item strong{display:block;font-size:12px;color:#6356e8;margin-bottom:3px}
+.flow-arrow{color:#ccc;font-size:22px;padding:0 6px;flex-shrink:0}
+
+/* ALERT */
+.alert{border-radius:10px;padding:16px 18px;margin:16px 0;display:block;font-size:15px;line-height:1.75;overflow-wrap:break-word;word-break:normal;width:100%}
+.alert-warn{background:#fffbeb;border:1px solid #fde68a;color:#92400e}
+.alert-info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af}
+.alert-success{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534}
+.alert-icon{font-size:18px;margin-right:6px;vertical-align:middle}
+
+/* COMMAND LINES - copiar por linha (seção Playbooks) */
+.cmd-lines{display:flex;flex-direction:column;gap:0;margin:14px 0;border-radius:10px;overflow:hidden;border:1px solid #2a2a2a;background:#1e1e1e}
+.cmd-line{display:flex;align-items:stretch;border-bottom:1px solid #2a2a2a}
+.cmd-line:last-child{border-bottom:none}
+.cmd-line-num{font-size:12px;color:#3a3a3a;background:#1a1a1a;padding:10px 12px;font-family:monospace;flex-shrink:0;width:34px;text-align:right;user-select:none;display:flex;align-items:center;justify-content:flex-end;border-right:1px solid #2a2a2a}
+.cmd-line.is-comment .cmd-line-num{color:#2a2a2a}
+.cmd-line-code{flex:1;font-family:'Courier New',monospace;font-size:13.5px;color:#d4d4d4;background:#1e1e1e;padding:10px 14px;line-height:1.5;overflow-x:auto;white-space:pre}
+.cmd-line-code.is-comment{color:#5a9a5a;background:#1b1f1b;font-style:italic}
+.cmd-line-copy{background:#1e1e1e;border:none;border-left:1px solid #2a2a2a;color:#555;font-size:11px;font-weight:500;padding:0 14px;cursor:pointer;transition:all .15s;flex-shrink:0;white-space:nowrap;display:flex;align-items:center;letter-spacing:.02em}
+.cmd-line-copy:hover{color:#fff;background:#2a9d8f;border-left-color:#2a9d8f}
+.cmd-line-copy.copied-line{color:#4ade80;background:#1a3a1a;border-left-color:#1a4a1a}
+.cmd-line.is-comment .cmd-line-copy{display:none}
+.img-placeholder{background:#f0effe;border:2px dashed #c4b8ff;border-radius:10px;padding:28px;text-align:center;color:#7c6ff7;font-size:15px;margin:14px 0}
+
+/* FOOTER */
+footer{background:#1a1a18;color:#666;text-align:center;padding:36px 24px;font-size:15px}
+footer strong{color:#aaa}
+
+@media(max-width:960px){
+  .container{padding:0 24px}
+  .step{padding:18px 20px}
+  .section h2{font-size:25px}
+}
+@media(max-width:700px){
+  body{font-size:16px}
+  #hero h1{font-size:26px}
+  #hero p{font-size:16px}
+  .section h2{font-size:22px}
+  .flow{flex-direction:column;align-items:flex-start}
+  .flow-arrow{transform:rotate(90deg)}
+  .cards{grid-template-columns:1fr}
+  .step{flex-direction:column;gap:10px;padding:16px 16px}
+  .toc a{font-size:14px;padding:12px 14px}
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div id="hero">
+  <h1>📓 NotebookLM + Claude</h1>
+  <p>Guia completo: como conectar o poder de análise do Claude com a capacidade do NotebookLM de processar centenas de documentos</p>
+  <div class="hero-version">v2.13</div>
+</div>
+
+<!-- TOC -->
+<div class="toc-wrap">
+  <nav class="toc">
+    <a href="#s0">Visão Geral</a>
+    <a href="#s1">1. Instalação local</a>
+    <a href="#s1b">2. Login local</a>
+    <a href="#s2">3. Colab</a>
+    <a href="#s3">4. Servidor</a>
+    <a href="#s4">5. Studio</a>
+    <a href="#s5">6. Uso diário</a>
+    <a href="#s6">7. Comandos</a>
+    <a href="#s7">8. Problemas</a>
+    <a href="#s8">★ Transferir contexto</a>
+    <a href="#s-playbooks">&#127919; Playbooks</a>
+  </nav>
+</div>
+
+<div class="container">
+
+<!-- VISÃO GERAL -->
+<div class="section" id="s0">
+  <div class="section-num">0</div>
+  <h2>Visão Geral</h2>
+
+  <p class="section-desc">Tudo começa no <strong>NotebookLM</strong> — você carrega seus documentos lá e ele os processa. O <strong>Studio</strong> (um arquivo HTML que abre no navegador) envia comandos ao NotebookLM via <strong>Google Colab + ngrok</strong>, que funcionam como ponte na nuvem. Os resultados voltam ao Studio, e você os repassa ao <strong>Claude</strong> para análise, redação e elaboração.</p>
+
+  <div style="display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap;margin:24px 0;padding:20px;background:linear-gradient(135deg,#f0fdf9,#f8fbff);border-radius:16px;border:1px solid #c6eee9">
+    <div style="text-align:center;padding:12px 16px">
+      <div style="font-size:28px;margin-bottom:6px">📓</div>
+      <div style="font-size:13px;font-weight:700;color:#1a1a2e">NotebookLM</div>
+      <div style="font-size:12px;color:#777;margin-top:2px">documentos</div>
+    </div>
+    <div style="font-size:22px;color:#2a9d8f;padding:0 8px;font-weight:300">⟷</div>
+    <div style="text-align:center;padding:12px 16px">
+      <div style="font-size:28px;margin-bottom:6px">☁️</div>
+      <div style="font-size:13px;font-weight:700;color:#1a1a2e">Colab + ngrok</div>
+      <div style="font-size:12px;color:#777;margin-top:2px">ponte na nuvem</div>
+    </div>
+    <div style="font-size:22px;color:#2a9d8f;padding:0 8px;font-weight:300">⟷</div>
+    <div style="text-align:center;padding:12px 16px">
+      <div style="font-size:28px;margin-bottom:6px">🖥️</div>
+      <div style="font-size:13px;font-weight:700;color:#1a1a2e">Studio</div>
+      <div style="font-size:12px;color:#777;margin-top:2px">terminal visual</div>
+    </div>
+    <div style="font-size:22px;color:#2a9d8f;padding:0 8px;font-weight:300">→</div>
+    <div style="text-align:center;padding:12px 16px">
+      <div style="font-size:28px;margin-bottom:6px">🧠</div>
+      <div style="font-size:13px;font-weight:700;color:#1a1a2e">Claude</div>
+      <div style="font-size:12px;color:#777;margin-top:2px">análise e redação</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:8px">
+    <div class="card">
+      <div class="card-icon">📓</div>
+      <div class="card-title">NotebookLM — onde tudo começa</div>
+      <div class="card-desc">Carrega e processa seus documentos (PDFs, textos, links). Responde perguntas com citações exatas, gera relatórios, podcasts e guias de estudo diretamente do seu acervo.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">☁️</div>
+      <div class="card-title">Colab + ngrok — a ponte</div>
+      <div class="card-desc">O Google Colab executa os comandos notebooklm-py em segundo plano. O ngrok cria um endereço público para o Studio se comunicar com o Colab de qualquer lugar.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🖥️</div>
+      <div class="card-title">Studio — o painel de controle</div>
+      <div class="card-desc">Arquivo HTML que você abre no Chrome. Permite enviar comandos ao NotebookLM, visualizar resultados, gerar relatórios e transferir todo o contexto ao Claude com um clique.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🧠</div>
+      <div class="card-title">Claude — onde tudo termina</div>
+      <div class="card-desc">Recebe os resultados do NotebookLM via relatório ou contexto copiado. Interpreta, estrutura argumentos, redige documentos e responde em linguagem natural — sem reler os originais.</div>
+    </div>
+  </div>
+</div>
+
+<!-- PASSO 1 -->
+<div class="section" id="s1">
+  <div class="section-num">1</div>
+  <h2>Instalar o notebooklm-py no seu computador</h2>
+  <p class="section-desc">O login no NotebookLM <strong>não funciona dentro do Google Colab</strong> — ele precisa de um navegador real para abrir a tela de autenticação do Google. Por isso, o primeiro passo é instalar o notebooklm-py na sua máquina local.</p>
+
+  <div class="alert alert-info">
+    <span class="alert-icon">💡</span>
+    <span><strong>Por que instalar localmente?</strong> O processo de login abre um navegador Chrome real para você fazer login no Google. O Colab roda em servidores na nuvem sem interface gráfica, então esse passo precisa ser feito na sua máquina. Depois de gerar o arquivo de credenciais, você o envia para o Colab usar.</span>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Instale o Python no seu computador</div>
+        <div class="step-desc">O Python é necessário para rodar o notebooklm-py. Siga as instruções do seu sistema:</div>
+
+        <div style="margin-top:12px;display:flex;flex-direction:column;gap:10px">
+          <div style="background:#f8f7ff;border:1px solid #e0dcff;border-radius:8px;padding:14px 16px">
+            <div style="font-size:15px;font-weight:600;color:#4338ca;margin-bottom:8px">&#127967; Windows</div>
+            <ol style="font-size:15px;color:#444;padding-left:18px;line-height:2.1">
+              <li>Acesse <a href="https://www.python.org/downloads/" target="_blank">python.org/downloads</a> e clique em <strong>Download Python</strong></li>
+              <li>Abra o instalador baixado</li>
+              <li><strong style="color:#dc2626">&#9888; MARQUE a caixa "Add Python to PATH"</strong> antes de continuar</li>
+              <li>Clique em <strong>Install Now</strong> e aguarde finalizar</li>
+            </ol>
+            <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:8px 10px;font-size:14px;color:#92400e;margin-top:8px">
+              &#9888;&#65039; Se esquecer de marcar "Add to PATH", o comando <code>notebooklm</code> nao vai funcionar no terminal. Nesse caso, desinstale e reinstale marcando a opcao.
+            </div>
+          </div>
+
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:14px 16px">
+            <div style="font-size:15px;font-weight:600;color:#166534;margin-bottom:8px">&#127822; Mac</div>
+            <ol style="font-size:15px;color:#444;padding-left:18px;line-height:2.1">
+              <li>Acesse <a href="https://www.python.org/downloads/" target="_blank">python.org/downloads</a> e baixe a versao para macOS</li>
+              <li>Abra o arquivo <code>.pkg</code> e siga o assistente — o PATH e configurado automaticamente</li>
+            </ol>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;font-size:15px;color:#444">Para confirmar que funcionou, abra o terminal e execute:</div>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">terminal</span><button class="code-copy" onclick="copyCode(this)">copiar</button></div>
+          <pre>python --version</pre>
+        </div>
+        <div style="font-size:15px;color:#444;margin-top:8px">Deve aparecer algo como <code>Python 3.12.0</code>. Se aparecer erro, repita a instalacao marcando "Add to PATH".</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Instale o notebooklm-py localmente</div>
+        <div class="step-desc">No terminal do seu computador, execute:</div>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">terminal</span><button class="code-copy" onclick="copyCode(this)">copiar</button></div>
+          <pre>pip install notebooklm-py playwright
+playwright install chromium</pre>
+        </div>
+        <div class="step-tip">💡 Isso instala o notebooklm-py e o Chromium (navegador que ele usa para fazer login). Pode demorar 2-3 minutos.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PASSO 1B -->
+<div class="section" id="s1b">
+  <div class="section-num">2</div>
+  <h2>Fazer login e gerar o arquivo de credenciais</h2>
+  <p class="section-desc">Com o notebooklm-py instalado localmente, agora você vai fazer login no Google. Isso gera um arquivo <code>storage_state.json</code> com suas credenciais — é ele que o Colab vai usar para se autenticar.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Execute o login no terminal local</div>
+        <div class="step-desc">No terminal do seu computador (não no Colab), execute:</div>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">terminal</span><button class="code-copy" onclick="copyCode(this)">copiar</button></div>
+          <pre>notebooklm login</pre>
+        </div>
+        <div class="step-desc" style="margin-top:8px">Uma janela do Chrome vai abrir automaticamente com a tela de login do Google.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Faça login com sua conta Google</div>
+        <div class="step-desc">Na janela que abriu, entre com o e-mail e senha da sua conta Google. Após o login, aguarde chegar na página inicial do NotebookLM. Quando estiver lá, volte ao terminal e pressione <strong>Enter</strong> para salvar as credenciais.</div>
+        <div class="step-note">⚠️ Use a mesma conta Google onde seus notebooks estão salvos.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Localize o arquivo gerado</div>
+        <div class="step-desc">O arquivo <code>storage_state.json</code> fica na pasta oculta <code>.notebooklm</code> do seu usuario:</div>
+        <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
+          <div style="background:#f8f7ff;border:1px solid #e0dcff;border-radius:8px;padding:12px 14px;font-size:13px">
+            <strong style="color:#4338ca">&#127967; Windows:</strong><br>
+            <code style="font-size:12px">C:\Users\SeuUsuario\.notebooklm\storage_state.json</code><br>
+            <span style="color:#555;font-size:14px;margin-top:6px;display:block">No Explorador de Arquivos, cole <code>%USERPROFILE%\.notebooklm</code> na barra de endereco e pressione Enter</span>
+          </div>
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px 14px;font-size:13px">
+            <strong style="color:#166534">&#127822; Mac:</strong><br>
+            <code style="font-size:12px">~/.notebooklm/storage_state.json</code><br>
+            <span style="color:#555;font-size:14px;margin-top:6px;display:block">No Finder, pressione Cmd+Shift+G e cole <code>~/.notebooklm</code></span>
+          </div>
+        </div>
+        <div class="step-tip" style="margin-top:10px">&#128161; Confirme executando <code>notebooklm list</code> no terminal. Se seus notebooks aparecerem, o login funcionou!</div>
+        <div style="margin-top:10px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 12px;font-size:15px;color:#1e40af">
+          &#128204; <strong>Guarde esse arquivo!</strong> Voce vai precisar dele no Passo 3. Quando as credenciais expirarem, repita o login e pegue o novo arquivo no mesmo local.
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="alert alert-warn" style="margin-top:8px">
+    <span class="alert-icon">🔄</span>
+    <span><strong>Credenciais expiraram?</strong> As credenciais duram algumas semanas. Quando aparecer <em>"Authentication expired"</em> no Studio, basta repetir este passo: execute <code>notebooklm login</code> no terminal local, localize o novo <code>storage_state.json</code> (Passo 2, item 3) e faça upload novamente na célula de setup do Colab.</span>
+  </div>
+</div>
+
+<!-- PASSO 2 (antigo) agora vira PASSO 3 -->
+<div class="section" id="s2">
+  <div class="section-num">3</div>
+  <h2>Configurar o Google Colab</h2>
+  <p class="section-desc">Agora que você tem o arquivo de credenciais, vamos configurar o Google Colab — o ambiente na nuvem que vai executar os comandos notebooklm-py.</p>
+  <div class="alert alert-success">
+    <span class="alert-icon">&#10003;&#65039;</span>
+    <span><strong>Validado!</strong> Este fluxo foi testado e validado diretamente no Google Colab. Todas as dependências, autenticação e conectividade foram confirmadas como funcionais.</span>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Acesse o Google Colab e crie um notebook</div>
+        <div class="step-desc">Abra <a href="https://colab.research.google.com" target="_blank">colab.research.google.com</a>, faça login com sua conta Google e clique em <strong>Novo notebook</strong>. Para adicionar cada bloco de código, clique no botão <strong>+ Código</strong> na barra superior — ele cria uma nova célula pronta para receber o código. Execute cada célula com <strong>▶</strong> ou <strong>Ctrl+Enter</strong>.</div>
+        <div class="step-tip">&#128161; O ícone de <strong>🔑 chave</strong> na barra lateral esquerda do Colab abre o painel de <strong>Secrets</strong> — você vai precisar dele para configurar o token do ngrok com segurança (próximos passos).</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Instale as dependências no Colab</div>
+        <div class="step-desc">Clique em <strong>+ Código</strong>, cole o conteúdo abaixo na célula criada e execute com <strong>Ctrl+Enter</strong> ou o botão ▶:</div>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">python</span><button class="code-copy" onclick="copyCode(this)">copiar</button></div>
+          <pre>!pip install notebooklm-py flask flask-cors pyngrok requests -q
+print("✅ Dependências instaladas!")</pre>
+        </div>
+        <div class="step-tip">💡 No Colab não precisamos do Playwright ou xvfb — a autenticação já foi feita localmente e vem pelo arquivo JSON.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Instale as dependências e faça upload das credenciais</div>
+        <div class="step-desc">Crie uma nova célula e cole o script abaixo. Ao executar, ele instala as dependências e abre um botão de upload — selecione o arquivo <code>storage_state.json</code> gerado no Passo 2:</div>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">python</span><button class="code-copy" onclick="copyCode(this)">copiar</button></div>
+          <pre>import os
+import json
+from google.colab import files
+
+print('--- Instalando dependencias ---')
+os.system('pip install notebooklm-py flask flask-cors pyngrok requests -q')
+<span class="c"># Reinstala para garantir versao completa e funcional</span>
+os.system('pip install --force-reinstall notebooklm-py -q')
+
+print('\n--- Autenticacao ---')
+print('Faca o upload do seu arquivo storage_state.json:')
+uploaded = files.upload()
+
+if 'storage_state.json' in uploaded:
+    auth_content = uploaded['storage_state.json'].decode('utf-8')
+    try:
+        json.loads(auth_content)
+        <span class="c"># Salva o arquivo no diretorio esperado pela CLI</span>
+        os.makedirs(os.path.expanduser('~/.notebooklm'), exist_ok=True)
+        path = os.path.expanduser('~/.notebooklm/storage_state.json')
+        with open(path, 'w') as f:
+            f.write(auth_content)
+        <span class="c"># Define tambem como variavel de ambiente (dupla compatibilidade)</span>
+        os.environ['NOTEBOOKLM_AUTH_JSON'] = auth_content
+        print('\n&#10003; Credenciais configuradas com sucesso!')
+        print('\n--- Verificando login ---')
+        import subprocess
+        result = subprocess.run(
+            ['notebooklm', 'list'],
+            capture_output=True, text=True,
+            env=os.environ
+        )
+        if result.returncode == 0:
+            print('&#10003; Login OK! Seus notebooks:')
+            print(result.stdout)
+        else:
+            print('Erro:', result.stderr)
+            print('Verifique se o storage_state.json esta correto e tente novamente.')
+    except Exception as e:
+        print(f'Erro: {e}')
+else:
+    print('Erro: arquivo storage_state.json nao encontrado.')</pre>
+        </div>
+        <div class="step-note">⚠️ Este upload precisa ser feito toda vez que o Colab reiniciar a sessão, pois os arquivos não persistem entre sessões gratuitas.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PASSO 4 (servidor) -->
+<div class="section" id="s3">
+  <div class="section-num">4</div>
+  <h2>Iniciar o servidor</h2>
+  <p class="section-desc">Este é o passo que conecta tudo. O servidor Flask expõe os comandos notebooklm-py via HTTP. O ngrok cria um endereço público para acessá-lo.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Obtenha e configure seu token do ngrok</div>
+        <div class="step-desc">Acesse <a href="https://dashboard.ngrok.com/get-started/your-authtoken" target="_blank">dashboard.ngrok.com</a>, crie uma conta gratuita e copie seu token. Depois escolha <strong>uma das duas opções</strong> para configurá-lo no Colab:</div>
+
+        <div style="margin-top:14px;display:flex;flex-direction:column;gap:10px">
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:14px 16px">
+            <div style="font-size:15px;font-weight:700;color:#166534;margin-bottom:8px">✅ Opção A — Colab Secrets (recomendada)</div>
+            <ol style="font-size:15px;color:#444;padding-left:20px;line-height:2.2">
+              <li>No Colab, clique no ícone de <strong>🔑 chave</strong> na barra lateral esquerda (abaixo dos ícones de arquivos, pesquisa e código)</li>
+              <li>Clique em <strong>"Add new secret"</strong></li>
+              <li>No campo <strong>Name</strong>, digite exatamente: <code>NGROK_TOKEN</code></li>
+              <li>No campo <strong>Value</strong>, cole o token copiado do <a href="https://dashboard.ngrok.com/get-started/your-authtoken" target="_blank">dashboard do ngrok</a></li>
+              <li>À direita dos campos, ative o toggle <strong>"Notebook access"</strong> — sem isso, o código não consegue ler o token</li>
+              <li>Clique em <strong>Save</strong></li>
+            </ol>
+            <div style="margin-top:10px;background:#dcfce7;border-radius:6px;padding:10px 12px;font-size:14px;color:#166534">
+              ✓ Pronto. O token fica salvo permanentemente no Colab e nunca aparece visível no código.
+            </div>
+          </div>
+
+          <div style="background:#f8f7ff;border:1px solid #e0dcff;border-radius:8px;padding:14px 16px">
+            <div style="font-size:15px;font-weight:700;color:#4338ca;margin-bottom:8px">⚡ Opção B — Direto no código (rápida)</div>
+            <div style="font-size:15px;color:#444;line-height:1.7">No código do servidor (próximo passo), localize a linha:<br>
+            <code style="background:#e8e6ff;padding:2px 8px;border-radius:4px">ngrok_token = 'SEU_TOKEN_AQUI'</code><br>
+            e substitua <code>SEU_TOKEN_AQUI</code> pelo seu token real.</div>
+            <div style="font-size:14px;color:#6b7280;margin-top:6px">⚠️ Não compartilhe o notebook com o token visível.</div>
+          </div>
+        </div>
+
+        <div class="alert alert-warn" style="margin-top:12px">
+          <span class="alert-icon">⛔</span>
+          <span><strong>Se deixar SEU_TOKEN_AQUI no código, o servidor vai travar</strong> com erro <code>ERR_NGROK_105</code>. O código agora valida automaticamente e exibe uma mensagem clara caso o token não esteja configurado.</span>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Cole e execute o código do servidor</div>
+        <div class="step-desc">Crie uma nova célula, cole o código abaixo e execute. <strong>Deixe essa célula rodando o tempo todo que for usar o sistema.</strong></div>
+        <div class="step-note">⚠️ <strong>Antes de executar, configure o token do ngrok</strong> — veja as duas opções comentadas no código (via Colab Secrets ou direto no código). Se deixar <code>SEU_TOKEN_AQUI</code>, o servidor vai travar com erro de autenticação.</div>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">python</span><button class="code-copy" onclick="copyCode(this)">copiar</button></div>
+          <pre>from flask import Flask, request, jsonify, send_from_directory
+from flask_cors import CORS
+from pyngrok import ngrok
+import subprocess, requests, os, time
+
+app = Flask(__name__)
+CORS(app, origins="*")
+
+AUTH_FILE = '/content/storage_state.json'
+CONTENT_DIR = '/content/'
+
+<span class="c"># Opção: carregar credenciais do Google Drive (sem reupload manual)</span>
+<span class="c"># import gdown</span>
+<span class="c"># gdown.download(id='SEU_ID_NO_DRIVE', output=AUTH_FILE, quiet=True)</span>
+
+if not os.path.exists(AUTH_FILE):
+    raise FileNotFoundError(f'Credenciais não encontradas em {AUTH_FILE}.')
+
+def run_notebooklm(cmd, retries=3, delay=30):
+    with open(AUTH_FILE, 'r') as f:
+        auth_content = f.read().strip()
+    env = os.environ.copy()
+    env['NOTEBOOKLM_AUTH_JSON'] = auth_content
+    for attempt in range(retries):
+        result = subprocess.run(
+            f'notebooklm {cmd}',
+            shell=True, capture_output=True,
+            text=True, timeout=300, env=env
+        )
+        <span class="c"># Retry automático em rate limit do Google</span>
+        if result.returncode != 0 and 'GENERATION_FAILED' in (result.stdout + result.stderr):
+            if attempt < retries - 1:
+                time.sleep(delay * (attempt + 1))
+                continue
+        return result
+    return result
+
+@app.route('/execute', methods=['POST'])
+def execute():
+    cmd = request.json.get('command', '')
+    try:
+        result = run_notebooklm(cmd)
+        return jsonify({'stdout': result.stdout, 'stderr': result.stderr, 'returncode': result.returncode})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/health', methods=['GET'])
+def health():
+    return jsonify({'status': 'ok'})
+
+@app.route('/download/&lt;path:filename&gt;', methods=['GET'])
+def download(filename):
+    try:
+        return send_from_directory(CONTENT_DIR, filename, as_attachment=True)
+    except FileNotFoundError:
+        return jsonify({'error': 'File not found'}), 404
+
+<span class="c"># v2.3: salvar histórico de comandos do Studio no Colab</span>
+@app.route('/save-history', methods=['POST'])
+def save_history():
+    import json, datetime
+    data = request.json.get('history', [])
+    path = '/content/nlm_history.json'
+    with open(path, 'w') as f:
+        json.dump({'version':'2.4','synced':datetime.datetime.now().isoformat(),'commands':data}, f, indent=2)
+    return jsonify({'ok': True, 'path': path, 'count': len(data)})
+
+<span class="c"># ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
+<span class="c"># PASSO OBRIGATÓRIO: configure seu token do ngrok</span>
+<span class="c"># ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
+<span class="c"># OPÇÃO A (recomendada — token não aparece no código):</span>
+<span class="c">#   1. No Colab, clique em 🔑 (ícone de chave) na barra lateral esquerda</span>
+<span class="c">#   2. Ou acesse: Runtime &gt; Manage Secrets</span>
+<span class="c">#   3. Clique em "Add new secret"</span>
+<span class="c">#   4. Name: NGROK_TOKEN  |  Value: seu_token_aqui</span>
+<span class="c">#   5. Ative o toggle "Notebook access"</span>
+<span class="c">#</span>
+<span class="c"># OPÇÃO B (simples — cole o token diretamente):</span>
+<span class="c">#   Substitua SEU_TOKEN_AQUI pelo token real (linha abaixo)</span>
+<span class="c">#</span>
+<span class="c"># Obtenha seu token em: https://dashboard.ngrok.com/get-started/your-authtoken</span>
+<span class="c"># ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
+try:
+    from google.colab import userdata
+    ngrok_token = userdata.get('NGROK_TOKEN')  <span class="c"># Opção A: via Secrets</span>
+    if not ngrok_token:
+        raise ValueError("Token vazio")
+except Exception:
+    ngrok_token = 'SEU_TOKEN_AQUI'  <span class="c"># Opção B: cole aqui o token</span>
+
+<span class="c"># Validação antes de tentar conectar</span>
+if ngrok_token == 'SEU_TOKEN_AQUI' or not ngrok_token:
+    raise ValueError(
+        "\n\n❌ TOKEN DO NGROK NÃO CONFIGURADO!\n"
+        "Configure via Colab Secrets (Opção A) ou\n"
+        "substitua SEU_TOKEN_AQUI pelo seu token real (Opção B).\n"
+        "Acesse: https://dashboard.ngrok.com/get-started/your-authtoken"
+    )
+
+ngrok.set_auth_token(ngrok_token)
+print("✅ Token ngrok configurado com sucesso.")
+
+<span class="c"># Alternativa gratuita ao ngrok: Cloudflare Tunnel (sem limites de sessão)</span>
+<span class="c"># !wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -O cloudflared -q</span>
+<span class="c"># !chmod +x cloudflared</span>
+<span class="c"># import subprocess; subprocess.Popen(['./cloudflared','tunnel','--url','http://localhost:5000'])</span>
+<span class="c"># (leia a URL gerada no output do Colab)</span>
+
+url = ngrok.connect(5000)
+print(f"\n&#10003;&#65039; Servidor ativo!")
+print(f"&#128225; URL para colar no Studio: {url}\n")
+
+url = ngrok.connect(5000)
+url_str = url.public_url  <span class="c"># extrai só a URL limpa (sem 'NgrokTunnel: ...')</span>
+
+<span class="c"># Keep-alive: previne desconexão do Colab após 90 min de inatividade</span>
+import threading
+def keep_alive():
+    while True:
+        time.sleep(25 * 60)  <span class="c"># ping a cada 25 minutos</span>
+        try: requests.get(url_str + '/health', timeout=5)
+        except: pass
+threading.Thread(target=keep_alive, daemon=True).start()
+
+<span class="c"># Exibe URL uma única vez após tudo estar pronto</span>
+print(f"\n&#10003;&#65039; Servidor ativo!")
+print(f"&#128225; URL para colar no Studio: {url_str}")
+print(f"&#128337; Keep-alive ativo — ping a cada 25 min\n")
+
+app.run(port=5000)</pre>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Copie a URL gerada</div>
+        <div class="step-desc">Após executar, vai aparecer algo como:<br><br>
+        <code style="background:#f0f0ec;padding:6px 10px;border-radius:6px;font-size:12px;display:block;margin-top:6px">✅ Servidor ativo!<br>📡 URL para colar no Studio: https://xxxx-xx-xx.ngrok-free.app</code><br>
+        <strong>Copie essa URL</strong> — você vai precisar dela no próximo passo.</div>
+        <div class="step-tip">💡 A URL muda toda vez que você reinicia o servidor. Anote onde você está usando para atualizar quando necessário.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PASSO 5 -->
+<div class="section" id="s4">
+  <div class="section-num">5</div>
+  <h2>Abrir o NotebookLM Studio</h2>
+  <p class="section-desc">O Studio é um arquivo HTML que você abre no seu navegador. Ele se comunica com o servidor no Colab via ngrok.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Baixe o arquivo do Studio</div>
+        <div class="step-desc">O arquivo <strong>notebooklm_studio.html</strong> foi compartilhado nesta conversa. Salve-o no seu computador em qualquer pasta.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Abra no navegador</div>
+        <div class="step-desc">Dê um duplo clique no arquivo <code>notebooklm_studio.html</code>. Ele vai abrir no seu navegador padrão (Chrome recomendado).</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Cole a URL do ngrok e conecte</div>
+        <div class="step-desc">No campo da tela de conexão, cole a URL gerada pelo Colab (ex: <code>https://xxxx.ngrok-free.app</code>) e clique em <strong>Conectar</strong>. Se aparecer o badge verde <em>"conectado"</em>, está funcionando!</div>
+        <div class="step-note">⚠️ Se aparecer erro de conexão, verifique se a célula do servidor ainda está rodando no Colab. Às vezes o Colab desconecta após inatividade.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RECAPITULO -->
+<div class="section" style="background:#fff;margin:0 -24px;padding:48px 24px">
+  <div class="container" style="padding:0">
+    <div class="section-num">✓</div>
+    <h2>O que você precisa guardar</h2>
+    <p class="section-desc">Itens essenciais para retomar em qualquer sessão:</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:4px">
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:#fff;border:1px solid #e4e8f0;border-radius:10px">
+        <span style="font-size:20px;flex-shrink:0">💻</span>
+        <div><strong style="font-size:15px;color:#1a1a2e;display:block">notebooklm-py local</strong><span style="font-size:14px;color:#666">Para gerar e renovar o arquivo de credenciais quando necessário.</span></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:#fff;border:1px solid #e4e8f0;border-radius:10px">
+        <span style="font-size:20px;flex-shrink:0">🗝️</span>
+        <div><strong style="font-size:15px;color:#1a1a2e;display:block">storage_state.json</strong><span style="font-size:14px;color:#666">Credenciais do Google. Geradas localmente, enviadas ao Colab a cada sessão.</span></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:#fff;border:1px solid #e4e8f0;border-radius:10px">
+        <span style="font-size:20px;flex-shrink:0">🔑</span>
+        <div><strong style="font-size:15px;color:#1a1a2e;display:block">Token do ngrok</strong><span style="font-size:14px;color:#666">Salvo via Colab Secrets. Obtenha em <a href="https://dashboard.ngrok.com" target="_blank">dashboard.ngrok.com</a>.</span></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:#fff;border:1px solid #e4e8f0;border-radius:10px">
+        <span style="font-size:20px;flex-shrink:0">☁️</span>
+        <div><strong style="font-size:15px;color:#1a1a2e;display:block">Notebook do Colab</strong><span style="font-size:14px;color:#666">Salvo no Google Drive com os três blocos de código do servidor.</span></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:#fff;border:1px solid #e4e8f0;border-radius:10px">
+        <span style="font-size:20px;flex-shrink:0">🖥️</span>
+        <div><strong style="font-size:15px;color:#1a1a2e;display:block">notebooklm_studio.html</strong><span style="font-size:14px;color:#666">Salvo no computador. Abrir no Chrome para executar comandos.</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PASSO 6 -->
+<div class="section" id="s5">
+  <div class="section-num">6</div>
+  <h2>Uso no dia a dia</h2>
+  <p class="section-desc">Com tudo configurado, este é o fluxo que você vai usar toda vez.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Liste seus notebooks</div>
+        <div class="step-desc">No Studio, clique em <strong>list</strong> na paleta lateral (coluna esquerda). Os notebooks aparecerão como cartões com botão <strong>Usar</strong> — clique para selecionar o que quer trabalhar.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Selecione um notebook</div>
+        <div class="step-desc">Após clicar em <strong>Usar</strong>, o sistema executa automaticamente <code>use &lt;id&gt;</code>. Todos os comandos seguintes (perguntas, geração de relatórios) serão aplicados a esse notebook.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Execute um comando e copie o resultado</div>
+        <div class="step-desc">Clique em qualquer comando na paleta ou digite diretamente no terminal. Cada resultado tem um botão <strong>📋 copiar</strong> individual — use-o para copiar apenas o que precisar.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">Cole no chat do Claude para interpretar</div>
+        <div class="step-desc">Volte a este chat, cole o resultado e peça ao Claude para interpretar, resumir, comparar ou elaborar sobre os dados. O Claude transforma o JSON técnico em linguagem humana clara.</div>
+        <div class="step-tip">💡 Exemplo: após executar <code>ask "quais fatos podem ser provados documentalmente?"</code>, copie a resposta e peça ao Claude: <em>"organize esses fatos em ordem cronológica e destaque os mais relevantes juridicamente"</em></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert alert-success" style="margin-top:8px">
+    <span class="alert-icon">✅</span>
+    <span><strong>Dica de ouro:</strong> Para relatórios longos, use o botão <strong>↓ Baixar</strong> que aparece nos artefatos prontos. Depois envie o arquivo .md diretamente neste chat — o Claude consegue ler e interpretar o conteúdo completo.</span>
+  </div>
+</div>
+
+<!-- COMANDOS -->
+<div class="section" id="s6">
+  <div class="section-num">7</div>
+  <h2>Guia de Comandos</h2>
+  <p class="section-desc">Referência rápida de todos os comandos disponíveis na paleta do Studio.</p>
+
+  <table class="cmd-table">
+    <tr>
+      <th>Comando</th>
+      <th>O que faz</th>
+      <th>Quando usar</th>
+    </tr>
+    <tr>
+      <td><span class="cmd">list --json</span></td>
+      <td class="cmd-desc">Lista todos os notebooks da sua conta</td>
+      <td class="cmd-when">Sempre ao iniciar, para ver o que está disponível</td>
+    </tr>
+    <tr>
+      <td><span class="cmd">use &lt;id&gt;</span></td>
+      <td class="cmd-desc">Seleciona um notebook como ativo (os 6 primeiros caracteres do ID bastam)</td>
+      <td class="cmd-when">Antes de qualquer operação específica em um notebook</td>
+    </tr>
+    <tr>
+      <td><span class="cmd">status</span></td>
+      <td class="cmd-desc">Mostra qual notebook está selecionado atualmente</td>
+      <td class="cmd-when">Para confirmar qual notebook está ativo</td>
+    </tr>
+    <tr>
+      <td><span class="cmd">source list</span></td>
+      <td class="cmd-desc">Lista os documentos (fontes) do notebook ativo</td>
+      <td class="cmd-when">Para ver quais documentos foram carregados no notebook</td>
+    </tr>
+    <tr>
+      <td><span class="cmd">source add "URL"</span></td>
+      <td class="cmd-desc">Adiciona uma URL ou arquivo como fonte ao notebook</td>
+      <td class="cmd-when">Para adicionar novos documentos, sites ou PDFs ao notebook</td>
+    </tr>
+    <tr>
+      <td><span class="cmd">ask "pergunta"</span></td>
+      <td class="cmd-desc">Faz uma pergunta ao NotebookLM sobre o conteúdo das fontes</td>
+      <td class="cmd-when">Para consultar informações específicas dos documentos</td>
+    </tr>
+    <tr>
+      <td><span class="cmd">generate report<br>--format briefing-doc</span></td>
+      <td class="cmd-desc">Gera um relatório completo de todos os documentos</td>
+      <td class="cmd-when">Para ter uma visão geral e análise do notebook inteiro</td>
+    </tr>
+    <tr>
+      <td><span class="cmd">generate report<br>--format study-guide</span></td>
+      <td class="cmd-desc">Gera um guia de estudos estruturado</td>
+      <td class="cmd-when">Para material de estudo ou capacitação</td>
+    </tr>
+    <tr>
+      <td><span class="cmd">generate quiz</span></td>
+      <td class="cmd-desc">Gera um questionário baseado no conteúdo</td>
+      <td class="cmd-when">Para testar conhecimento sobre os documentos</td>
+    </tr>
+    <tr>
+      <td><span class="cmd">generate audio</span></td>
+      <td class="cmd-desc">Gera um podcast/áudio sobre o conteúdo</td>
+      <td class="cmd-when">Para ouvir um resumo do notebook (pode demorar 10-20 min)</td>
+    </tr>
+    <tr>
+      <td><span class="cmd">artifact list</span></td>
+      <td class="cmd-desc">Lista relatórios e podcasts gerados</td>
+      <td class="cmd-when">Para ver o status de gerações em andamento ou prontas</td>
+    </tr>
+    <tr>
+      <td><span class="cmd">artifact wait &lt;id&gt;</span></td>
+      <td class="cmd-desc">Aguarda a conclusão de uma geração</td>
+      <td class="cmd-when">Após gerar relatório ou podcast — espera até ficar pronto</td>
+    </tr>
+    <tr>
+      <td><span class="cmd">download report<br>./relatorio.md</span></td>
+      <td class="cmd-desc">Baixa o relatório gerado para o Colab</td>
+      <td class="cmd-when">Após o relatório ficar pronto para enviá-lo ao Claude</td>
+    </tr>
+    <tr>
+      <td><span class="cmd">create "Título"</span></td>
+      <td class="cmd-desc">Cria um novo notebook vazio</td>
+      <td class="cmd-when">Para começar um novo projeto de pesquisa</td>
+    </tr>
+  </table>
+
+  <div class="alert alert-info" style="margin-top:16px">
+    <span class="alert-icon">⏱️</span>
+    <span><strong>Tempo de geração:</strong> Relatórios levam 5-15 minutos. Podcasts levam 10-20 minutos. Perguntas (<code>ask</code>) são respondidas em segundos. Após iniciar uma geração, use <code>artifact wait</code> para aguardar.</span>
+  </div>
+</div>
+
+<!-- PROBLEMAS -->
+<div class="section" id="s7">
+  <div class="section-num">8</div>
+  <h2>Solução de Problemas</h2>
+  <p class="section-desc">Os erros mais comuns e como resolvê-los.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">!</div>
+      <div class="step-body">
+        <div class="step-title" style="color:#dc2626">ERR_NGROK_105 — Token inválido ou não configurado</div>
+        <div class="step-desc">Acontece quando o código ainda tem <code>SEU_TOKEN_AQUI</code> ou o token está vazio. Solução: configure o token via Colab Secrets (Opção A do Passo 4) ou substitua <code>SEU_TOKEN_AQUI</code> pelo seu token real no código. Obtenha o token em <a href="https://dashboard.ngrok.com/get-started/your-authtoken" target="_blank">dashboard.ngrok.com</a>.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">!</div>
+      <div class="step-body">
+        <div class="step-title" style="color:#dc2626">Authentication expired or invalid</div>
+        <div class="step-desc">As credenciais do Google expiraram. O processo de renovacao e feito <strong>no seu computador</strong>, nao no Colab:</div>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">terminal (seu computador)</span><button class="code-copy" onclick="copyCode(this)">copiar</button></div>
+          <pre>notebooklm login</pre>
+        </div>
+        <div class="step-desc" style="margin-top:8px">Apos fazer login no Google na janela que abrir, localize o novo <code>storage_state.json</code> (veja Passo 2, item 3). Depois execute novamente a celula de setup no Colab, selecione o novo arquivo e reinicie a celula do servidor.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">!</div>
+      <div class="step-body">
+        <div class="step-title" style="color:#dc2626">Não foi possível conectar (Studio)</div>
+        <div class="step-desc">A célula do servidor parou de rodar. Verifique no Colab se a célula ainda está executando (deve ter um ícone de loading). Se não estiver, execute novamente. A URL do ngrok vai mudar — atualize no Studio clicando em <strong>desconectar</strong> e reconectando com a nova URL.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">!</div>
+      <div class="step-body">
+        <div class="step-title" style="color:#dc2626">GENERATION_FAILED ao gerar relatório/podcast</div>
+        <div class="step-desc">O Google aplicou limite de taxa temporário. Aguarde 5-10 minutos e tente novamente. É uma limitação do servidor do Google, não do sistema.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">!</div>
+      <div class="step-body">
+        <div class="step-title" style="color:#dc2626">Colab desconecta após inatividade</div>
+        <div class="step-desc">O Colab gratuito desconecta após ~90 minutos de inatividade. Para evitar, interaja com o notebook regularmente ou considere o plano Colab Pro. Ao reconectar, você precisará executar novamente as células de instalação e do servidor.</div>
+        <div class="step-tip">💡 Salve o notebook Colab no seu Google Drive (File → Save) para não perder o código entre sessões.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">!</div>
+      <div class="step-body">
+        <div class="step-title" style="color:#dc2626">No notebook context (sem notebook selecionado)</div>
+        <div class="step-desc">Você tentou executar um comando sem selecionar um notebook antes. Sempre execute <code>use &lt;id&gt;</code> ou clique em <strong>Usar</strong> na lista de notebooks antes de fazer perguntas ou gerar conteúdo.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">!</div>
+      <div class="step-body">
+        <div class="step-title" style="color:#dc2626">Colab desconecta após ~90 minutos</div>
+        <div class="step-desc">O servidor inclui um <strong>keep-alive automático</strong> que faz ping a cada 25 minutos, estendendo a sessão. Se mesmo assim desconectar, o Studio exibe <em>"⚠ Colab pode ter desconectado"</em> na barra de status. Clique em <strong>desconectar</strong>, reinicie a célula do servidor no Colab (nova URL será gerada) e reconecte.</div>
+        <div class="step-tip">&#128161; A barra de status no topo do Studio mostra um ponto verde pulsando enquanto o Colab está ativo, e o horário do último ping. Se o ponto ficar cinza, o Colab provavelmente desconectou.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">!</div>
+      <div class="step-body">
+        <div class="step-title" style="color:#dc2626">Studio mostra "⚠ Credenciais expiradas"</div>
+        <div class="step-desc">O Studio detecta automaticamente quando as credenciais do Google expiraram e exibe um alerta vermelho com instruções passo a passo. Clique no alerta para ver o procedimento completo de renovação (é o mesmo do Passo 2 deste guia).</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">!</div>
+      <div class="step-body">
+        <div class="step-title" style="color:#dc2626">Conflito ao enviar dois comandos rápido</div>
+        <div class="step-desc">O Studio serializa todos os comandos em uma <strong>fila interna</strong>. O badge <em>"N na fila"</em> ao lado do título mostra quantos estão aguardando. Envie quantos quiser em sequência — serão executados um a um sem conflito.</div>
+        <div class="step-tip">&#128161; Use o painel de histórico para <strong>exportar/importar comandos em JSON</strong> ou sincronizar com Google Drive (botão &#9729;). Para instalar o Studio como <strong>app nativo</strong> no computador ou celular, use o botão &#128242; na barra superior. Os <strong>Playbooks e o Histórico</strong> ficam salvos no navegador (localStorage) — não no Colab — e sobrevivem a reinicializações do servidor.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- PASSO 8 — FLUXO AVANÇADO -->
+<div class="section" id="s8">
+  <div class="section-num">&#9733;</div>
+  <h2>Fluxo avançado — transferindo contexto entre conversas</h2>
+  <p class="section-desc">Uma das maiores vantagens desta integração é poder iniciar uma nova conversa com o Claude já carregada com todo o estado do projeto — notebooks, fontes, relatórios — sem precisar explicar nada. Este fluxo foi testado e validado em produção.</p>
+
+  <div class="alert alert-success">
+    <span class="alert-icon">&#10003;&#65039;</span>
+    <span><strong>Exemplo validado:</strong> Em um projeto com mais de 20 fontes (documentos, relatórios, imagens), o contexto completo foi transferido para um novo agente em menos de 1 minuto. O agente recebeu o projeto, identificou os pontos principais e ficou pronto para trabalhar — sem nenhuma explicação adicional.</span>
+  </div>
+
+  <div class="steps" style="margin-top:28px">
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Selecione o notebook e verifique as fontes</div>
+        <div class="step-desc">No Studio, execute os comandos para garantir que o notebook correto está ativo e as fontes estão prontas:</div>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">studio</span><button class="code-copy" onclick="copyCode(this)">copiar</button></div>
+          <pre>list --json           <span class="c"># veja seus notebooks e IDs</span>
+use &lt;id&gt;              <span class="c"># selecione o notebook ativo</span>
+source list --json    <span class="c"># confirme que as fontes estão "ready"</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Gere um relatório (opcional mas recomendado)</div>
+        <div class="step-desc">Se quiser levar uma análise completa do notebook para a nova conversa, gere um relatório antes. O Studio aguarda automaticamente e faz o download quando pronto:</div>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">studio</span><button class="code-copy" onclick="copyCode(this)">copiar</button></div>
+          <pre>generate report --format briefing-doc</pre>
+        </div>
+        <div class="step-desc" style="margin-top:10px">O Studio vai mostrar o progresso em tempo real com cronômetro, executar o <code>artifact wait</code> automaticamente e baixar o arquivo <code>relatorio.md</code> assim que ficar pronto.</div>
+        <div class="step-tip">&#128161; Para relatórios longos (casos com muitas fontes), o processo pode levar 5-15 minutos. Você pode continuar usando o Studio enquanto aguarda.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Gere o bloco de contexto com um clique</div>
+        <div class="step-desc">No Studio, clique no botão <strong>Contexto</strong> na barra superior. Ele monta automaticamente um bloco limpo e estruturado, focado no notebook ativo — sem ruído de comandos operacionais.</div>
+
+        <div style="margin-top:14px;background:#1a1a18;border:1px solid #2e2e2a;border-radius:10px;overflow:hidden">
+          <div style="padding:8px 14px;background:#141412;border-bottom:1px solid #2e2e2a;font-size:11px;font-weight:700;color:#2a9d8f;letter-spacing:.06em;text-transform:uppercase">O que o botão coleta</div>
+          <div style="display:flex;flex-direction:column;gap:0">
+            <div style="display:flex;align-items:flex-start;gap:12px;padding:10px 14px;border-bottom:1px solid #1e1e1a;font-size:14px">
+              <span style="background:#2a9d8f;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px">1</span>
+              <span style="color:#aaa"><strong style="color:#ccc">Dados do notebook ativo</strong> — nome, ID e data de criação, extraídos diretamente do servidor</span>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:12px;padding:10px 14px;border-bottom:1px solid #1e1e1a;font-size:14px">
+              <span style="background:#2a9d8f;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px">2</span>
+              <span style="color:#aaa"><strong style="color:#ccc">Lista de fontes</strong> — apenas os nomes dos documentos, sem status técnico ou colunas de tabela</span>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:12px;padding:10px 14px;font-size:14px">
+              <span style="background:#2a9d8f;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px">3</span>
+              <span style="color:#aaa"><strong style="color:#ccc">Respostas do NotebookLM</strong> — somente os resultados dos comandos <code style="background:#252520;padding:1px 6px;border-radius:3px;color:#7fd3cc">ask</code> executados na sessão, com a pergunta e a resposta limpa. Comandos operacionais (<code style="background:#252520;padding:1px 6px;border-radius:3px;color:#7fd3cc">use</code>, <code style="background:#252520;padding:1px 6px;border-radius:3px;color:#7fd3cc">list</code>, <code style="background:#252520;padding:1px 6px;border-radius:3px;color:#7fd3cc">status</code>, <code style="background:#252520;padding:1px 6px;border-radius:3px;color:#7fd3cc">source list</code>) são automaticamente ignorados</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-tip" style="margin-top:14px">&#128204; A qualidade do contexto depende das perguntas que você fizer. Antes de clicar em Contexto, execute os <code>ask</code> mais importantes — sobre fatos comprovados, contradições, argumentos centrais. Cada resposta do NotebookLM entra no bloco e enriquece o que o Claude recebe.</div>
+
+        <div style="margin-top:14px">
+          <div style="font-size:13px;color:#666;margin-bottom:8px;font-weight:600">Exemplo do bloco gerado:</div>
+          <div style="background:#f8f8f6;border:1px solid #e0e0da;border-radius:8px;padding:14px 16px;font-size:12px;font-family:monospace;line-height:1.9;color:#333;overflow-x:auto">
+            <span style="color:#777"># Contexto do Projeto — NotebookLM + Claude</span><br>
+            <span style="color:#999">Gerado em: 01/03/2026, 14:32</span><br><br>
+            <span style="color:#777">## Notebook ativo</span><br>
+            <span style="color:#333">- <strong>Nome:</strong> Análise de Contrato — Projeto X<br>
+            - <strong>ID:</strong> a1b2c3d4...<br>
+            - <strong>Fontes:</strong> 8 documentos carregados</span><br><br>
+            <span style="color:#777">## Fontes carregadas</span><br>
+            <span style="color:#333">&nbsp;&nbsp;1. Contrato Principal.pdf<br>
+            &nbsp;&nbsp;2. Aditivo 01.pdf<br>
+            &nbsp;&nbsp;3. Parecer Jurídico.docx<br>
+            &nbsp;&nbsp;4. Jurisprudência Aplicável.txt<br>
+            &nbsp;&nbsp;...</span><br><br>
+            <span style="color:#777">## Respostas do NotebookLM nesta sessão</span><br><br>
+            <span style="color:#555"><strong>Pergunta:</strong> Quais cláusulas apresentam risco para a parte contratante?</span><br>
+            <span style="color:#333">Com base nas fontes 1 e 3, as cláusulas 7.2 e 12.1 apresentam risco, pois estabelecem condições unilaterais que podem ser interpretadas como...</span><br><br>
+            <span style="color:#555"><strong>Pergunta:</strong> O parecer jurídico contradiz alguma cláusula do contrato?</span><br>
+            <span style="color:#333">Sim. O parecer (fonte 3) aponta que a cláusula 12.1 contraria o entendimento consolidado nos precedentes citados nas fontes 2 e 4, pois...</span>
+          </div>
+        </div>
+
+        <div class="alert alert-warn" style="margin-top:14px">
+          <span class="alert-icon">⚠️</span>
+          <span>O botão <strong>Contexto</strong> fica desabilitado se as credenciais do Google expirarem — o Studio detecta isso automaticamente ao conectar e ao gerar o contexto. Renove o <code>storage_state.json</code> antes de continuar.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">Abra uma nova conversa com o Claude</div>
+        <div class="step-desc">Acesse <a href="https://claude.ai" target="_blank">claude.ai</a> e inicie uma nova conversa. Cole o bloco de contexto copiado e, se gerou um relatório, <strong>anexe o arquivo <code>.md</code></strong> diretamente na mensagem. O Claude consegue ler o arquivo completo de uma vez.</div>
+        <div class="step-note">&#9888;&#65039; Não precisa explicar o projeto — o contexto já diz tudo. Vá direto ao que precisa fazer.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <div class="step-title">Trabalhe com o Claude + mantenha o Studio aberto</div>
+        <div class="step-desc">Com o contexto carregado, o Claude pode redigir peças, estruturar teses, analisar argumentos e preparar perguntas para o NotebookLM. Mantenha o Studio aberto em paralelo para executar consultas e trazer novos dados:</div>
+
+        <div style="margin-top:14px;background:#f8f7ff;border:1px solid #e0dcff;border-radius:10px;padding:16px 18px">
+          <div style="font-size:14px;font-weight:600;color:#4338ca;margin-bottom:12px">&#128260; Ciclo de trabalho recomendado</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:center;gap:12px;font-size:14px;color:#444">
+              <span style="background:#6356e8;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">A</span>
+              <span>Claude pede: <em>"Execute no Studio: <code>ask &quot;quais documentos comprovam a tese principal?&quot;</code>"</em></span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;font-size:14px;color:#444">
+              <span style="background:#6356e8;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">B</span>
+              <span>Você roda no Studio → clica 📋 copiar no bloco de resultado</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;font-size:14px;color:#444">
+              <span style="background:#6356e8;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">C</span>
+              <span>Cola o resultado na conversa → Claude incorpora e constrói em cima</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;font-size:14px;color:#444">
+              <span style="background:#6356e8;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">D</span>
+              <span>Repita para cada ponto que precisar aprofundar</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-tip" style="margin-top:14px">&#128161; Para relatórios longos, use sempre o botão <strong>&#11015;&#65039; Baixar</strong> do Studio e anexe o <code>.md</code> na conversa. O Claude lê o arquivo inteiro de uma vez, sem limite de texto colado.</div>
+        <div class="step-tip" style="margin-top:10px">&#128269; <strong>Dicas rápidas do Studio:</strong> use a <strong>busca na paleta</strong> (campo no topo da coluna esquerda) para filtrar comandos rápido; o botão <strong>⇄ notebooks</strong> troca de projeto sem digitar ID; o <strong>histórico</strong> fica salvo mesmo após fechar o Studio; e uma <strong>notificação</strong> aparece automaticamente quando a geração terminar. Comandos entram em <strong>fila automática</strong> (badge no topo). Exporte/importe o histórico ou sincronize via Drive pelo painel de histórico. Para instalar o Studio como <strong>app nativo</strong>, use o botão 📲 na topbar.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-body">
+        <div class="step-title">Resultado esperado pelo novo agente</div>
+        <div class="step-desc">Com o contexto transferido corretamente, o novo Claude responde algo assim:</div>
+        <div style="margin-top:12px;background:#f0f9f0;border-left:4px solid #2a9d8f;border-radius:0 8px 8px 0;padding:14px 16px;font-size:14px;color:#1a3a2a;line-height:1.75;font-style:italic">
+          "Contexto recebido e compreendido. Estou a par do projeto e do notebook ativo no NotebookLM. O notebook está carregado com todas as fontes disponíveis, cobrindo as diferentes frentes do tema. Posso analisar os documentos, estruturar argumentos, redigir conteúdo ou preparar perguntas para rodar no Studio. Como quer prosseguir?"
+        </div>
+        <div class="step-desc" style="margin-top:10px">Isso significa que o agente está posicionado e pode redigir peças, estruturar teses, analisar argumentos e processar novos dados do notebook — tudo sem nenhuma explicação adicional da sua parte.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="alert alert-info" style="margin-top:28px">
+    <span class="alert-icon">&#128161;</span>
+    <span><strong>Quando criar uma nova conversa vs. continuar na mesma?</strong> Crie uma nova conversa quando: (1) a conversa atual ficou longa e o Claude está perdendo contexto das mensagens antigas; (2) você vai trabalhar em um notebook diferente; (3) quer começar uma tarefa completamente nova (ex: mudar de análise para redigir uma peça). Continue na mesma conversa quando está aprofundando o mesmo ponto e o contexto acumulado é valioso.</span>
+  </div>
+</div>
+
+
+<!-- RECEITAS PRATICAS -->
+<div class="section" id="s-playbooks">
+  <div class="section-num">&#127859;</div>
+  <h2>Playbooks</h2>
+  <p class="section-desc">Sequências de comandos prontas para os casos de uso mais comuns. Execute cada comando separadamente no Studio — um de cada vez — e em seguida use o resultado no Claude.</p>
+
+  <div class="alert alert-warn" style="margin-bottom:8px">
+    <span class="alert-icon">&#9888;&#65039;</span>
+    <span><strong>Importante:</strong> cada linha é um comando independente — use o botão <strong>copiar</strong> de cada linha para colá-la no Studio individualmente. Execute um, aguarde o resultado, depois execute o próximo. Se salvar como Playbook, o Studio faz isso automaticamente pela fila.</span>
+  </div>
+
+  <div class="steps">
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Redigir uma peça jurídica</div>
+        <div class="step-desc">Use quando precisar redigir petições, manifestações ou memoriais com base nos documentos do notebook.</div>
+        <div class="cmd-lines">
+          <div class="cmd-line">
+            <span class="cmd-line-num">1</span>
+            <span class="cmd-line-code">use &lt;id-do-notebook&gt;</span>
+            <button class="cmd-line-copy" onclick="copyLine(this,'use <id-do-notebook>')">copiar</button>
+          </div>
+          <div class="cmd-line">
+            <span class="cmd-line-num">2</span>
+            <span class="cmd-line-code">generate report --format briefing-doc</span>
+            <button class="cmd-line-copy" onclick="copyLine(this,'generate report --format briefing-doc')">copiar</button>
+          </div>
+          <div class="cmd-line is-comment">
+            <span class="cmd-line-num"></span>
+            <span class="cmd-line-code is-comment"># aguarda download automático do relatorio.md</span>
+          </div>
+        </div>
+        <div class="step-desc" style="margin-top:10px">Depois, no Claude: anexe o <code>relatorio.md</code> e diga <em>"Com base neste relatorio, redija uma petição inicial contestando os calculos do exequente."</em></div>
+        <div class="step-tip">&#128161; Salve esse fluxo como Playbook no Studio. Abra o painel de Histórico, clique em <strong>Playbook</strong>, selecione os dois comandos e dê um nome. O Studio os executará um a um pela fila automaticamente.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Montar um dossie de provas</div>
+        <div class="step-desc">Ideal para mapear quais documentos comprovam cada fato relevante, com citações rastreavéis.</div>
+        <div class="cmd-lines">
+          <div class="cmd-line">
+            <span class="cmd-line-num">1</span>
+            <span class="cmd-line-code">use &lt;id-do-notebook&gt;</span>
+            <button class="cmd-line-copy" onclick="copyLine(this,'use <id-do-notebook>')">copiar</button>
+          </div>
+          <div class="cmd-line is-comment">
+            <span class="cmd-line-num"></span>
+            <span class="cmd-line-code is-comment"># passo 1 — selecionar o notebook</span>
+          </div>
+          <div class="cmd-line">
+            <span class="cmd-line-num">2</span>
+            <span class="cmd-line-code">ask "Quais fatos estão comprovados pelos documentos? Cite as fontes."</span>
+            <button class="cmd-line-copy" onclick="copyLine(this,'ask &quot;Quais fatos estão comprovados pelos documentos? Cite as fontes.&quot;')">copiar</button>
+          </div>
+          <div class="cmd-line is-comment">
+            <span class="cmd-line-num"></span>
+            <span class="cmd-line-code is-comment"># passo 2 — aguarde a resposta e use Copiar Contexto</span>
+          </div>
+          <div class="cmd-line">
+            <span class="cmd-line-num">3</span>
+            <span class="cmd-line-code">ask "Quais documentos contradizem a versao da parte contraria?"</span>
+            <button class="cmd-line-copy" onclick="copyLine(this,'ask &quot;Quais documentos contradizem a versao da parte contraria?&quot;')">copiar</button>
+          </div>
+          <div class="cmd-line is-comment">
+            <span class="cmd-line-num"></span>
+            <span class="cmd-line-code is-comment"># passo 3 — aguarde e use Copiar Contexto novamente</span>
+          </div>
+          <div class="cmd-line">
+            <span class="cmd-line-num">4</span>
+            <span class="cmd-line-code">generate report --format study-guide</span>
+            <button class="cmd-line-copy" onclick="copyLine(this,'generate report --format study-guide')">copiar</button>
+          </div>
+          <div class="cmd-line is-comment">
+            <span class="cmd-line-num"></span>
+            <span class="cmd-line-code is-comment"># passo 4 — aguarda download automático do relatorio</span>
+          </div>
+        </div>
+        <div class="step-desc" style="margin-top:10px">Cole os resultados no Claude e peça: <em>"Organize essas provas em um dossie estruturado por eixo tematico, com os numeros de citação do NotebookLM."</em></div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Revisão bibliográfica / pesquisa acadêmica</div>
+        <div class="step-desc">Para projetos com artigos, teses e relatorios — mapear argumentos, identificar lacunas e comparar posicoes.</div>
+        <div class="cmd-lines">
+          <div class="cmd-line">
+            <span class="cmd-line-num">1</span>
+            <span class="cmd-line-code">source list --json</span>
+            <button class="cmd-line-copy" onclick="copyLine(this,'source list --json')">copiar</button>
+          </div>
+          <div class="cmd-line is-comment">
+            <span class="cmd-line-num"></span>
+            <span class="cmd-line-code is-comment"># confirme que todas as fontes estao "ready"</span>
+          </div>
+          <div class="cmd-line">
+            <span class="cmd-line-num">2</span>
+            <span class="cmd-line-code">ask "Quais sao os principais argumentos de cada fonte?"</span>
+            <button class="cmd-line-copy" onclick="copyLine(this,'ask &quot;Quais sao os principais argumentos de cada fonte?&quot;')">copiar</button>
+          </div>
+          <div class="cmd-line is-comment">
+            <span class="cmd-line-num"></span>
+            <span class="cmd-line-code is-comment"># aguarde e use Copiar Contexto</span>
+          </div>
+          <div class="cmd-line">
+            <span class="cmd-line-num">3</span>
+            <span class="cmd-line-code">ask "Onde os autores divergem entre si?"</span>
+            <button class="cmd-line-copy" onclick="copyLine(this,'ask &quot;Onde os autores divergem entre si?&quot;')">copiar</button>
+          </div>
+          <div class="cmd-line is-comment">
+            <span class="cmd-line-num"></span>
+            <span class="cmd-line-code is-comment"># aguarde e use Copiar Contexto novamente</span>
+          </div>
+          <div class="cmd-line">
+            <span class="cmd-line-num">4</span>
+            <span class="cmd-line-code">generate report --format study-guide</span>
+            <button class="cmd-line-copy" onclick="copyLine(this,'generate report --format study-guide')">copiar</button>
+          </div>
+          <div class="cmd-line is-comment">
+            <span class="cmd-line-num"></span>
+            <span class="cmd-line-code is-comment"># aguarda download automático</span>
+          </div>
+        </div>
+        <div class="step-desc" style="margin-top:10px">Transfira o contexto para o Claude (botão copiar contexto) e peça: <em>"Com base na revisao do NotebookLM, escreva um referencial teorico de 3 paginas comparando as perspectivas X e Y."</em></div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">Análise de dados financeiros / relatorios empresariais</div>
+        <div class="step-desc">Para due diligence, analise de balancete, comparativo de indicadores entre periodos.</div>
+        <div class="cmd-lines">
+          <div class="cmd-line">
+            <span class="cmd-line-num">1</span>
+            <span class="cmd-line-code">ask "Quais indicadores aparecem em todos os relatorios?"</span>
+            <button class="cmd-line-copy" onclick="copyLine(this,'ask &quot;Quais indicadores aparecem em todos os relatorios?&quot;')">copiar</button>
+          </div>
+          <div class="cmd-line">
+            <span class="cmd-line-num">2</span>
+            <span class="cmd-line-code">ask "Houve queda ou crescimento ano a ano? Cite os valores exatos."</span>
+            <button class="cmd-line-copy" onclick="copyLine(this,'ask &quot;Houve queda ou crescimento ano a ano? Cite os valores exatos.&quot;')">copiar</button>
+          </div>
+          <div class="cmd-line">
+            <span class="cmd-line-num">3</span>
+            <span class="cmd-line-code">generate report --format briefing-doc</span>
+            <button class="cmd-line-copy" onclick="copyLine(this,'generate report --format briefing-doc')">copiar</button>
+          </div>
+        </div>
+        <div class="step-desc" style="margin-top:10px">Cole no Claude: <em>"Com os dados acima, redija um parecer executivo de 1 pagina apontando os 3 pontos de atencao criticos."</em></div>
+        <div class="step-tip">&#128161; Para este fluxo, o formato <code>briefing-doc</code> funciona melhor que <code>study-guide</code> — gera um resumo executivo com os dados-chave ja destacados.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="alert alert-info" style="margin-top:24px">
+    <span class="alert-icon">&#127919;</span>
+    <span><strong>Dica de produtividade — Playbooks:</strong> Salve qualquer sequência como <strong>Playbook</strong> no Studio. Abra o painel de histórico, clique em <strong>Playbook</strong>, selecione os comandos e dê um nome. Na próxima sessão, um clique na paleta executa tudo na ordem certa. <strong>Os playbooks ficam salvos no navegador</strong> (localStorage) — não no Colab. Isso significa que sobrevivem a reinicializações do Colab, trocas de URL do ngrok e fechamentos do Studio. O único caso em que se perdem é se você limpar os dados do navegador ou usar outro computador.</span>
+  </div>
+</div>
+
+<!-- HISTÓRICO DE VERSÕES -->
+<div class="section">
+  <div class="section-num">&#8635;</div>
+  <h2>Histórico de versões</h2>
+  <p class="section-desc">Evolução do projeto desde o início até a versão atual.</p>
+  <table class="cmd-table">
+    <tr><th>Versão</th><th>O que entrou</th></tr>
+    <tr><td><span class="cmd">v1.0</span></td><td class="cmd-desc">Terminal básico + conexão ngrok</td></tr>
+    <tr><td><span class="cmd">v1.1</span></td><td class="cmd-desc">Guia de uso criado</td></tr>
+    <tr><td><span class="cmd">v1.2</span></td><td class="cmd-desc">Paleta de comandos + cards clicáveis (notebooks, artefatos)</td></tr>
+    <tr><td><span class="cmd">v1.3</span></td><td class="cmd-desc">Modal personalizado substituindo window.prompt + fix do comando ask (aspas)</td></tr>
+    <tr><td><span class="cmd">v1.4</span></td><td class="cmd-desc">Spinner com cronômetro + auto artifact wait + auto download de relatórios</td></tr>
+    <tr><td><span class="cmd">v1.5</span></td><td class="cmd-desc">Paleta teal + botão "copiar contexto" + limpar tela + versionamento + fluxo avançado no guia</td></tr>
+    <tr><td><span class="cmd">v1.6</span></td><td class="cmd-desc">Busca na paleta + histórico persistente + switch de notebooks + notificações + Colab Secrets + Google Drive + Cloudflare Tunnel</td></tr>
+    <tr><td><span class="cmd">v2.0</span></td><td class="cmd-desc">Versão major: audit completo, guia e Studio sincronizados, todas as features estabilizadas</td></tr>
+    <tr><td><span class="cmd">v2.1</span></td><td class="cmd-desc">Keep-alive automático (ping 25 min) + detecção de credenciais expiradas com alerta e instruções</td></tr>
+    <tr><td><span class="cmd">v2.2</span></td><td class="cmd-desc">Fila de comandos: serializa execuções, badge contador, sem conflitos em uso simultâneo</td></tr>
+    <tr><td><span class="cmd">v2.3</span></td><td class="cmd-desc">Histórico: exportar JSON, importar JSON (merge dedup), sincronizar via Google Drive</td></tr>
+    <tr><td><span class="cmd">v2.4</span></td><td class="cmd-desc">PWA instalável como app nativo (desktop e mobile), service worker com cache offline</td></tr>
+    <tr><td><span class="cmd">v2.5</span></td><td class="cmd-desc">Interface redesenhada: pills arredondados no menu, fontes maiores, paleta com ícones, botão Sair vermelho, indicador de notebook ativo na topbar</td></tr>
+    <tr><td><span class="cmd">v2.6</span></td><td class="cmd-desc">Playbooks na paleta (sequências de 1 clique), logs estruturados JSONL, timeouts diferenciados, painel Debug, botões da topbar com ícones SVG</td></tr>
+    <tr><td><span class="cmd">v2.7</span></td><td class="cmd-desc">Fix TOC (getBoundingClientRect, sem break), responsividade com breakpoint 960px, CSS defensivo em section-desc e step-desc, tabela histórico corrigida</td></tr>
+    <tr><td><span class="cmd">v2.8</span></td><td class="cmd-desc">Contexto ampliado (captura toda a sessão incluindo ask); copiar por linha nos Playbooks do guia; status "Conectado" na barra; edição de playbooks existentes; botão Contexto bloqueado com credenciais expiradas</td></tr>
+    <tr><td><span class="cmd">v2.9</span></td><td class="cmd-desc">Design dos blocos de comando (cmd-lines) corrigido: visual unificado, botão copiar visível, comentários sem fundo preto. Seção "Transferir contexto" atualizada: explica captura da sessão com ask, exemplo real do bloco gerado e aviso sobre credenciais</td></tr>
+    <tr><td><span class="cmd">v2.10</span></td><td class="cmd-desc">Verificação de credenciais ao conectar (probe silenciosa); showContext aborta e alerta se credenciais expiradas mesmo sem comando anterior; TOC com offset dinâmico (mede header real) + requestAnimationFrame + auto-scroll horizontal corrigido com getBoundingClientRect</td></tr>
+    <tr><td><span class="cmd">v2.11</span></td><td class="cmd-desc">Contexto reescrito: filtra comandos operacionais, remove tabelas ASCII do CLI, extrai apenas respostas de ask limpas. Guia: passo 3 da transferência de contexto atualizado com descrição precisa e exemplo real</td></tr>
+    <tr><td><span class="cmd">v2.12</span></td><td class="cmd-desc">Removida seção "Outros notebooks" do contexto — irrelevante para o Claude que trabalha em um caso específico. Eliminada chamada list --json desnecessária</td></tr>
+    <tr><td><span class="cmd">v2.13</span></td><td class="cmd-desc">Verificação de credenciais durante a conexão (antes de liberar o terminal): se expiradas, exibe instruções de renovação na tela de setup sem entrar no Studio. Guia: exemplo do bloco de contexto substituído por dados genéricos — removidas referências a casos reais</td></tr>
+  </table>
+</div>
+
+
+</div><!-- /container -->
+
+<footer>
+  Desenvolvido por <strong>Bruno Ferreira</strong> — 2026
+</footer>
+
+<script>
+function copyCode(btn){
+  const pre=btn.closest('.code-block').querySelector('pre');
+  navigator.clipboard.writeText(pre.textContent.trim()).then(()=>{
+    btn.textContent='✓ copiado!';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='copiar';btn.classList.remove('copied');},1500);
+  });
+}
+
+function copyLine(btn, text){
+  // Decodificar entidades HTML se necessário
+  const decoded = text.replace(/&quot;/g,'"').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
+  navigator.clipboard.writeText(decoded).then(()=>{
+    btn.textContent='✓';btn.classList.add('copied-line');
+    setTimeout(()=>{btn.textContent='copiar';btn.classList.remove('copied-line');},1500);
+  });
+}
+
+// Active TOC — offset dinâmico baseado na altura real do header sticky
+const tocLinks = document.querySelectorAll('.toc a');
+const tocSections = Array.from(document.querySelectorAll('.section[id]'));
+let _tocRaf = null;
+
+function getTocOffset() {
+  // Mede a altura real do banner sticky em tempo real (cobre zoom e resize)
+  const toc = document.querySelector('.toc-wrap');
+  return toc ? toc.getBoundingClientRect().bottom + 8 : 80;
+}
+
+function getActiveSection() {
+  const offset = getTocOffset();
+  let active = tocSections[0];
+  // Percorre todas as seções e guarda a última cujo topo já cruzou o ponto de referência.
+  // getBoundingClientRect().top é sempre relativo ao viewport, preciso em qualquer zoom.
+  for (const s of tocSections) {
+    if (s.getBoundingClientRect().top <= offset) active = s;
+  }
+  return active ? active.id : null;
+}
+
+function updateToc() {
+  _tocRaf = null;
+  const activeId = getActiveSection();
+  tocLinks.forEach(a => {
+    const isActive = a.getAttribute('href') === '#' + activeId;
+    if (a.classList.contains('active') === isActive) return; // sem mudança, evita reflow
+    a.classList.toggle('active', isActive);
+    if (isActive) {
+      // Scroll horizontal do nav para manter o item ativo visível
+      const nav = a.closest('nav');
+      if (nav) {
+        // offsetLeft do <a> relativo ao nav (não ao documento)
+        const navRect = nav.getBoundingClientRect();
+        const aRect   = a.getBoundingClientRect();
+        const aLeft   = aRect.left - navRect.left + nav.scrollLeft;
+        const aRight  = aLeft + aRect.width;
+        if (aLeft < nav.scrollLeft + 20) {
+          nav.scrollTo({ left: aLeft - 20, behavior: 'smooth' });
+        } else if (aRight > nav.scrollLeft + nav.offsetWidth - 20) {
+          nav.scrollTo({ left: aRight - nav.offsetWidth + 20, behavior: 'smooth' });
+        }
+      }
+    }
+  });
+}
+
+function scheduleTocUpdate() {
+  if (_tocRaf) return; // já agendado neste frame
+  _tocRaf = requestAnimationFrame(updateToc);
+}
+
+window.addEventListener('scroll', scheduleTocUpdate, { passive: true });
+window.addEventListener('resize', scheduleTocUpdate, { passive: true });
+document.addEventListener('DOMContentLoaded', updateToc);
+updateToc();
+</script>
+</body>
+</html>
