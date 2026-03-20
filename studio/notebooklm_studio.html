@@ -1,0 +1,1895 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1c1c24">
+<meta name="description" content="NotebookLM Studio v2.16 — Terminal visual para notebooklm-py via Google Colab">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NLM Studio">
+<title>NotebookLM Studio v2.16</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#1c1c24;height:100vh;display:flex;flex-direction:column;color:#cdd0d8;overflow:hidden}
+
+/* TOPBAR */
+#topbar{background:#21212d;border-bottom:1px solid #2e2e3d;padding:11px 18px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:12px}
+#topbar-title{font-size:15px;font-weight:700;color:#e8e8e8;display:flex;align-items:center;gap:10px}
+#topbar-name{letter-spacing:-.01em}
+#version-badge{font-size:11px;font-weight:600;color:#2a9d8f;background:#1a2e2d;padding:2px 9px;border-radius:10px;border:1px solid #1e3d3a;letter-spacing:.03em}
+#nb-indicator{display:none;font-size:12px;color:#888;background:#1e1e2a;border:1px solid #2a2a38;border-radius:8px;padding:2px 12px;max-width:320px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+#nb-indicator:hover{border-color:#2a9d8f;color:#cdd0d8}
+#nb-indicator .nb-label{font-size:10px;color:#555;margin-right:4px}
+#topbar-right{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.top-btn{font-size:12px;color:#888;background:none;border:none;border-radius:8px;padding:5px 10px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.top-btn:hover{color:#e0e0e8;background:#25253a}
+.icon-btn{display:flex;align-items:center;gap:5px;padding:6px 10px;border:1px solid #252535;border-radius:8px}
+.icon-btn svg{stroke:#888;transition:stroke .15s;flex-shrink:0}
+.icon-btn:hover{background:#1e2035;border-color:#363655}
+.icon-btn:hover svg{stroke:#cdd0d8}
+.icon-btn span{font-size:12px;color:#888;transition:color .15s}
+.icon-btn:hover span{color:#cdd0d8}
+.ctx-btn-style{background:#1a2e2d;border-color:#2a9d8f}
+.ctx-btn-style svg{stroke:#2a9d8f}
+.ctx-btn-style span{color:#7fd3cc;font-weight:600}
+.ctx-btn-style:hover{background:#1e3a38;border-color:#3abfb1}
+.ctx-btn-style:hover svg{stroke:#7fd3cc}
+.ctx-btn-style:hover span{color:#a0e8e0}
+.danger-icon-btn{border-color:#3a1e1e}
+.danger-icon-btn svg{stroke:#f87171}
+.danger-icon-btn span{color:#f87171}
+.danger-icon-btn:hover{background:#2a1a1a;border-color:#8b2020}
+.danger-icon-btn:hover svg{stroke:#fca5a5}
+.danger-icon-btn:hover span{color:#fca5a5}
+
+/* PWA INSTALL */
+#pwa-btn{display:none;background:#1a2e2d;border-color:#2a9d8f;color:#7fd3cc;animation:pulse-pwa 2s ease-in-out 3}
+@keyframes pulse-pwa{0%,100%{box-shadow:none}50%{box-shadow:0 0 0 3px rgba(42,157,143,.2)}}
+
+/* SETUP */
+#setup{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;gap:20px}
+.setup-icon{font-size:40px}
+.setup-title{font-size:18px;font-weight:600;color:#e8e8e8}
+.setup-desc{font-size:15px;color:#888;text-align:center;max-width:380px;line-height:1.7}
+.field{width:100%;max-width:400px}
+.field input{width:100%;padding:12px 14px;background:#21212d;border:1px solid #363648;border-radius:8px;font-size:15px;color:#d4d4d4;outline:none;transition:border .2s;font-family:monospace}
+.field input:focus{border-color:#2a9d8f}
+.field input.err{border-color:#ef4444}
+#setup-err{font-size:12px;color:#f87171;max-width:400px;width:100%;display:none;line-height:1.5}
+#setup-btn{width:100%;max-width:400px;padding:13px 0;background:#2a9d8f;color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;transition:background .2s}
+#setup-btn:hover{background:#21897e}
+#setup-btn:disabled{background:#333;color:#555;cursor:not-allowed}
+.setup-hint{background:#21212d;border:1px solid #2e2e3d;border-radius:8px;padding:12px 16px;max-width:400px;width:100%;font-size:12px;line-height:1.9;color:#666}
+.setup-hint strong{color:#aaa;display:block;margin-bottom:2px}
+code{font-family:monospace;font-size:11px;background:#1f1f1f;padding:1px 5px;border-radius:3px;color:#aaa}
+
+/* MAIN LAYOUT */
+#main{flex:1;display:none;overflow:hidden;flex-direction:row}
+
+/* COMMAND PALETTE */
+#palette{width:220px;background:#191921;border-right:1px solid #272735;display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+#palette-title{padding:12px 14px 10px;font-size:12px;font-weight:700;color:#e8e8e8;border-bottom:1px solid #272735;flex-shrink:0;letter-spacing:-.01em}
+.pal-section{padding:6px 0 10px;border-bottom:1px solid #22222e}
+.pal-section:last-child{border-bottom:none}
+.pal-label{padding:8px 14px 4px;font-size:11px;font-weight:700;color:#2a9d8f;text-transform:uppercase;letter-spacing:.07em;display:flex;align-items:center;gap:6px}
+.pal-label::before{content:'';display:inline-block;width:3px;height:12px;background:#2a9d8f;border-radius:2px;flex-shrink:0}
+.pal-btn{width:100%;padding:7px 14px 7px 18px;background:none;border:none;text-align:left;cursor:pointer;transition:all .12s;display:flex;flex-direction:column;gap:2px;border-left:2px solid transparent}
+.pal-btn:hover{background:#22222e;border-left-color:#2a9d8f}
+.pal-btn span.cmd{font-family:monospace;font-size:13px;color:#c8d0dc;font-weight:500}
+.pal-btn:hover span.cmd{color:#fff}
+.pal-btn span.desc{font-size:12px;color:#556}
+.pal-btn:hover span.desc{color:#8899aa}
+
+/* TERMINAL */
+#terminal-pane{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;background:#1c1c24}
+#output{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:2px;background:#1c1c24}
+.block{margin-bottom:10px}
+.block-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px}
+.block-cmd{font-family:monospace;font-size:14px;color:#2a9d8f}
+.block-copy{font-size:11px;padding:3px 9px;background:#252535;border:1px solid #1e3d3a;border-radius:4px;color:#666;cursor:pointer;transition:all .1s}
+.block-copy:hover{color:#d4d4d4;border-color:#444}
+.block-copy.copied{color:#4ade80;border-color:#1a3a1a}
+.block-out{font-family:monospace;font-size:14px;color:#cdd0d8;white-space:pre-wrap;word-break:break-word;line-height:1.7;background:#181820;border-radius:6px;padding:10px 12px;border:1px solid #2a2a38}
+.block-err{font-family:monospace;font-size:14px;color:#fc8585;white-space:pre-wrap;background:#1e1624;border-radius:6px;padding:10px 12px;border:1px solid #352030}
+.line-info{font-size:13px;color:#60a5fa;padding:2px 0}
+.line-sep{border-top:1px solid #272735;margin:8px 0}
+.spinner-row{display:flex;align-items:center;gap:10px;padding:12px 16px;margin:4px 0;background:#182928;border:1px solid #1e3d3a;border-radius:8px;font-size:14px;color:#5bc4bb}
+.spinner-row .spinner-cmd{font-family:monospace;font-size:12px;color:#2a9d8f;margin-left:4px}
+.spinner-row .spinner-time{font-family:monospace;font-size:11px;color:#555;margin-left:auto}
+.spinner{width:14px;height:14px;border:2px solid #1e3d3a;border-top-color:#2a9d8f;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+.progress-bar-wrap{height:3px;background:#252535;border-radius:2px;margin-top:8px;overflow:hidden;width:100%}
+.progress-bar{height:3px;background:linear-gradient(90deg,#2a9d8f,#7fd3cc);border-radius:2px;animation:progress-pulse 2s ease-in-out infinite}
+@keyframes progress-pulse{0%{width:5%;opacity:.7}50%{width:75%;opacity:1}100%{width:95%;opacity:.7}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+#input-row{display:flex;align-items:center;gap:0;padding:10px 16px 14px;border-top:1px solid #272735;background:#191921;flex-shrink:0}
+#prompt-label{color:#2a9d8f;font-family:monospace;font-size:14px;margin-right:10px;flex-shrink:0}
+#cmd-input{flex:1;background:transparent;border:none;outline:none;font-family:monospace;font-size:14px;color:#d4d4d4}
+#run-btn{padding:7px 16px;background:#2a9d8f;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;margin-left:10px;flex-shrink:0;transition:background .15s}
+#run-btn:hover{background:#21897e}
+#run-btn:disabled{background:#333;color:#555;cursor:not-allowed}
+
+/* HELP PANEL */
+#help-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:none;align-items:center;justify-content:center}
+
+/* INPUT MODAL */
+#input-modal{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:none;align-items:center;justify-content:center}
+#input-modal.show{display:flex}
+#input-modal-box{background:#21212d;border:1px solid #363648;border-radius:14px;padding:24px;width:90%;max-width:560px;display:flex;flex-direction:column;gap:14px}
+#input-modal-title{font-size:13px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.06em}
+#input-modal-label{font-size:15px;color:#e8e8e8;font-weight:500;line-height:1.5}
+#input-modal-hint{font-size:12px;color:#555;font-family:monospace}
+#input-modal-text{background:#15151e;border:1px solid #363648;border-radius:8px;color:#d4d4d4;font-size:14px;font-family:inherit;padding:12px 14px;resize:vertical;min-height:80px;outline:none;transition:border .2s;line-height:1.6}
+#input-modal-text:focus{border-color:#2a9d8f}
+#input-modal-single{background:#15151e;border:1px solid #363648;border-radius:8px;color:#d4d4d4;font-size:14px;font-family:monospace;padding:10px 14px;outline:none;transition:border .2s;width:100%}
+#input-modal-single:focus{border-color:#2a9d8f}
+#input-modal-actions{display:flex;gap:8px;justify-content:flex-end}
+#input-modal-cancel{padding:8px 18px;background:none;border:1px solid #363648;border-radius:7px;color:#999;font-size:13px;cursor:pointer;transition:all .15s}
+#input-modal-cancel:hover{border-color:#555;color:#d4d4d4}
+#input-modal-run{padding:8px 22px;background:#2a9d8f;border:none;border-radius:7px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s}
+#input-modal-run:hover{background:#21897e}
+#help-overlay.show{display:flex}
+#help-box{background:#21212d;border:1px solid #363648;border-radius:12px;padding:24px;max-width:480px;width:90%;max-height:80vh;overflow-y:auto}
+#help-box h2{font-size:15px;font-weight:600;color:#e8e8e8;margin-bottom:16px}
+.help-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #1e1e1e}
+.help-row:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.help-cmd{font-family:monospace;font-size:13px;color:#5bc4bb;background:#1a2e2d;padding:4px 9px;border-radius:4px;white-space:nowrap;flex-shrink:0}
+.help-desc{font-size:14px;color:#888;line-height:1.6}
+#help-close{margin-top:16px;width:100%;padding:8px;background:#2a2a38;border:none;border-radius:6px;color:#aaa;font-size:13px;cursor:pointer}
+#help-close:hover{background:#333;color:#fff}
+
+/* COPY ALL FLOATING */
+#copy-all-btn{position:fixed;bottom:60px;right:16px;padding:7px 14px;background:#2a2a38;border:1px solid #3a3a50;border-radius:20px;color:#888;font-size:12px;cursor:pointer;transition:all .15s;display:none;z-index:10}
+#copy-all-btn:hover{background:#333;color:#fff}
+
+/* PALETTE SEARCH */
+#palette-search-wrap{padding:8px 10px;border-bottom:1px solid #1e1e2a;flex-shrink:0}
+#palette-search{width:100%;background:#15151e;border:1px solid #2a2a38;border-radius:6px;color:#cdd0d8;font-size:13px;padding:7px 10px;outline:none;transition:border .15s}
+#palette-search:focus{border-color:#2a9d8f}
+#palette-search::placeholder{color:#444}
+.pal-btn.hidden{display:none}
+
+/* NOTEBOOK SWITCHER */
+#nb-switcher{display:none;position:fixed;top:50px;right:auto;background:#21212d;border:1px solid #2e2e3d;border-radius:10px;min-width:260px;max-width:340px;max-height:280px;overflow-y:auto;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+#nb-switcher-header{padding:10px 14px;font-size:11px;font-weight:600;color:#2a9d8f;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #2e2e3d;flex-shrink:0}
+#nb-switcher-close{background:none;border:none;color:#555;cursor:pointer;font-size:16px;line-height:1}
+#nb-switcher-close:hover{color:#aaa}
+.nb-switch-item{width:100%;padding:6px 12px;background:none;border:none;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:1px;transition:background .1s}
+.nb-switch-item:hover{background:#22222e}
+.nb-switch-item .nb-title{font-size:12px;color:#cdd0d8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nb-switch-item .nb-id{font-size:10px;color:#555;font-family:monospace}
+.nb-switch-item.active-nb .nb-title{color:#2a9d8f;font-weight:600}
+
+/* HISTORY PANEL */
+#hist-panel{display:none;position:fixed;right:16px;bottom:80px;width:320px;max-height:320px;background:#21212d;border:1px solid #2e2e3d;border-radius:10px;z-index:50;flex-direction:column;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+#hist-panel.show{display:flex}
+#hist-header{padding:10px 14px;border-bottom:1px solid #2e2e3d;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+#hist-title{font-size:12px;font-weight:600;color:#aaa}
+#hist-close{background:none;border:none;color:#555;cursor:pointer;font-size:16px}
+#hist-list{flex:1;overflow-y:auto;padding:6px}
+.hist-item{padding:8px 12px;border-radius:6px;cursor:pointer;font-family:monospace;font-size:13px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:all .1s}
+.hist-item:hover{background:#2a2a38;color:#cdd0d8}
+#hist-clear{padding:8px;border-top:1px solid #2e2e3d;text-align:center;font-size:11px;color:#555;cursor:pointer;flex-shrink:0}
+#hist-clear:hover{color:#f87171}
+#hist-actions{display:flex;border-top:1px solid #2e2e3d;flex-shrink:0}
+#hist-actions button{flex:1;padding:8px 4px;background:none;border:none;font-size:12px;cursor:pointer;color:#555;transition:all .1s;border-right:1px solid #2e2e3d}
+#hist-actions button:last-child{border-right:none}
+#hist-actions button:hover{color:#2a9d8f;background:#1a2e2d}
+
+/* NOTIFICATION badge */
+#notif-badge{display:none;position:fixed;top:12px;left:50%;transform:translateX(-50%);background:#1a3a1a;border:1px solid #2a9d8f;border-radius:20px;padding:8px 20px;font-size:13px;color:#7fd3cc;z-index:500;animation:slideDown .3s ease;box-shadow:0 4px 16px rgba(0,0,0,.4)}
+
+/* COMMAND QUEUE */
+#queue-badge{display:none;align-items:center;gap:6px;font-size:11px;color:#2a9d8f;padding:2px 10px;background:#15251e;border:1px solid #1e3d3a;border-radius:10px;margin-left:6px}
+#queue-badge.active{display:flex}
+#queue-count{font-weight:700}
+
+/* KEEPALIVE + CRED EXPIRY indicator */
+#status-row{display:none;align-items:center;gap:10px;padding:5px 18px;background:#15151e;border-bottom:1px solid #1e1e2a;font-size:13px;flex-shrink:0}
+#keepalive-dot{width:7px;height:7px;border-radius:50%;background:#555;flex-shrink:0;transition:background .3s}
+#keepalive-dot.alive{background:#2a9d8f;animation:pulse-dot 3s ease-in-out infinite}
+#keepalive-txt{color:#666;flex:1;font-size:13px}
+#cred-warn{display:none;margin-left:auto;padding:2px 10px;background:#3a1a1a;border:1px solid #8b2020;border-radius:10px;color:#f87171;font-size:11px;cursor:pointer}
+#cred-warn:hover{background:#4a2020}
+@keyframes pulse-dot{0%,100%{opacity:.6}50%{opacity:1}}
+
+/* DEBUG PANEL */
+#debug-panel{display:none;position:fixed;right:16px;bottom:80px;width:540px;max-height:480px;background:#15151e;border:1px solid #2e2e3d;border-radius:10px;z-index:51;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,.6)}
+#debug-panel.show{display:flex}
+#debug-header{padding:10px 14px;border-bottom:1px solid #2e2e3d;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:10px}
+#debug-title{font-size:13px;font-weight:600;color:#e8e8e8}
+#debug-hbtns{display:flex;gap:6px}
+#debug-hbtns button{font-size:11px;padding:3px 9px;background:#21212d;border:1px solid #363648;border-radius:5px;color:#888;cursor:pointer}
+#debug-hbtns button:hover{color:#fff;border-color:#555}
+#debug-close{background:none;border:none;color:#555;cursor:pointer;font-size:16px;padding:0 4px}
+#debug-tabs{display:flex;border-bottom:1px solid #1e1e2a;flex-shrink:0}
+.debug-tab{padding:7px 16px;font-size:12px;color:#555;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+.debug-tab.active{color:#2a9d8f;border-bottom-color:#2a9d8f}
+.debug-tab:hover{color:#aaa}
+#debug-content{flex:1;overflow-y:auto;padding:10px}
+.de{margin-bottom:8px;border:1px solid #1e1e2a;border-radius:6px;overflow:hidden}
+.de-head{padding:5px 10px;background:#1e1e2a;font-size:11px;display:flex;gap:8px;align-items:center}
+.de-cmd{font-family:monospace;color:#2a9d8f;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.de-ts{color:#444;font-size:10px;flex-shrink:0}
+.de-rc{padding:1px 7px;border-radius:10px;font-size:10px;font-weight:600;flex-shrink:0}
+.de-ok{background:#1a3a1a;color:#4ade80}
+.de-err{background:#3a1a1a;color:#f87171}
+.de-dur{background:#1a2535;color:#60a5fa}
+.de-raw{font-family:monospace;font-size:11px;color:#f87171;white-space:pre-wrap;padding:6px 10px;max-height:80px;overflow-y:auto}
+
+/* PLAYBOOK */
+.pal-pb{width:100%;padding:7px 14px 7px 18px;background:none;border:none;text-align:left;cursor:pointer;transition:all .12s;display:flex;align-items:center;gap:8px;border-left:2px solid transparent}
+.pal-pb:hover{background:#22222e;border-left-color:#f59e0b}
+.pal-pb .pb-name{font-size:13px;color:#c8d0dc;font-weight:500;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pal-pb .pb-n{font-size:10px;color:#555;flex-shrink:0}
+.pal-pb:hover .pb-name{color:#fff}
+.pb-del{background:none;border:none;color:#444;cursor:pointer;font-size:12px;padding:2px 4px;flex-shrink:0;border-radius:3px}
+.pb-del:hover{color:#f87171;background:#2a1a1a}
+@keyframes slideDown{from{transform:translateX(-50%) translateY(-20px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+
+/* CONTEXT MODAL */
+#ctx-modal{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:300;display:none;align-items:center;justify-content:center}
+#ctx-modal.show{display:flex}
+#ctx-box{background:#21212d;border:1px solid #363648;border-radius:14px;width:90%;max-width:680px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden}
+#ctx-header{padding:16px 20px;border-bottom:1px solid #2e2e3d;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+#ctx-header-left{display:flex;flex-direction:column;gap:3px}
+#ctx-title{font-size:14px;font-weight:600;color:#e8e8e8}
+#ctx-subtitle{font-size:12px;color:#666}
+#ctx-close{background:none;border:1px solid #333;border-radius:6px;color:#888;font-size:12px;padding:4px 10px;cursor:pointer}
+#ctx-close:hover{color:#fff;border-color:#555}
+#ctx-loading{padding:32px;text-align:center;color:#555;font-size:13px;display:flex;flex-direction:column;align-items:center;gap:12px}
+#ctx-loading .spinner{width:20px;height:20px;border:2px solid #333;border-top-color:#2a9d8f;border-radius:50%;animation:spin .6s linear infinite}
+#ctx-preview{flex:1;overflow-y:auto;padding:0}
+#ctx-text{margin:0;padding:18px 20px;font-family:monospace;font-size:12.5px;line-height:1.7;color:#cdd0d8;white-space:pre-wrap;word-break:break-word;background:#15151e;border:none;width:100%;resize:none;outline:none;min-height:200px}
+#ctx-footer{padding:14px 20px;border-top:1px solid #2e2e3d;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:10px}
+#ctx-footer-note{font-size:12px;color:#555;line-height:1.5;flex:1}
+#ctx-copy-btn{padding:9px 22px;background:#2a9d8f;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s;flex-shrink:0}
+#ctx-copy-btn:hover{background:#21897e}
+#ctx-copy-btn.copied{background:#166534}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div id="topbar-title">
+    📓 <span id="topbar-name">NotebookLM Studio</span>
+    <span id="version-badge">v2.16</span>
+    <span id="nb-indicator" onclick="run('status')" title="Clique para ver status completo"><span class="nb-label">notebook:</span><span id="nb-indicator-name">—</span></span>
+    <span id="queue-badge"><span id="queue-count">0</span> na fila</span>
+  </div>
+  <div id="topbar-right">
+    <button class="top-btn icon-btn ctx-btn-style" id="ctx-btn" onclick="showContext()" style="display:none" title="Copiar contexto para o Claude">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+      <span>Contexto</span>
+    </button>
+    <button class="top-btn icon-btn" id="hist-btn" onclick="toggleHistory()" style="display:none" title="Histórico">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>Histórico</span>
+    </button>
+    <button class="top-btn icon-btn" id="nb-btn" onclick="toggleNbSwitcher()" style="display:none" title="Trocar notebook">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+      <span>Notebook</span>
+    </button>
+    <button class="top-btn icon-btn" id="clear-btn" onclick="clearOutput()" style="display:none" title="Limpar terminal">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+      <span>Limpar</span>
+    </button>
+    <button class="top-btn icon-btn" id="pwa-btn" onclick="installPWA()" style="display:none" title="Instalar como app">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <span>Instalar</span>
+    </button>
+    <button class="top-btn icon-btn" onclick="showHelp()" title="Ajuda">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span>Ajuda</span>
+    </button>
+    <button class="top-btn icon-btn" id="debug-btn" onclick="toggleDebug()" style="display:none" title="Debug">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span>Debug</span>
+    </button>
+    <button class="top-btn icon-btn danger-icon-btn" id="disconnect-btn" onclick="disconnect()" style="display:none" title="Desconectar">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <span>Sair</span>
+    </button>
+  </div>
+</div>
+
+<!-- STATUS ROW -->
+<div id="status-row">
+  <div id="keepalive-dot"></div>
+  <span id="keepalive-txt">Colab desconectado</span>
+  <span id="cred-warn" onclick="showCredWarning()" title="Clique para ver instruções">⚠ Credenciais expiradas</span>
+</div>
+
+<!-- SETUP -->
+<div id="setup">
+  <div class="setup-icon">🔗</div>
+  <div class="setup-title">Conectar ao Google Colab</div>
+  <div class="setup-desc">Cole a URL do ngrok. O terminal executará comandos diretamente no NotebookLM rodando no seu Colab.</div>
+  <div class="field"><input id="url-input" type="text" placeholder="https://xxxx.ngrok-free.app" onkeydown="if(event.key==='Enter')connect()"></div>
+  <div id="setup-err"></div>
+  <button id="setup-btn" onclick="connect()">Conectar</button>
+  <div class="setup-hint">
+    <strong>A célula do servidor no Colab deve mostrar:</strong>
+    <code>✅ URL para colar: https://xxx.ngrok-free.app</code><br>
+    <code> * Running on http://127.0.0.1:5000</code>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <!-- PALETTE -->
+  <div id="palette">
+    <div id="palette-title">Comandos</div>
+    <div id="palette-search-wrap">
+      <input id="palette-search" type="text" placeholder="🔍 buscar comando..." oninput="filterPalette(this.value)" autocomplete="off" spellcheck="false">
+    </div>
+
+    <div class="pal-section">
+      <div class="pal-label">📚 Notebooks</div>
+      <button class="pal-btn" onclick="run('list --json')">
+        <span class="cmd">list</span>
+        <span class="desc">Listar todos</span>
+      </button>
+      <button class="pal-btn" onclick="promptRun('use ', 'Cole os primeiros 6+ caracteres do ID do notebook:', {quote:false, hint:'ff8de59a', placeholder:'Ex: ff8de59a'})">
+        <span class="cmd">use &lt;id&gt;</span>
+        <span class="desc">Selecionar notebook</span>
+      </button>
+      <button class="pal-btn" onclick="promptRun('create ', 'Título do novo notebook:', {quote:true, hint:'Meu Novo Notebook', placeholder:'Ex: Pesquisa sobre direito tributário'})">
+        <span class="cmd">create</span>
+        <span class="desc">Criar notebook</span>
+      </button>
+      <button class="pal-btn" onclick="run('status')">
+        <span class="cmd">status</span>
+        <span class="desc">Ver contexto atual</span>
+      </button>
+    </div>
+
+    <div class="pal-section">
+      <div class="pal-label">📄 Fontes</div>
+      <button class="pal-btn" onclick="run('source list --json')">
+        <span class="cmd">source list</span>
+        <span class="desc">Listar fontes</span>
+      </button>
+      <button class="pal-btn" onclick="promptRun('source add ', 'URL ou caminho do arquivo a adicionar como fonte:', {quote:false, hint:'https://exemplo.com/artigo', placeholder:'https:// ou caminho do arquivo'})">
+        <span class="cmd">source add</span>
+        <span class="desc">Adicionar fonte</span>
+      </button>
+    </div>
+
+    <div class="pal-section">
+      <div class="pal-label">💬 Perguntas</div>
+      <button class="pal-btn" onclick="promptRun('ask ', 'Qual é a sua pergunta para o NotebookLM?', {multiline:true, quote:true, hint:'sua pergunta aqui', placeholder:'Ex: Do que se trata esse notebook? Quais são os principais argumentos jurídicos?'})">
+        <span class="cmd">ask</span>
+        <span class="desc">Fazer pergunta</span>
+      </button>
+    </div>
+
+    <div class="pal-section">
+      <div class="pal-label">⚡ Gerar</div>
+      <button class="pal-btn" onclick="run('generate report --format briefing-doc')">
+        <span class="cmd">briefing-doc</span>
+        <span class="desc">Relatório geral</span>
+      </button>
+      <button class="pal-btn" onclick="run('generate report --format study-guide')">
+        <span class="cmd">study-guide</span>
+        <span class="desc">Guia de estudos</span>
+      </button>
+      <button class="pal-btn" onclick="run('generate quiz')">
+        <span class="cmd">quiz</span>
+        <span class="desc">Questionário</span>
+      </button>
+      <button class="pal-btn" onclick="promptRun('generate audio ', 'Instruções para o podcast (opcional — pressione Executar sem preencher para usar padrão):', {multiline:true, quote:true, optional:true, placeholder:'Ex: Foque nos argumentos jurídicos mais relevantes. Use tom formal.'})">
+        <span class="cmd">podcast</span>
+        <span class="desc">Áudio/podcast</span>
+      </button>
+    </div>
+
+    <div class="pal-section">
+      <div class="pal-label">📦 Artefatos</div>
+      <button class="pal-btn" onclick="run('artifact list --json')">
+        <span class="cmd">artifact list</span>
+        <span class="desc">Ver gerados</span>
+      </button>
+      <button class="pal-btn" onclick="promptRun('artifact wait ', 'Cole os primeiros 6+ caracteres do ID do artefato:', {quote:false, hint:'778b983e', placeholder:'Ex: 778b983e'})">
+        <span class="cmd">artifact wait</span>
+        <span class="desc">Aguardar geração</span>
+      </button>
+    </div>
+
+    <div class="pal-section">
+      <div class="pal-label">⬇ Download</div>
+      <button class="pal-btn" onclick="run('download report ./relatorio.md')">
+        <span class="cmd">↓ relatório</span>
+        <span class="desc">Salvar .md</span>
+      </button>
+      <button class="pal-btn" onclick="run('download audio ./podcast.mp3')">
+        <span class="cmd">↓ podcast</span>
+        <span class="desc">Salvar .mp3</span>
+      </button>
+    </div>
+    <div class="pal-section" id="pal-playbooks">
+      <div class="pal-label">🎯 Playbooks</div>
+      <div id="playbook-list"></div>
+      <button class="pal-btn" onclick="openSavePlaybook()">
+        <span class="cmd">+ novo playbook</span>
+        <span class="desc">Salvar sequencia do historico</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- TERMINAL -->
+  <div id="terminal-pane">
+    <div id="output"></div>
+    <div id="input-row">
+      <span id="prompt-label">notebooklm $</span>
+      <input id="cmd-input" type="text" placeholder="comando ou use a paleta →" onkeydown="handleKey(event)" autocomplete="off" spellcheck="false">
+      <button id="run-btn" onclick="runFromInput()">▶ Run</button>
+    </div>
+  </div>
+</div>
+
+<!-- HELP OVERLAY -->
+<!-- INPUT MODAL -->
+<div id="input-modal" onclick="if(event.target===this)closeModal()">
+  <div id="input-modal-box">
+    <div id="input-modal-title">Executar comando</div>
+    <div id="input-modal-label"></div>
+    <div id="input-modal-hint"></div>
+    <textarea id="input-modal-text" style="display:none" placeholder="Digite aqui..."></textarea>
+    <input id="input-modal-single" style="display:none" placeholder="Digite aqui...">
+    <div id="input-modal-actions">
+      <button id="input-modal-cancel" onclick="closeModal()">Cancelar</button>
+      <button id="input-modal-run" onclick="confirmModal()">▶ Executar</button>
+    </div>
+  </div>
+</div>
+
+<div id="help-overlay" onclick="if(event.target===this)closeHelp()">
+  <div id="help-box">
+    <h2>📋 Como usar</h2>
+    <div class="help-row">
+      <span class="help-cmd">list --json</span>
+      <span class="help-desc">Lista todos os notebooks. Cole o resultado aqui no Claude para ele interpretar.</span>
+    </div>
+    <div class="help-row">
+      <span class="help-cmd">use &lt;id&gt;</span>
+      <span class="help-desc">Seleciona um notebook pelo ID (os primeiros 6 caracteres bastam). Sempre execute antes de qualquer operação específica.</span>
+    </div>
+    <div class="help-row">
+      <span class="help-cmd">source list</span>
+      <span class="help-desc">Lista as fontes do notebook selecionado.</span>
+    </div>
+    <div class="help-row">
+      <span class="help-cmd">ask "pergunta"</span>
+      <span class="help-desc">Faz uma pergunta ao NotebookLM sobre o conteúdo das fontes.</span>
+    </div>
+    <div class="help-row">
+      <span class="help-cmd">generate report</span>
+      <span class="help-desc">Gera um relatório. Pode demorar alguns minutos. Depois use artifact wait com o ID retornado.</span>
+    </div>
+    <div class="help-row">
+      <span class="help-cmd">artifact wait &lt;id&gt;</span>
+      <span class="help-desc">Aguarda a conclusão de um relatório ou podcast em geração.</span>
+    </div>
+    <div class="help-row">
+      <span class="help-cmd">download report ./arquivo.md</span>
+      <span class="help-desc">Baixa o relatório gerado para o Colab. Você pode então enviar o arquivo aqui para o Claude interpretar.</span>
+    </div>
+    <div class="help-row">
+      <span class="help-cmd">Botão 📋 copiar</span>
+      <span class="help-desc">Cada bloco de output tem seu próprio botão de cópia. Copie apenas o que precisa e cole no chat do Claude.</span>
+    </div>
+    <button id="help-close" onclick="closeHelp()">Fechar</button>
+  </div>
+</div>
+
+<!-- COPY ALL FLOATING -->
+<!-- CONTEXT MODAL -->
+<div id="ctx-modal" onclick="if(event.target===this)closeContext()">
+  <div id="ctx-box">
+    <div id="ctx-header">
+      <div id="ctx-header-left">
+        <div id="ctx-title">📋 Copiar Contexto para Nova Conversa</div>
+        <div id="ctx-subtitle">Coletando informações do notebook ativo...</div>
+      </div>
+      <button id="ctx-close" onclick="closeContext()">✕ fechar</button>
+    </div>
+    <div id="ctx-loading">
+      <div class="spinner"></div>
+      <span id="ctx-loading-txt">Coletando dados do notebook...</span>
+    </div>
+    <textarea id="ctx-text" style="display:none" readonly></textarea>
+    <div id="ctx-footer" style="display:none">
+      <div id="ctx-footer-note">Cole esse bloco no início de uma nova conversa com o Claude para ele ter todo o contexto do projeto sem precisar de explicações.</div>
+      <button id="ctx-copy-btn" onclick="copyContext()">📋 Copiar tudo</button>
+    </div>
+  </div>
+</div>
+
+<button id="copy-all-btn" onclick="copyAll()">📋 copiar tudo</button>
+
+<!-- NOTIFICATION BADGE -->
+<div id="notif-badge"></div>
+
+<!-- NOTEBOOK SWITCHER DROPDOWN -->
+<div id="nb-switcher">
+  <div id="nb-switcher-header">
+    <span>Trocar notebook</span>
+    <button id="nb-switcher-close" onclick="toggleNbSwitcher()">✕</button>
+  </div>
+  <div id="nb-list-items"></div>
+</div>
+
+<!-- DEBUG PANEL -->
+<div id="debug-panel">
+  <div id="debug-header">
+    <span id="debug-title">&#128269; Debug — Ultimos comandos</span>
+    <div id="debug-hbtns"><button onclick="refreshDebug()">&#8635; atualizar</button><button onclick="copyDebugAll()">&#128203; copiar</button></div>
+    <button id="debug-close" onclick="toggleDebug()">&#10005;</button>
+  </div>
+  <div id="debug-tabs"><div class="debug-tab active" onclick="setDebugTab('log')" id="dtab-log">Comandos</div><div class="debug-tab" onclick="setDebugTab('raw')" id="dtab-raw">JSON bruto</div></div>
+  <div id="debug-content"></div>
+</div>
+
+<!-- HISTORY PANEL -->
+<div id="hist-panel">
+  <div id="hist-header">
+    <span id="hist-title">Histórico de comandos</span>
+    <button id="hist-close" onclick="toggleHistory()">✕</button>
+  </div>
+  <div id="hist-list"></div>
+  <div id="hist-actions">
+    <button onclick="exportHistory()" title="Exportar JSON">⬇ Exportar</button>
+    <button onclick="importHistory()" title="Importar JSON">⬆ Importar</button>
+    <button onclick="syncHistoryDrive()" title="Sincronizar com Google Drive via Colab">☁ Drive</button>
+    <button onclick="clearHistory()" title="Limpar histórico" style="color:#555">🗑 Limpar</button>
+  </div>
+  <input type="file" id="hist-import-input" accept=".json" style="display:none" onchange="handleHistImport(event)">
+</div>
+
+<script>
+const H={'Content-Type':'application/json','ngrok-skip-browser-warning':'true'};
+const STUDIO_VERSION='2.16'; // versão atual — atualizar a cada release
+const GITHUB_RELEASES_URL='https://api.github.com/repos/brunoflma/notebooklm-studio/releases/latest';
+let URL_BASE='';
+let hist=JSON.parse(localStorage.getItem('nlm_hist')||'[]');
+let histIdx=-1;
+
+async function connect(){
+  const url=document.getElementById('url-input').value.trim().replace(/\/$/,'');
+  if(!url)return;
+  const btn=document.getElementById('setup-btn');
+  const err=document.getElementById('setup-err');
+  btn.disabled=true;btn.textContent='Conectando...';
+  err.style.display='none';
+  document.getElementById('url-input').classList.remove('err');
+
+  try{
+    // Passo 1 — verificar se o servidor Flask está respondendo
+    const r=await fetch(`${url}/health`,{headers:H});
+    const d=await r.json();
+    if(d.status!=='ok'){showErr('Servidor respondeu com status inesperado.');btn.disabled=false;btn.textContent='Conectar';return;}
+
+    // Passo 2 — verificar credenciais do NotebookLM antes de entrar no terminal
+    btn.textContent='Verificando credenciais...';
+    let credOk=true;
+    try{
+      const cr=await fetch(`${url}/execute`,{method:'POST',headers:H,body:JSON.stringify({command:'list --json'})});
+      const cd=await cr.json();
+      const combined=(cd.stdout||'')+(cd.stderr||'');
+      const expired=combined.toLowerCase().includes('authentication expired')||
+                    (combined.toLowerCase().includes('redirected to')&&combined.toLowerCase().includes('accounts.google.com'))||
+                    combined.toLowerCase().includes('invalid session')||
+                    (combined.toLowerCase().includes('403')&&combined.toLowerCase().includes('forbidden'));
+      if(expired){ credOk=false; }
+    }catch(e){ /* se falhou a probe, assume credencial OK e deixa o usuário tentar */ }
+
+    if(!credOk){
+      // Credenciais expiradas — mostrar aviso detalhado na tela de setup, sem entrar no terminal
+      btn.disabled=false;btn.textContent='Conectar';
+      err.innerHTML=
+        '<div style="background:#1e1414;border:1px solid #8b2020;border-radius:8px;padding:14px 16px;margin-top:4px;font-size:13px;line-height:1.9;color:#f0c0c0;text-align:left">'+
+        '<div style="font-size:14px;font-weight:600;color:#f87171;margin-bottom:8px">⚠ Credenciais do Google expiradas</div>'+
+        'O servidor está online, mas as credenciais do NotebookLM expiraram. Renove antes de continuar:<br>'+
+        '<ol style="padding-left:18px;margin-top:8px;color:#e0a0a0;line-height:2.1">'+
+        '<li>No seu <strong>computador local</strong>, execute: <code style="background:#2a1a1a;padding:1px 7px;border-radius:3px;color:#fca5a5">notebooklm login</code></li>'+
+        '<li>Faça login na janela do Chrome que abrir</li>'+
+        '<li>Localize o arquivo renovado em <code style="background:#2a1a1a;padding:1px 7px;border-radius:3px;color:#fca5a5">~/.notebooklm/storage_state.json</code></li>'+
+        '<li>Execute a célula de setup no Colab e faça upload do novo arquivo</li>'+
+        '<li>Reinicie a célula do servidor e tente conectar novamente</li>'+
+        '</ol></div>';
+      err.style.display='block';
+      document.getElementById('url-input').classList.add('err');
+      return;
+    }
+
+    // Passo 3 — credenciais OK, liberar o terminal
+    URL_BASE=url;
+    _credExpired=false;
+    document.getElementById('setup').style.display='none';
+    document.getElementById('main').style.display='flex';
+    document.getElementById('disconnect-btn').style.display='block';
+    document.getElementById('copy-all-btn').style.display='block';
+    document.getElementById('ctx-btn').style.display='block';
+    document.getElementById('clear-btn').style.display='block';
+    document.getElementById('hist-btn').style.display='block';
+    document.getElementById('nb-btn').style.display='block';
+    requestNotifPermission();
+    startKeepAlive();
+    document.getElementById('status-row').style.display='flex';
+    document.getElementById('nb-indicator').style.display='flex';
+    document.getElementById('debug-btn').style.display='block';
+    info(`✅ Conectado em ${url}`);
+    info('💡 Use a paleta à esquerda ou digite comandos abaixo. Copie os resultados e cole no chat do Claude para interpretar.');
+    sep();
+    document.getElementById('cmd-input').focus();
+    // Verificar nova versão disponível (não bloqueia a UI)
+    _checkVersionUpdate();
+
+  }catch(e){
+    showErr(`Não foi possível conectar. Verifique se a célula do servidor está rodando.\n${e.message}`);
+    document.getElementById('url-input').classList.add('err');
+  }
+  btn.disabled=false;btn.textContent='Conectar';
+}
+
+// Verifica se existe versão mais recente no GitHub e exibe alerta não-bloqueante
+async function _checkVersionUpdate(){
+  try{
+    const r=await fetch(GITHUB_RELEASES_URL,{headers:{'Accept':'application/vnd.github+json'}});
+    if(!r.ok)return;
+    const d=await r.json();
+    const latest=(d.tag_name||'').replace(/^v/,'').trim();
+    if(!latest)return;
+    // Comparar versões numericamente (ex: 2.15 vs 2.14)
+    const toNum=v=>v.split('.').map(Number).reduce((a,b,i)=>a+b*Math.pow(1000,2-i),0);
+    if(toNum(latest)>toNum(STUDIO_VERSION)){
+      const url=d.html_url||'https://github.com/brunoflma/notebooklm-studio/releases/latest';
+      // Exibir alerta azul não-bloqueante no terminal
+      const out=document.getElementById('output');
+      const box=document.createElement('div');
+      box.style.cssText='margin:4px 0;padding:10px 14px;background:#0f1e35;border:1px solid #1e4a7a;border-radius:8px;font-size:13px;color:#93c5fd;line-height:1.6;cursor:pointer';
+      box.innerHTML=`🔔 <strong style="color:#bfdbfe">Nova versão disponível: v${latest}</strong> — você está usando v${STUDIO_VERSION}. <a href="${url}" target="_blank" rel="noopener" style="color:#60a5fa;text-decoration:underline">Ver o que mudou →</a>`;
+      out.appendChild(box);
+      sep();
+    }
+  }catch(e){/* silencioso — falha de rede não deve afetar o Studio */}
+}
+
+// _checkCredsOnConnect mantido como fallback para reconexões via keepalive
+async function _checkCredsOnConnect(){
+  try{
+    const r=await fetch(`${URL_BASE}/execute`,{method:'POST',headers:H,body:JSON.stringify({command:'list --json'})});
+    const d=await r.json();
+    checkForCredExpiry(d.stdout||'',d.stderr||'');
+  }catch(e){}
+}
+
+function showErr(msg){const e=document.getElementById('setup-err');e.textContent='⚠ '+msg;e.style.display='block';}
+
+function disconnect(){
+  URL_BASE='';
+  document.getElementById('setup').style.display='flex';
+  document.getElementById('main').style.display='none';
+  document.getElementById('output').innerHTML='';
+  document.getElementById('disconnect-btn').style.display='none';
+  document.getElementById('copy-all-btn').style.display='none';
+  document.getElementById('ctx-btn').style.display='none';
+  document.getElementById('clear-btn').style.display='none';
+  document.getElementById('hist-btn').style.display='none';
+  document.getElementById('nb-btn').style.display='none';
+  document.getElementById('nb-switcher').style.display='none';
+  document.getElementById('hist-panel').classList.remove('show');
+  stopKeepAlive();
+  document.getElementById('status-row').style.display='none';
+  document.getElementById('nb-indicator').style.display='none';
+  document.getElementById('debug-btn').style.display='none';
+  document.getElementById('debug-panel').classList.remove('show');
+  document.getElementById('nb-indicator-name').textContent='—';
+  document.getElementById('url-input').value='';
+}
+
+function info(t){
+  const out=document.getElementById('output');
+  const d=document.createElement('div');
+  d.className='line-info';d.textContent=t;
+  out.appendChild(d);scroll();
+}
+function sep(){
+  const out=document.getElementById('output');
+  const d=document.createElement('div');d.className='line-sep';
+  out.appendChild(d);scroll();
+}
+function scroll(){const o=document.getElementById('output');o.scrollTop=o.scrollHeight;}
+
+let spinnerEl=null;
+let _spinnerStart=0;
+let _spinnerTimer=null;
+
+function showSpinner(cmd){
+  removeSpinner();
+  _spinnerStart=Date.now();
+  const out=document.getElementById('output');
+  const d=document.createElement('div');d.className='spinner-row';d.id='spinner';
+  d.innerHTML=`
+    <div class="spinner"></div>
+    <div style="flex:1;min-width:0">
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="color:#5bc4bb;font-size:12px">Executando</span>
+        <span class="spinner-cmd">notebooklm ${cmd}</span>
+        <span class="spinner-time" id="spin-timer">0s</span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar"></div></div>
+    </div>`;
+  out.appendChild(d);spinnerEl=d;scroll();
+  _spinnerTimer=setInterval(()=>{
+    const el=document.getElementById('spin-timer');
+    if(el){const s=((Date.now()-_spinnerStart)/1000).toFixed(0);el.textContent=s+'s';}
+  },1000);
+}
+
+function updateSpinner(t){const el=document.getElementById('spin-txt');if(el)el.textContent=t;}
+
+function removeSpinner(){
+  if(_spinnerTimer){clearInterval(_spinnerTimer);_spinnerTimer=null;}
+  const el=document.getElementById('spinner');if(el)el.remove();spinnerEl=null;
+}
+
+function copyBlock(content,btn){
+  navigator.clipboard.writeText(content).then(()=>{
+    btn.textContent='✓ copiado!';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='📋 copiar';btn.classList.remove('copied');},1500);
+  });
+}
+
+function renderNotebookList(notebooks, block){
+  const grid=document.createElement('div');
+  grid.style.cssText='display:flex;flex-direction:column;gap:4px;margin-top:4px';
+  notebooks.forEach(nb=>{
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;justify-content:space-between;background:#22222e;border:1px solid #2e2e3d;border-radius:6px;padding:7px 10px;gap:8px';
+    const info=document.createElement('div');
+    info.style.cssText='display:flex;flex-direction:column;gap:2px;min-width:0';
+    const title=document.createElement('span');
+    title.style.cssText='font-size:12px;color:#d4d4d4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+    title.textContent=nb.title;
+    const meta=document.createElement('span');
+    meta.style.cssText='font-size:10px;color:#555;font-family:monospace';
+    const date=new Date(nb.created_at).toLocaleDateString('pt-BR');
+    meta.textContent=`${nb.id.substring(0,8)}... · ${date}${nb.is_owner?'':' · compartilhado'}`;
+    info.appendChild(title);info.appendChild(meta);
+    const btn=document.createElement('button');
+    btn.textContent='Usar';
+    btn.style.cssText='flex-shrink:0;padding:4px 10px;background:#2a9d8f;color:#fff;border:none;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap';
+    btn.onmouseenter=()=>btn.style.background='#21897e';
+    btn.onmouseleave=()=>btn.style.background='#2a9d8f';
+    btn.onclick=()=>{run('use '+nb.id.substring(0,8));};
+    row.appendChild(info);row.appendChild(btn);
+    grid.appendChild(row);
+  });
+  block.appendChild(grid);
+}
+
+function renderArtifactList(artifacts, block){
+  const grid=document.createElement('div');
+  grid.style.cssText='display:flex;flex-direction:column;gap:4px;margin-top:4px';
+  artifacts.forEach(a=>{
+    const row=document.createElement('div');
+    const statusColor=a.status==='completed'?'#4ade80':a.status==='in_progress'?'#fbbf24':'#888';
+    row.style.cssText='display:flex;align-items:center;justify-content:space-between;background:#22222e;border:1px solid #2e2e3d;border-radius:6px;padding:7px 10px;gap:8px';
+    const info=document.createElement('div');
+    info.style.cssText='display:flex;flex-direction:column;gap:2px;min-width:0';
+    const title=document.createElement('span');
+    title.style.cssText='font-size:12px;color:#d4d4d4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+    title.textContent=a.title||a.type||'Artefato';
+    const meta=document.createElement('span');
+    meta.style.cssText='font-size:10px;font-family:monospace';
+    meta.style.color=statusColor;
+    meta.textContent=`${a.id.substring(0,8)}... · ${a.status}`;
+    info.appendChild(title);info.appendChild(meta);
+    const actions=document.createElement('div');
+    actions.style.cssText='display:flex;gap:4px;flex-shrink:0';
+    if(a.status!=='completed'){
+      const waitBtn=document.createElement('button');
+      waitBtn.textContent='Aguardar';
+      waitBtn.style.cssText='padding:4px 8px;background:#2a2a38;color:#aaa;border:1px solid #363648;border-radius:5px;font-size:11px;cursor:pointer';
+      waitBtn.onclick=()=>run('artifact wait '+a.id.substring(0,8));
+      actions.appendChild(waitBtn);
+    } else {
+      const dlBtn=document.createElement('button');
+      dlBtn.textContent='↓ Baixar';
+      dlBtn.style.cssText='padding:4px 8px;background:#2a9d8f;color:#fff;border:none;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer';
+      dlBtn.onclick=()=>{
+        const type=(a.type||'').toLowerCase();
+        if(type.includes('audio'))run('download audio ./podcast.mp3');
+        else if(type.includes('video'))run('download video ./video.mp4');
+        else run('download report ./relatorio.md');
+      };
+      actions.appendChild(dlBtn);
+    }
+    row.appendChild(info);row.appendChild(actions);
+    grid.appendChild(row);
+  });
+  block.appendChild(grid);
+}
+
+function tryRenderSmart(cmd, stdout, block){
+  if(!stdout)return false;
+  try{
+    const data=JSON.parse(stdout);
+    if(data.notebooks&&Array.isArray(data.notebooks)){
+      renderNotebookList(data.notebooks,block);return true;
+    }
+    if(data.artifacts&&Array.isArray(data.artifacts)){
+      renderArtifactList(data.artifacts,block);return true;
+    }
+  }catch(e){}
+  return false;
+}
+
+function addBlock(cmd,stdout,stderr,code){
+  removeSpinner();
+  const out=document.getElementById('output');
+  const block=document.createElement('div');
+  block.className='block';
+
+  const header=document.createElement('div');
+  header.className='block-header';
+  const cmdEl=document.createElement('span');
+  cmdEl.className='block-cmd';cmdEl.textContent='$ notebooklm '+cmd;
+  const copyBtn=document.createElement('button');
+  copyBtn.className='block-copy';copyBtn.textContent='📋 copiar';
+  const content=stdout||stderr||'(sem output)';
+  copyBtn.onclick=()=>copyBlock(content,copyBtn);
+  header.appendChild(cmdEl);header.appendChild(copyBtn);
+  block.appendChild(header);
+
+  const rendered=tryRenderSmart(cmd,stdout,block);
+  if(!rendered){
+    if(stdout){const d=document.createElement('div');d.className='block-out';d.textContent=stdout.trimEnd();block.appendChild(d);}
+    if(stderr){const d=document.createElement('div');d.className='block-err';d.textContent=stderr.trimEnd();block.appendChild(d);}
+    if(!stdout&&!stderr){const d=document.createElement('div');d.className='block-out';d.style.color='#555';d.textContent='(comando executado sem output)';block.appendChild(d);}
+  }
+  // Update active notebook indicator
+  if(stdout){
+    // Detect 'use <id>' command — matched notebook title
+    const matchedLine = stdout.match(/Matched:[^\n]*\(([^)]+)\)/);
+    if(matchedLine){
+      const el=document.getElementById('nb-indicator-name');
+      if(el) el.textContent=matchedLine[1].trim().substring(0,28)+(matchedLine[1].trim().length>28?'…':'');
+    }
+    // Detect status output — "Title | Notebook Title"
+    const titleLine = stdout.match(/Title\s*│\s*([^│\n]+)/);
+    if(titleLine){
+      const el=document.getElementById('nb-indicator-name');
+      if(el) el.textContent=titleLine[1].trim().substring(0,28)+(titleLine[1].trim().length>28?'…':'');
+    }
+  }
+  // Check for credential expiry in every response
+  if(checkForCredExpiry(stdout||'', stderr||'')) {
+    const warn=document.createElement('div');
+    warn.style.cssText='margin:4px 0;padding:10px 14px;background:#1e1414;border:1px solid #8b2020;border-radius:8px;font-size:12px;color:#f87171;cursor:pointer;line-height:1.6';
+    warn.innerHTML='⚠ <strong>Credenciais expiradas</strong> — clique aqui para ver como renovar';
+    warn.onclick=showCredWarning;
+    out.appendChild(warn);
+  }
+  out.appendChild(block);scroll();
+}
+
+// ── COMMAND QUEUE (v2.2) ────────────────────────────────────────
+let _cmdQueue=[];
+let _cmdRunning=false;
+
+async function execCmd(cmd){
+  const r=await fetch(`${URL_BASE}/execute`,{method:'POST',headers:H,body:JSON.stringify({command:cmd})});
+  return await r.json();
+}
+
+function run(cmd){
+  if(!cmd.trim()||!URL_BASE)return;
+  // Save to history
+  hist.unshift(cmd);histIdx=-1;
+  if(hist.length>100) hist=hist.slice(0,100);
+  try{localStorage.setItem('nlm_hist',JSON.stringify(hist));}catch(e){}
+  // Push to queue
+  _cmdQueue.push(cmd);
+  _updateQueueBadge();
+  _processQueue();
+}
+
+function _updateQueueBadge(){
+  const badge=document.getElementById('queue-badge');
+  const count=document.getElementById('queue-count');
+  const pending=_cmdQueue.length + (_cmdRunning?1:0);
+  if(badge) badge.className=pending>0?'active':'';
+  if(count) count.textContent=pending;
+}
+
+async function _processQueue(){
+  if(_cmdRunning||_cmdQueue.length===0)return;
+  _cmdRunning=true;
+  const cmd=_cmdQueue.shift();
+  _updateQueueBadge();
+  document.getElementById('run-btn').disabled=true;
+  showSpinner(cmd);
+  try{
+    const d=await execCmd(cmd);
+    addBlock(cmd,d.stdout,d.stderr,d.returncode);
+
+    // Auto wait + download after generate commands
+    if(d.returncode===0 && cmd.startsWith('generate ')){
+      const m=d.stdout.match(/Started:\s*([0-9a-f-]{36})/i);
+      if(m){
+        const artifactId=m[1].substring(0,8);
+        const isAudio=cmd.includes('audio');
+        const isVideo=cmd.includes('video');
+
+        info('⏳ Aguardando geração automática...');
+        showSpinner('artifact wait '+artifactId);
+        const waitResult=await execCmd('artifact wait '+artifactId);
+        addBlock('artifact wait '+artifactId, waitResult.stdout, waitResult.stderr, waitResult.returncode);
+
+        if(waitResult.returncode===0){
+          // Notify user
+          const genType=isAudio?'Podcast':'Relatório';
+          sendNotif(genType+' pronto!', 'Download iniciando...');
+          // Auto-download
+          let dlCmd, dlFile, dlMime;
+          if(isAudio){
+            dlCmd='download audio ./output.mp3'; dlFile='output.mp3'; dlMime='audio/mpeg';
+          } else if(isVideo){
+            dlCmd='download video ./output.mp4'; dlFile='output.mp4'; dlMime='video/mp4';
+          } else {
+            dlCmd='download report ./relatorio.md'; dlFile='relatorio.md'; dlMime='text/markdown';
+          }
+
+          info('⬇️ Baixando arquivo...');
+          showSpinner(dlCmd);
+          const dlResult=await execCmd(dlCmd);
+          addBlock(dlCmd, dlResult.stdout, dlResult.stderr, dlResult.returncode);
+
+          if(dlResult.returncode===0){
+            // Trigger browser download via server
+            await triggerDownload(dlFile, dlMime);
+          }
+        }
+      }
+    }
+
+    // Auto-download after explicit download commands
+    if(d.returncode===0 && cmd.startsWith('download ')){
+      const parts=cmd.split(' ');
+      const filePath=parts[parts.length-1];
+      const fileName=filePath.replace(/^\.?\//,'');
+      const isAudio=cmd.includes('audio');
+      const isVideo=cmd.includes('video');
+      const mime=isAudio?'audio/mpeg':isVideo?'video/mp4':'text/markdown';
+      await triggerDownload(fileName, mime);
+    }
+
+  }catch(e){
+    removeSpinner();
+    const out=document.getElementById('output');
+    const block=document.createElement('div');block.className='block';
+    const header=document.createElement('div');header.className='block-header';
+    const cmdEl=document.createElement('span');cmdEl.className='block-cmd';cmdEl.textContent='$ notebooklm '+cmd;
+    header.appendChild(cmdEl);block.appendChild(header);
+    const d2=document.createElement('div');d2.className='block-err';d2.textContent='Erro de conexão: '+e.message;
+    block.appendChild(d2);out.appendChild(block);scroll();
+  }
+  _cmdRunning=false;
+  _updateQueueBadge();
+  // Process next in queue
+  if(_cmdQueue.length>0){
+    setTimeout(_processQueue, 400);
+  } else {
+    document.getElementById('run-btn').disabled=false;
+    document.getElementById('cmd-input').focus();
+  }
+}
+
+function triggerDownload(fileName, mimeType){
+  // Strip path prefix, keep only the base filename
+  const baseName = fileName.split('/').pop().split('\\').pop() || fileName;
+  info('📥 Abrindo download de "'+baseName+'"...');
+
+  // Open the download URL directly in a new tab — avoids CORS preflight entirely
+  // The server GET /download/<filename> serves the file as attachment
+  const downloadUrl = `${URL_BASE}/download/${encodeURIComponent(baseName)}`;
+  const a = document.createElement('a');
+  a.href = downloadUrl;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  // Show confirmation with fallback instructions
+  const box = document.createElement('div');
+  box.style.cssText = 'margin:6px 0;padding:12px 14px;background:#182a1e;border:1px solid #2a5c34;border-radius:8px;font-size:12px;line-height:1.8;color:#a3d9a8';
+  box.innerHTML =
+    '✅ <strong style="color:#c3e8c8">Download iniciado</strong> — o arquivo <strong>'+baseName+'</strong> deve abrir em uma nova aba.<br>'+
+    '<span style="color:#7fbf85">Se nada aconteceu:</span> verifique se o navegador bloqueou o popup, ou baixe manualmente pelo painel de arquivos do Colab '+
+    '(ícone 📁 na barra lateral → botão direito → <em>Fazer download</em>).<br>'+
+    '<span style="color:#555">URL direta: <a href="'+downloadUrl+'" target="_blank" style="color:#5bc4bb">'+downloadUrl+'</a></span>';
+  document.getElementById('output').appendChild(box);
+  scroll();
+}
+
+function runFromInput(){
+  const input=document.getElementById('cmd-input');
+  const cmd=input.value.trim();
+  if(!cmd)return;
+  input.value='';
+  run(cmd);
+}
+
+let _modalPrefix='';
+let _modalQuote=false;
+let _modalOptional=false;
+
+function promptRun(prefix, label, opts){
+  opts = opts || {};
+  _modalPrefix = prefix;
+  _modalQuote = opts.quote !== false; // default true
+  _modalOptional = opts.optional || false;
+
+  const modal = document.getElementById('input-modal');
+  const lbl = document.getElementById('input-modal-label');
+  const hint = document.getElementById('input-modal-hint');
+  const textarea = document.getElementById('input-modal-text');
+  const single = document.getElementById('input-modal-single');
+
+  lbl.textContent = label;
+
+  // Show hint with example command
+  if(opts.hint){
+    hint.textContent = 'Ex: ' + prefix + (opts.hint||'');
+    hint.style.display = 'block';
+  } else {
+    hint.style.display = 'none';
+  }
+
+  // Use textarea for ask (long text), input for short values
+  if(opts.multiline){
+    textarea.style.display = 'block';
+    single.style.display = 'none';
+    textarea.value = '';
+    textarea.placeholder = opts.placeholder || 'Digite aqui...';
+    setTimeout(() => textarea.focus(), 80);
+    textarea.onkeydown = e => {
+      if(e.key==='Enter' && e.ctrlKey){ e.preventDefault(); confirmModal(); }
+    };
+  } else {
+    textarea.style.display = 'none';
+    single.style.display = 'block';
+    single.value = '';
+    single.placeholder = opts.placeholder || 'Digite aqui...';
+    setTimeout(() => single.focus(), 80);
+    single.onkeydown = e => { if(e.key==='Enter'){ e.preventDefault(); confirmModal(); } };
+  }
+
+  modal.classList.add('show');
+}
+
+function closeModal(){
+  document.getElementById('input-modal').classList.remove('show');
+}
+
+function confirmModal(){
+  const textarea = document.getElementById('input-modal-text');
+  const single = document.getElementById('input-modal-single');
+  const val = (textarea.style.display !== 'none' ? textarea.value : single.value).trim();
+
+  if(!val && !_modalOptional){ 
+    const el = textarea.style.display !== 'none' ? textarea : single;
+    el.style.border = '1px solid #ef4444';
+    setTimeout(() => el.style.border = '1px solid #333', 1000);
+    return;
+  }
+
+  closeModal();
+  let cmd;
+  if(!val){
+    cmd = _modalPrefix.trim();
+  } else if(_modalQuote){
+    // wrap in quotes, escape any internal quotes
+    const escaped = val.replace(/"/g, '\"');
+    cmd = _modalPrefix + '"' + escaped + '"';
+  } else {
+    cmd = _modalPrefix + val;
+  }
+  run(cmd);
+}
+
+function handleKey(e){
+  if(e.key==='Enter'){runFromInput();return;}
+  const input=document.getElementById('cmd-input');
+  if(e.key==='ArrowUp'){e.preventDefault();if(histIdx<hist.length-1){histIdx++;input.value=hist[histIdx];}}
+  if(e.key==='ArrowDown'){e.preventDefault();if(histIdx>0){histIdx--;input.value=hist[histIdx];}else{histIdx=-1;input.value='';}}
+}
+
+function copyAll(){
+  const blocks=document.querySelectorAll('.block-out,.block-err');
+  const cmds=document.querySelectorAll('.block-cmd');
+  let text='';
+  document.querySelectorAll('.block').forEach(b=>{
+    const cmd=b.querySelector('.block-cmd');
+    const out=b.querySelector('.block-out,.block-err');
+    if(cmd)text+=cmd.textContent+'\n';
+    if(out)text+=out.textContent+'\n\n';
+  });
+  navigator.clipboard.writeText(text.trim()).then(()=>{
+    const btn=document.getElementById('copy-all-btn');
+    btn.textContent='✓ copiado!';
+    setTimeout(()=>btn.textContent='📋 copiar tudo',1500);
+  });
+}
+
+function clearOutput(){
+  document.getElementById('output').innerHTML='';
+  info('🗑 Tela limpa.');
+  sep();
+}
+
+// ── PALETTE SEARCH ──────────────────────────────────
+function filterPalette(q){
+  const term=q.toLowerCase().trim();
+  document.querySelectorAll('.pal-btn').forEach(btn=>{
+    const text=(btn.textContent||'').toLowerCase();
+    btn.classList.toggle('hidden', term!==''&&!text.includes(term));
+  });
+  document.querySelectorAll('.pal-section').forEach(sec=>{
+    const visible=[...sec.querySelectorAll('.pal-btn')].some(b=>!b.classList.contains('hidden'));
+    sec.style.display=visible?'':'none';
+  });
+}
+
+// ── HISTORY PANEL ───────────────────────────────────
+function toggleHistory(){
+  const panel=document.getElementById('hist-panel');
+  const isShowing=panel.classList.contains('show');
+  if(!isShowing) renderHistory();
+  panel.classList.toggle('show');
+}
+
+function renderHistory(){
+  const list=document.getElementById('hist-list');
+  list.innerHTML='';
+  if(!hist.length){
+    const empty=document.createElement('div');
+    empty.style.cssText='padding:16px;text-align:center;color:#444;font-size:12px';
+    empty.textContent='Nenhum comando executado ainda.';
+    list.appendChild(empty);
+    return;
+  }
+  hist.forEach((cmd,i)=>{
+    const item=document.createElement('div');
+    item.className='hist-item';
+    item.title=cmd;
+    item.textContent=cmd;
+    item.onclick=()=>{
+      document.getElementById('cmd-input').value=cmd;
+      document.getElementById('hist-panel').classList.remove('show');
+      document.getElementById('cmd-input').focus();
+    };
+    list.appendChild(item);
+  });
+}
+
+function clearHistory(){
+  if(!confirm('Limpar todo o histórico de comandos?')) return;
+  hist=[];
+  try{localStorage.removeItem('nlm_hist');}catch(e){}
+  renderHistory();
+}
+
+// ── HISTORY EXPORT / IMPORT / DRIVE SYNC (v2.3) ──────────────────
+function exportHistory(){
+  const data=JSON.stringify({version:'2.4',exported:new Date().toISOString(),commands:hist},null,2);
+  const blob=new Blob([data],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='nlm_history_'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  info('📥 Histórico exportado com '+hist.length+' comandos.');
+}
+
+function importHistory(){
+  document.getElementById('hist-import-input').click();
+}
+
+function handleHistImport(event){
+  const file=event.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      const cmds=Array.isArray(data)?data:(data.commands||[]);
+      if(!cmds.length){alert('Arquivo vazio ou inválido.');return;}
+      // Merge: union of current + imported, deduplicated, keep last 200
+      const merged=[...new Set([...hist,...cmds])].slice(0,200);
+      hist=merged;
+      try{localStorage.setItem('nlm_hist',JSON.stringify(hist));}catch(ex){}
+      renderHistory();
+      info('📤 Histórico importado: '+cmds.length+' comandos mesclados (total: '+hist.length+').');
+    }catch(ex){alert('Erro ao ler arquivo: '+ex.message);}
+  };
+  reader.readAsText(file);
+  event.target.value='';
+}
+
+async function syncHistoryDrive(){
+  if(!URL_BASE){alert('Conecte ao Colab primeiro.');return;}
+  // Export current history to Colab, save as JSON via /execute
+  const data=JSON.stringify({version:'2.4',synced:new Date().toISOString(),commands:hist});
+  const escapedData=data.replace(/'/g,"\'");
+  const saveCmd=""; // placeholder (Drive sync via /save-history route)
+  // Use a direct approach: POST to a /save-history endpoint if available,
+  // otherwise show instructions for manual Drive backup
+  try{
+    const r=await fetch(`${URL_BASE}/save-history`,{method:'POST',headers:H,body:JSON.stringify({history:hist})});
+    if(r.ok){
+      info('☁ Histórico sincronizado com o Colab! Salvo em /content/nlm_history.json');
+      sendNotif('Histórico sincronizado','Salvo em /content/nlm_history.json no Colab.');
+    } else {
+      showDriveSyncInstructions();
+    }
+  }catch(e){
+    showDriveSyncInstructions();
+  }
+}
+
+function showDriveSyncInstructions(){
+  // Fallback: export JSON and show instructions
+  exportHistory();
+  const box=document.createElement('div');
+  box.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:400;display:flex;align-items:center;justify-content:center';
+  box.innerHTML=`
+    <div style="background:#1a1e2d;border:1px solid #2e2e3d;border-radius:14px;padding:28px;max-width:480px;width:90%;font-size:13px;line-height:1.8;color:#cdd0d8">
+      <div style="font-size:15px;font-weight:600;color:#7fd3cc;margin-bottom:14px">☁ Sincronizar histórico com Drive</div>
+      <div style="color:#aaa;margin-bottom:14px">O arquivo JSON foi baixado. Para sincronizar com o Google Drive:</div>
+      <ol style="padding-left:18px;color:#d4d4d4;line-height:2.2;font-size:12px">
+        <li>Faça upload do arquivo <code style="background:#252535;padding:1px 6px;border-radius:3px">nlm_history_*.json</code> no Colab</li>
+        <li>Execute no Colab:<br>
+          <code style="background:#252535;padding:3px 8px;border-radius:4px;display:block;margin:4px 0">from google.colab import drive<br>drive.mount('/gdrive')<br>import shutil<br>shutil.copy('nlm_history_*.json','/gdrive/MyDrive/')</code></li>
+        <li>Para restaurar em outro dispositivo: baixe o JSON do Drive e use <strong>⬆ Importar</strong></li>
+      </ol>
+      <button onclick="this.parentElement.parentElement.remove()" style="margin-top:16px;width:100%;padding:9px;background:#1e2e2d;border:1px solid #2a9d8f;border-radius:8px;color:#7fd3cc;font-size:13px;cursor:pointer">Fechar</button>
+    </div>`;
+  document.body.appendChild(box);
+}
+
+// ── NOTEBOOK SWITCHER ───────────────────────────────
+let _notebooks=[];
+
+function toggleNbSwitcher(){
+  const sw=document.getElementById('nb-switcher');
+  const isVisible=sw.style.display==='block';
+  if(isVisible){sw.style.display='none';return;}
+  // Position dropdown below the nb-btn button
+  const btn=document.getElementById('nb-btn');
+  if(btn){
+    const rect=btn.getBoundingClientRect();
+    sw.style.top=(rect.bottom+6)+'px';
+    sw.style.right=(window.innerWidth-rect.right)+'px';
+  }
+  sw.style.display='block';
+  if(!_notebooks.length) loadNbList();
+}
+
+async function loadNbList(){
+  const container=document.getElementById('nb-list-items');
+  container.innerHTML='<div style="padding:10px 12px;font-size:11px;color:#555">Carregando...</div>';
+  try{
+    const r=await fetch(`${URL_BASE}/execute`,{method:'POST',headers:H,body:JSON.stringify({command:'list --json'})});
+    const d=await r.json();
+    const data=JSON.parse(d.stdout||'{}');
+    _notebooks=data.notebooks||[];
+    container.innerHTML='';
+    if(!_notebooks.length){
+      container.innerHTML='<div style="padding:10px 12px;font-size:11px;color:#555">Nenhum notebook encontrado.</div>';
+      return;
+    }
+    _notebooks.forEach(nb=>{
+      const btn=document.createElement('button');
+      btn.className='nb-switch-item';
+      btn.innerHTML=`<span class="nb-title">${nb.title}</span><span class="nb-id">${nb.id.substring(0,8)}...</span>`;
+      btn.onclick=async()=>{
+        document.getElementById('nb-switcher').style.display='none';
+        await run('use '+nb.id.substring(0,8));
+        _notebooks=[];
+      };
+      container.appendChild(btn);
+    });
+  }catch(e){
+    container.innerHTML='<div style="padding:10px 12px;font-size:11px;color:#f87171">Erro ao carregar: '+e.message+'</div>';
+  }
+}
+
+// ── BROWSER NOTIFICATIONS ───────────────────────────
+function requestNotifPermission(){
+  if('Notification' in window && Notification.permission==='default'){
+    Notification.requestPermission();
+  }
+}
+
+function sendNotif(title, body){
+  // In-app badge
+  const badge=document.getElementById('notif-badge');
+  badge.textContent='✅ '+title+(body?' — '+body:'');
+  badge.style.display='block';
+  setTimeout(()=>badge.style.display='none', 5000);
+  // Browser notification
+  if('Notification' in window && Notification.permission==='granted'){
+    try{new Notification('NotebookLM Studio', {body: title+(body?' — '+body:''), icon:'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><text y=%221em%22 font-size=%2224%22>📓</text></svg>'});}catch(e){}
+  }
+}
+
+// ── KEEP-ALIVE ──────────────────────────────────────────────────
+let _kaTimer=null;
+let _kaFails=0;
+
+function startKeepAlive(){
+  stopKeepAlive();
+  updateKaStatus(true, 'Conectado');
+  _kaTimer=setInterval(async()=>{
+    try{
+      const r=await fetch(`${URL_BASE}/health`,{headers:H});
+      const d=await r.json();
+      if(d.status==='ok'){
+        _kaFails=0;
+        updateKaStatus(true,'Conectado — '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}));
+      } else { handleKaFail(); }
+    }catch(e){ handleKaFail(); }
+  }, 25*60*1000); // ping a cada 25 min
+}
+
+function stopKeepAlive(){
+  if(_kaTimer){clearInterval(_kaTimer);_kaTimer=null;}
+  updateKaStatus(false,'');
+}
+
+function handleKaFail(){
+  _kaFails++;
+  if(_kaFails>=2){
+    updateKaStatus(false,'⚠ Colab pode ter desconectado — reconecte com a nova URL');
+    sendNotif('Colab desconectado?','Clique em desconectar e reconecte com a nova URL.');
+  }
+}
+
+function updateKaStatus(alive, txt){
+  const dot=document.getElementById('keepalive-dot');
+  const label=document.getElementById('keepalive-txt');
+  if(dot) dot.className=alive?'alive':'';
+  if(label) label.textContent=txt;
+}
+
+// ── CREDENTIAL EXPIRY DETECTION ─────────────────────────────────
+let _credExpired = false;
+
+function checkForCredExpiry(stdout, stderr){
+  const combined=(stdout+stderr).toLowerCase();
+  const expired=combined.includes('authentication expired') ||
+                combined.includes('redirected to') && combined.includes('accounts.google.com') ||
+                combined.includes('invalid session') ||
+                combined.includes('403') && combined.includes('forbidden');
+  const warn=document.getElementById('cred-warn');
+  if(expired){
+    _credExpired = true;
+    if(warn) warn.style.display='block';
+    // Desabilitar botão de contexto enquanto credenciais estiverem expiradas
+    const ctxBtn = document.getElementById('ctx-btn');
+    if(ctxBtn){
+      ctxBtn.disabled = true;
+      ctxBtn.title = 'Credenciais expiradas — renove antes de copiar contexto';
+      ctxBtn.style.opacity = '0.4';
+      ctxBtn.style.cursor = 'not-allowed';
+    }
+  }
+  return expired;
+}
+
+function showCredWarning(){
+  const box=document.createElement('div');
+  box.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:400;display:flex;align-items:center;justify-content:center';
+  box.innerHTML=`
+    <div style="background:#1e1414;border:1px solid #8b2020;border-radius:14px;padding:28px;max-width:480px;width:90%;font-size:13px;line-height:1.8;color:#f0c0c0">
+      <div style="font-size:15px;font-weight:600;color:#f87171;margin-bottom:16px">⚠ Credenciais do NotebookLM expiradas</div>
+      <div style="color:#e0a0a0;margin-bottom:16px">As credenciais do Google expiraram. Para renovar:</div>
+      <ol style="padding-left:18px;color:#d4d4d4;line-height:2.2">
+        <li>No seu <strong>computador local</strong>, execute:<br>
+          <code style="background:#2a1a1a;padding:3px 8px;border-radius:4px;font-size:12px">notebooklm login</code></li>
+        <li>Faça login na janela do Chrome que abrir</li>
+        <li>Localize o arquivo renovado:<br>
+          <code style="background:#2a1a1a;padding:3px 8px;border-radius:4px;font-size:12px">~/.notebooklm/storage_state.json</code></li>
+        <li>Execute a célula de setup no Colab e faça upload do novo arquivo</li>
+        <li>Reinicie a célula do servidor</li>
+      </ol>
+      <button onclick="this.parentElement.parentElement.remove()" style="margin-top:18px;width:100%;padding:9px;background:#3a1a1a;border:1px solid #8b2020;border-radius:8px;color:#f87171;font-size:13px;cursor:pointer">Fechar</button>
+    </div>`;
+  document.body.appendChild(box);
+}
+
+function showHelp(){document.getElementById('help-overlay').classList.add('show');}
+function closeHelp(){document.getElementById('help-overlay').classList.remove('show');}
+
+async function showContext(){
+  // Bloquear se credenciais expiradas
+  if(_credExpired){
+    showCredWarning();
+    return;
+  }
+
+  const modal = document.getElementById('ctx-modal');
+  const loading = document.getElementById('ctx-loading');
+  const textarea = document.getElementById('ctx-text');
+  const footer = document.getElementById('ctx-footer');
+  const subtitle = document.getElementById('ctx-subtitle');
+  const loadingTxt = document.getElementById('ctx-loading-txt');
+  const copyBtn = document.getElementById('ctx-copy-btn');
+
+  // Reset state
+  textarea.style.display = 'none';
+  footer.style.display = 'none';
+  loading.style.display = 'flex';
+  copyBtn.textContent = '📋 Copiar tudo';
+  copyBtn.classList.remove('copied');
+  modal.classList.add('show');
+
+  const exec = async (cmd) => {
+    loadingTxt.textContent = 'Executando: notebooklm ' + cmd + '...';
+    try {
+      const r = await fetch(`${URL_BASE}/execute`, {
+        method:'POST', headers:H, body:JSON.stringify({command:cmd})
+      });
+      const d = await r.json();
+      return {stdout: d.stdout||'', stderr: d.stderr||'', code: d.returncode};
+    } catch(e) {
+      return {stdout:'', stderr: e.message, code:1};
+    }
+  };
+
+  // Collect fresh data from server
+  loadingTxt.textContent = 'Coletando dados do notebook...';
+  const status = await exec('status');
+  const sources = await exec('source list --json');
+
+  // Verificar credenciais nos resultados internos — mesmo que _credExpired ainda não tenha sido setado
+  const anyExpired = checkForCredExpiry(status.stdout, status.stderr)
+                  || checkForCredExpiry(sources.stdout, sources.stderr);
+  if(anyExpired){
+    loading.style.display = 'none';
+    modal.classList.remove('show');
+    showCredWarning();
+    return;
+  }
+
+  // ── Helpers de limpeza ──────────────────────────────────────────
+  // Remove linhas de tabela ASCII do CLI (┏ ┃ ┡ └ ━ etc.) e linhas em branco excessivas
+  function stripCliTables(text){
+    if(!text) return '';
+    return text
+      .split('\n')
+      .filter(l => !/^[\s]*[┏┗┡┘└├┤┬┴┼─━┃│╔╗╚╝╠╣╦╩╬═║]/.test(l))
+      .join('\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  }
+
+  // Extrai apenas as linhas de conteúdo de uma tabela ASCII (sem bordas)
+  // Ex: "│ Title  │ Litigância │" → "Litigância"
+  function extractTableValues(text){
+    if(!text) return {};
+    const result = {};
+    text.split('\n').forEach(line => {
+      const cells = line.split('│').map(s => s.trim()).filter(Boolean);
+      if(cells.length === 2 && !/^[━─═]+$/.test(cells[0])){
+        result[cells[0].toLowerCase()] = cells[1];
+      }
+    });
+    return result;
+  }
+
+  // Parse notebook info — extrair campos da tabela do status
+  let notebookName = '(não identificado)';
+  let notebookId = '';
+  let notebookCreated = '';
+  try {
+    const vals = extractTableValues(status.stdout);
+    notebookName = vals['title'] || notebookName;
+    notebookId   = vals['notebook id'] ? vals['notebook id'].substring(0,8) : '';
+    notebookCreated = vals['created'] || '';
+    // fallback regex se a tabela não parsear
+    if(notebookName === '(não identificado)'){
+      const m = status.stdout.match(/Title\s*│\s*([^│\n]+)/i);
+      if(m) notebookName = m[1].trim();
+    }
+    if(!notebookId){
+      const mid = status.stdout.match(/[0-9a-f]{8}-[0-9a-f]{4}/i);
+      if(mid) notebookId = mid[0].substring(0,8);
+    }
+  } catch(e){}
+
+  // Parse sources — lista limpa de nomes
+  let sourcesList = '';
+  let sourcesCount = 0;
+  try {
+    const data = JSON.parse(sources.stdout);
+    if(data.sources && data.sources.length > 0){
+      sourcesCount = data.sources.length;
+      sourcesList = data.sources.map((s,i) => `  ${i+1}. ${s.title||s.id}`).join('\n');
+    } else {
+      sourcesList = '  (nenhuma fonte carregada)';
+    }
+  } catch(e){
+    sourcesList = sources.stdout ? stripCliTables(sources.stdout) : '  (erro ao listar fontes)';
+  }
+
+  // Parse notebooks list — não é mais incluído no contexto (irrelevante para o Claude)
+  // A troca de notebook é função do Studio, não do Claude.
+
+  // ── Capturar respostas substantivas da sessão (apenas ask) ──────
+  loadingTxt.textContent = 'Capturando respostas da sessão...';
+
+  // Comandos a ignorar: operacionais, de navegação ou de listagem
+  const SKIP_PREFIXES = ['list','use ','status','source list','artifact list','artifact wait','download ','generate '];
+  const isSkippable = cmd => SKIP_PREFIXES.some(p => cmd === p.trim() || cmd.startsWith(p));
+
+  // Limpa a saída de um bloco: remove tabelas ASCII, cabeçalhos de continuação e linhas vazias excessivas
+  function cleanOutput(raw){
+    if(!raw) return '';
+    return raw
+      .split('\n')
+      // Remove linhas de borda de tabela e linhas só com espaços
+      .filter(l => !/^[\s]*[┏┗┡┘└├┤┬┴┼─━┃│╔╗╚╝╠╣╦╩╬═║]/.test(l))
+      // Remove linhas de sistema do CLI (Continuing conversation, Resumed conversation, Started:)
+      .filter(l => !/^(Continuing conversation|Resumed conversation|Started:|Matched:)/i.test(l.trim()))
+      .join('\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  }
+
+  let sessionEntries = [];
+  const blocks = document.querySelectorAll('#output .block');
+  blocks.forEach(block => {
+    const cmdEl = block.querySelector('.block-cmd');
+    const outEl = block.querySelector('.block-out');
+    if(!cmdEl || !outEl) return;
+
+    const cmdText = cmdEl.textContent.replace(/^\$\s*notebooklm\s*/,'').trim();
+
+    // Incluir apenas comandos ask (as únicas respostas substantivas do NotebookLM)
+    if(!cmdText.startsWith('ask ')) return;
+
+    const cleaned = cleanOutput(outEl.textContent);
+    if(!cleaned) return;
+
+    // Extrair a pergunta sem as aspas externas para exibição mais limpa
+    const questionMatch = cmdText.match(/^ask\s+"([\s\S]+)"$/i) || cmdText.match(/^ask\s+'([\s\S]+)'$/i);
+    const question = questionMatch ? questionMatch[1] : cmdText.replace(/^ask\s+/,'');
+
+    sessionEntries.push(`**Pergunta:** ${question}\n\n${cleaned}`);
+  });
+
+  const sessionLog = sessionEntries.join('\n\n---\n\n');
+
+  // Build context block
+  const now = new Date().toLocaleString('pt-BR');
+  const ctx = `# Contexto do Projeto — NotebookLM + Claude
+Gerado em: ${now}
+
+## Notebook ativo
+- **Nome:** ${notebookName}
+- **ID:** ${notebookId ? notebookId+'...' : '(não disponível)'}${notebookCreated ? '\n- **Criado em:** '+notebookCreated : ''}
+- **Fontes:** ${sourcesCount > 0 ? sourcesCount+' documentos carregados' : 'nenhuma fonte'}
+
+## Fontes carregadas
+${sourcesList}
+${sessionLog ? '\n## Respostas do NotebookLM nesta sessão\n\n'+sessionLog : ''}
+
+---
+Continue a conversa com base neste contexto. Para consultar os documentos, o usuário usará o NotebookLM Studio e colará os resultados aqui.`;
+
+  loading.style.display = 'none';
+  textarea.value = ctx;
+  textarea.style.display = 'block';
+  footer.style.display = 'flex';
+  const askCount = sessionEntries.length;
+  subtitle.textContent = askCount > 0
+    ? `Pronto! Inclui ${askCount} resposta${askCount>1?'s':''} do NotebookLM desta sessão.`
+    : 'Pronto! Cole no início de uma nova conversa com o Claude.';
+}
+
+function closeContext(){
+  document.getElementById('ctx-modal').classList.remove('show');
+}
+
+function copyContext(){
+  const text = document.getElementById('ctx-text').value;
+  const btn = document.getElementById('ctx-copy-btn');
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ Copiado!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = '📋 Copiar tudo';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+
+// ── PWA SERVICE WORKER + INSTALL (v2.4) ──────────────────────────
+let _deferredInstall=null;
+
+// Defer all PWA setup to after page fully loads, wrapped in try-catch
+window.addEventListener('load', function(){
+  try{
+    // Only register SW when served over http/https (not file://)
+    if('serviceWorker' in navigator && location.protocol !== 'file:'){
+      const swCode=[
+        "const CACHE='nlm-studio-v2.5';",
+        "self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.add('/')).then(()=>self.skipWaiting())));",
+        "self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));",
+        "self.addEventListener('fetch',e=>{ if(e.request.url.includes('/execute')||e.request.url.includes('/health')||e.request.url.includes('/download')) return; });"
+      ].join('\n');
+      const blob=new Blob([swCode],{type:'application/javascript'});
+      const swUrl=URL.createObjectURL(blob);
+      navigator.serviceWorker.register(swUrl).catch(()=>{});
+    }
+  }catch(e){ /* SW not supported or file:// */ }
+
+  // Capture install prompt (works on http/https)
+  window.addEventListener('beforeinstallprompt',function(e){
+    e.preventDefault();
+    _deferredInstall=e;
+    const btn=document.getElementById('pwa-btn');
+    if(btn) btn.style.display='block';
+  });
+
+  window.addEventListener('appinstalled',function(){
+    _deferredInstall=null;
+    const btn=document.getElementById('pwa-btn');
+    if(btn) btn.style.display='none';
+    sendNotif('App instalado!','NotebookLM Studio está na sua área de trabalho.');
+  });
+});
+
+async function installPWA(){
+  if(!_deferredInstall){
+    // Fallback instructions for non-Chrome or already installed
+    const box=document.createElement('div');
+    box.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:400;display:flex;align-items:center;justify-content:center';
+    box.innerHTML=`
+      <div style="background:#1a1e2d;border:1px solid #2e2e3d;border-radius:14px;padding:28px;max-width:420px;width:90%;font-size:13px;line-height:1.8;color:#cdd0d8">
+        <div style="font-size:15px;font-weight:600;color:#7fd3cc;margin-bottom:14px">📲 Instalar como app</div>
+        <div style="color:#aaa;margin-bottom:14px">Para instalar o Studio como aplicativo:</div>
+        <div style="color:#d4d4d4;line-height:2.2;font-size:12px">
+          <strong style="color:#7fd3cc">Chrome/Edge (desktop):</strong><br>
+          Menu (⋮) → Salvar e compartilhar → Instalar página como app<br><br>
+          <strong style="color:#7fd3cc">Chrome (Android):</strong><br>
+          Menu (⋮) → Adicionar à tela inicial<br><br>
+          <strong style="color:#7fd3cc">Safari (iPhone/iPad):</strong><br>
+          Compartilhar (□↑) → Adicionar à Tela de Início
+        </div>
+        <button onclick="this.parentElement.parentElement.remove()" style="margin-top:16px;width:100%;padding:9px;background:#1e2e2d;border:1px solid #2a9d8f;border-radius:8px;color:#7fd3cc;font-size:13px;cursor:pointer">Fechar</button>
+      </div>`;
+    document.body.appendChild(box);
+    return;
+  }
+  _deferredInstall.prompt();
+  const {outcome}=await _deferredInstall.userChoice;
+  if(outcome==='accepted') _deferredInstall=null;
+}
+
+// -- PLAYBOOKS v2.16 --
+let _playbooks=JSON.parse(localStorage.getItem('nlm_playbooks')||'[]');
+function savePlaybooks(){try{localStorage.setItem('nlm_playbooks',JSON.stringify(_playbooks));}catch(e){}}
+function renderPlaybooks(){
+  const list=document.getElementById('playbook-list');if(!list)return;list.innerHTML='';
+  if(!_playbooks.length){list.innerHTML='<div style="padding:6px 14px;font-size:11px;color:#444">Nenhum playbook.</div>';return;}
+  _playbooks.forEach((pb,i)=>{
+    const row=document.createElement('div');row.style.cssText='display:flex;align-items:center;padding:0 4px 0 0;gap:2px';
+    const btn=document.createElement('button');btn.className='pal-pb';btn.style.flex='1';
+    btn.innerHTML='<span class="pb-name">'+pb.name+'</span><span class="pb-n">'+pb.cmds.length+'&#215;</span>';
+    btn.title='Clique para executar: '+pb.cmds.join(' → ');btn.onclick=()=>runPlaybook(i);
+    const editBtn=document.createElement('button');editBtn.className='pb-del';editBtn.title='Editar playbook';
+    editBtn.innerHTML='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+    editBtn.style.color='#2a9d8f';
+    editBtn.onclick=(e)=>{e.stopPropagation();openEditPlaybook(i);};
+    const del=document.createElement('button');del.className='pb-del';del.textContent='✕';del.title='Excluir playbook';
+    del.onclick=(e)=>{e.stopPropagation();if(confirm('Excluir playbook "'+pb.name+'"?')){_playbooks.splice(i,1);savePlaybooks();renderPlaybooks();}};
+    row.appendChild(btn);row.appendChild(editBtn);row.appendChild(del);list.appendChild(row);
+  });
+}
+function runPlaybook(i){
+  const pb=_playbooks[i];if(!pb)return;
+  info('Playbook "'+pb.name+'" — '+pb.cmds.length+' comandos...');sep();
+  pb.cmds.forEach(cmd=>run(cmd));
+}
+
+// ── MODAL NOVO PLAYBOOK ──────────────────────────────────────
+function openSavePlaybook(){
+  const r=hist.slice(0,15);
+  const box=document.createElement('div');box.id='pb-modal';
+  box.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:500;display:flex;align-items:center;justify-content:center';
+  box.onclick=function(e){if(e.target===box)closePbModal();};
+  const chks=r.length ? r.map((c,i)=>'<label style="display:flex;align-items:center;gap:8px;padding:4px 8px;cursor:pointer;font-size:12px;color:#888"><input type="checkbox" value="'+i+'" style="accent-color:#f59e0b"><span style="font-family:monospace">'+c.substring(0,55)+'</span></label>').join('') : '<div style="font-size:11px;color:#555;padding:4px 8px">Nenhum comando no histórico ainda.</div>';
+  box.innerHTML='<div style="background:#21212d;border:1px solid #363648;border-radius:12px;padding:22px;width:90%;max-width:500px;display:flex;flex-direction:column;gap:12px">'
+    +'<div style="font-size:14px;font-weight:600;color:#e8e8e8">Novo Playbook</div>'
+    +'<input id="pb-nm" placeholder="Nome do playbook" style="background:#15151e;border:1px solid #363648;border-radius:7px;color:#d4d4d4;font-size:14px;padding:9px 12px;outline:none;width:100%">'
+    +'<div style="font-size:11px;color:#666">Selecione do histórico <span style="color:#555">(ou adicione novos abaixo)</span>:</div>'
+    +'<div id="pb-cl" style="display:flex;flex-direction:column;gap:2px;max-height:180px;overflow-y:auto">'+chks+'</div>'
+    +'<div style="font-size:11px;color:#666">Adicionar comandos novos <span style="color:#555">(um por linha)</span>:</div>'
+    +'<textarea id="pb-new-cmds" placeholder="Ex: ask &quot;Quais os principais argumentos?&quot;" style="background:#15151e;border:1px solid #363648;border-radius:7px;color:#d4d4d4;font-size:12px;font-family:monospace;padding:8px 10px;outline:none;resize:vertical;min-height:60px;width:100%"></textarea>'
+    +'<div style="display:flex;gap:8px;justify-content:flex-end">'
+    +'<button onclick="closePbModal()" style="padding:7px 16px;background:none;border:1px solid #363648;border-radius:6px;color:#999;font-size:13px;cursor:pointer">Cancelar</button>'
+    +'<button onclick="confirmPb()" style="padding:7px 20px;background:#f59e0b;border:none;border-radius:6px;color:#1a1000;font-size:13px;font-weight:600;cursor:pointer">Salvar</button>'
+    +'</div></div>';
+  document.body.appendChild(box);
+  setTimeout(()=>{const nm=document.getElementById('pb-nm');if(nm)nm.focus();},80);
+}
+
+function closePbModal(){
+  const m=document.getElementById('pb-modal');if(m)m.remove();
+}
+
+function confirmPb(){
+  const nm=document.getElementById('pb-nm');const name=nm?nm.value.trim():'';
+  if(!name){alert('Digite um nome.');return;}
+  const fromHist=[...document.querySelectorAll('#pb-cl input:checked')].map(cb=>hist[+cb.value]).filter(Boolean);
+  const newCmdsRaw=(document.getElementById('pb-new-cmds')||{value:''}).value;
+  const fromNew=newCmdsRaw.split('\n').map(s=>s.trim()).filter(Boolean);
+  const sel=[...fromHist,...fromNew];
+  if(!sel.length){alert('Selecione pelo menos 1 comando ou adicione um novo.');return;}
+  _playbooks.push({name,cmds:sel,created:new Date().toISOString()});
+  savePlaybooks();renderPlaybooks();
+  const m=document.getElementById('pb-modal');if(m)m.remove();
+  info('Playbook "'+name+'" salvo com '+sel.length+' comando(s)!');
+}
+
+// ── MODAL EDITAR PLAYBOOK EXISTENTE ─────────────────────────
+function openEditPlaybook(idx){
+  const pb=_playbooks[idx];if(!pb)return;
+  const box=document.createElement('div');box.id='pb-edit-modal';
+  box.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:500;display:flex;align-items:center;justify-content:center';
+  box.onclick=function(e){if(e.target===box)closeEditPbModal();};
+
+  function buildCmdRows(cmds){
+    return cmds.map((c,i)=>
+      '<div id="pb-edit-row-'+i+'" style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid #1e1e2a">'
+      +'<span style="font-size:10px;color:#555;width:14px;flex-shrink:0">'+(i+1)+'</span>'
+      +'<input id="pb-edit-cmd-'+i+'" value="'+c.replace(/"/g,'&quot;')+'" style="flex:1;background:#15151e;border:1px solid #2a2a38;border-radius:5px;color:#d4d4d4;font-size:12px;font-family:monospace;padding:5px 8px;outline:none">'
+      +'<button onclick="pbEditMoveUp('+i+')" title="Subir" style="background:none;border:none;color:#555;cursor:pointer;font-size:12px;padding:2px 4px">↑</button>'
+      +'<button onclick="pbEditMoveDown('+i+')" title="Descer" style="background:none;border:none;color:#555;cursor:pointer;font-size:12px;padding:2px 4px">↓</button>'
+      +'<button onclick="pbEditRemoveRow('+i+')" title="Remover" style="background:none;border:none;color:#f87171;cursor:pointer;font-size:12px;padding:2px 5px">✕</button>'
+      +'</div>'
+    ).join('');
+  }
+
+  box.innerHTML='<div style="background:#21212d;border:1px solid #363648;border-radius:12px;padding:22px;width:90%;max-width:520px;display:flex;flex-direction:column;gap:12px;max-height:90vh;overflow-y:auto">'
+    +'<div style="font-size:14px;font-weight:600;color:#e8e8e8">Editar Playbook</div>'
+    +'<label style="font-size:11px;color:#666">Nome</label>'
+    +'<input id="pb-edit-name" value="'+pb.name.replace(/"/g,'&quot;')+'" style="background:#15151e;border:1px solid #363648;border-radius:7px;color:#d4d4d4;font-size:14px;padding:9px 12px;outline:none;width:100%">'
+    +'<label style="font-size:11px;color:#666">Comandos <span style="color:#555">(edite, reordene ou remova)</span></label>'
+    +'<div id="pb-edit-rows" style="display:flex;flex-direction:column;gap:2px;max-height:220px;overflow-y:auto;padding:4px 0">'+buildCmdRows(pb.cmds)+'</div>'
+    +'<div style="display:flex;gap:6px;align-items:center">'
+    +'<input id="pb-edit-new" placeholder="Novo comando..." style="flex:1;background:#15151e;border:1px solid #363648;border-radius:6px;color:#d4d4d4;font-size:12px;font-family:monospace;padding:7px 10px;outline:none" onkeydown="if(event.key===\'Enter\')pbEditAddRow()">'
+    +'<button onclick="pbEditAddRow()" style="padding:7px 14px;background:#1a2e2d;border:1px solid #2a9d8f;border-radius:6px;color:#7fd3cc;font-size:12px;cursor:pointer">+ Adicionar</button>'
+    +'</div>'
+    +'<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px">'
+    +'<button onclick="closeEditPbModal()" style="padding:7px 16px;background:none;border:1px solid #363648;border-radius:6px;color:#999;font-size:13px;cursor:pointer">Cancelar</button>'
+    +'<button onclick="confirmEditPb('+idx+')" style="padding:7px 20px;background:#2a9d8f;border:none;border-radius:6px;color:#fff;font-size:13px;font-weight:600;cursor:pointer">Salvar alterações</button>'
+    +'</div></div>';
+  document.body.appendChild(box);
+  setTimeout(()=>{const nm=document.getElementById('pb-edit-name');if(nm)nm.focus();},80);
+}
+
+function closeEditPbModal(){
+  const m=document.getElementById('pb-edit-modal');if(m)m.remove();
+}
+
+function _pbEditGetRows(){
+  const rows=document.querySelectorAll('#pb-edit-rows [id^="pb-edit-cmd-"]');
+  return [...rows].map(i=>i.value.trim()).filter(Boolean);
+}
+function _pbEditRebuildRows(cmds){
+  const container=document.getElementById('pb-edit-rows');
+  if(!container)return;
+  container.innerHTML=cmds.map((c,i)=>
+    '<div id="pb-edit-row-'+i+'" style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid #1e1e2a">'
+    +'<span style="font-size:10px;color:#555;width:14px;flex-shrink:0">'+(i+1)+'</span>'
+    +'<input id="pb-edit-cmd-'+i+'" value="'+c.replace(/"/g,'&quot;')+'" style="flex:1;background:#15151e;border:1px solid #2a2a38;border-radius:5px;color:#d4d4d4;font-size:12px;font-family:monospace;padding:5px 8px;outline:none">'
+    +'<button onclick="pbEditMoveUp('+i+')" title="Subir" style="background:none;border:none;color:#555;cursor:pointer;font-size:12px;padding:2px 4px">↑</button>'
+    +'<button onclick="pbEditMoveDown('+i+')" title="Descer" style="background:none;border:none;color:#555;cursor:pointer;font-size:12px;padding:2px 4px">↓</button>'
+    +'<button onclick="pbEditRemoveRow('+i+')" title="Remover" style="background:none;border:none;color:#f87171;cursor:pointer;font-size:12px;padding:2px 5px">✕</button>'
+    +'</div>'
+  ).join('');
+}
+function pbEditMoveUp(i){
+  const cmds=_pbEditGetRows();
+  if(i===0)return;
+  [cmds[i-1],cmds[i]]=[cmds[i],cmds[i-1]];
+  _pbEditRebuildRows(cmds);
+}
+function pbEditMoveDown(i){
+  const cmds=_pbEditGetRows();
+  if(i>=cmds.length-1)return;
+  [cmds[i+1],cmds[i]]=[cmds[i],cmds[i+1]];
+  _pbEditRebuildRows(cmds);
+}
+function pbEditRemoveRow(i){
+  const cmds=_pbEditGetRows();
+  cmds.splice(i,1);
+  _pbEditRebuildRows(cmds);
+}
+function pbEditAddRow(){
+  const input=document.getElementById('pb-edit-new');
+  const val=input?input.value.trim():'';
+  if(!val){if(input){input.style.border='1px solid #f87171';setTimeout(()=>input.style.border='1px solid #363648',800);}return;}
+  const cmds=_pbEditGetRows();
+  cmds.push(val);
+  _pbEditRebuildRows(cmds);
+  if(input){input.value='';input.focus();}
+}
+function confirmEditPb(idx){
+  const nameEl=document.getElementById('pb-edit-name');
+  const name=nameEl?nameEl.value.trim():'';
+  if(!name){alert('O nome não pode ficar vazio.');return;}
+  const cmds=_pbEditGetRows();
+  if(!cmds.length){alert('O playbook precisa ter pelo menos 1 comando.');return;}
+  _playbooks[idx]={..._playbooks[idx],name,cmds,updated:new Date().toISOString()};
+  savePlaybooks();renderPlaybooks();
+  closeEditPbModal();
+  info('Playbook "'+name+'" atualizado ('+cmds.length+' comandos).');
+}
+
+document.addEventListener('DOMContentLoaded',renderPlaybooks);
+
+// -- DEBUG PANEL v2.6 --
+let _dbLog=[];let _dbTab='log';
+function toggleDebug(){const p=document.getElementById('debug-panel');if(p.classList.toggle('show'))refreshDebug();}
+async function refreshDebug(){
+  const c=document.getElementById('debug-content');
+  c.innerHTML='<div style="padding:16px;color:#555;font-size:12px">Carregando...</div>';
+  try{
+    const r=await fetch(URL_BASE+'/logs?n=30',{headers:H});
+    const d=await r.json();_dbLog=d.logs||[];renderDebug();
+  }catch(e){
+    c.innerHTML='<div style="padding:16px;color:#f87171;font-size:12px">Rota /logs indisponivel. Atualize o servidor_colab.py para v2.6.</div>';
+  }
+}
+function setDebugTab(t){
+  _dbTab=t;
+  document.querySelectorAll('.debug-tab').forEach(e=>e.classList.remove('active'));
+  const el=document.getElementById('dtab-'+t);if(el)el.classList.add('active');
+  renderDebug();
+}
+function renderDebug(){
+  const c=document.getElementById('debug-content');
+  if(_dbTab==='raw'){c.innerHTML='<pre style="font-family:monospace;font-size:11px;color:#888;white-space:pre-wrap;padding:10px">'+JSON.stringify(_dbLog,null,2)+'</pre>';return;}
+  if(!_dbLog.length){c.innerHTML='<div style="padding:16px;color:#555;font-size:12px">Sem registros ainda.</div>';return;}
+  c.innerHTML='';
+  [..._dbLog].reverse().forEach(e=>{
+    const el=document.createElement('div');el.className='de';
+    const rc=e.rc===0?'<span class="de-rc de-ok">ok</span>':'<span class="de-rc de-err">rc '+e.rc+'</span>';
+    const dur='<span class="de-rc de-dur">'+e.duration+'s</span>';
+    const ts=e.ts?e.ts.substring(11,19):'';
+    el.innerHTML='<div class="de-head"><span class="de-cmd">$ notebooklm '+(e.cmd||'')+'</span>'+rc+dur+'<span class="de-ts">'+ts+'</span></div>';
+    if(e.error){const r=document.createElement('div');r.className='de-raw';r.textContent=e.error;el.appendChild(r);}
+    c.appendChild(el);
+  });
+}
+function copyDebugAll(){
+  navigator.clipboard.writeText(JSON.stringify(_dbLog,null,2)).then(()=>{
+    const b=document.querySelector('#debug-hbtns button:last-child');
+    if(b){b.textContent='copiado!';setTimeout(()=>b.textContent='copiar',1500);}
+  });
+}
+
+</script>
+</body>
+</html>

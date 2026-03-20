@@ -1,3 +1,16 @@
+## v2.16
+- Nomes de arquivo padronizados e fixos: notebooklm_studio.html e guia_notebooklm_claude.html — sem número de versão no filename. Cada release substitui o arquivo anterior automaticamente, sem deixar versões antigas na pasta
+- release.py: build_zip e git_commit_push atualizados para os nomes fixos
+- README.md: referências de arquivo atualizadas para os nomes fixos
+
+## v2.15
+- Studio: verificação de nova versão ao conectar — consulta o GitHub e exibe alerta não-bloqueante se existir versão mais recente, com link direto para o release
+- Studio: constante STUDIO_VERSION centraliza a versão atual no JS — atualizar a cada release
+- release.py: git add seletivo — commita apenas os arquivos do projeto (Studio, Guia, servidor, README, CHANGELOG); release.py e .gitignore não entram no commit automático de versão
+- release.py: changelog compilado — consulta o GitHub para identificar a última versão publicada e compila todas as entradas intermediárias do CHANGELOG em um único release notes
+- release.py: load_config com strip de aspas e espaços nos valores do .github_config
+- README.md: revisão completa — informações atualizadas, recursos documentados, seção de contexto corrigida (botão agora chamado "Contexto"), referências de versão genéricas
+
 ## v2.14
 - release.py: zip validado após geração — se qualquer arquivo fora da allowlist (release.py, .gitignore, etc.) for encontrado dentro do zip, o script aborta, apaga o zip e exibe o arquivo infrator antes de publicar qualquer coisa
 
