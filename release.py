@@ -109,7 +109,10 @@ def run(cmd, check=True):
     result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
     if check and result.returncode != 0:
         print(f"\n❌ Erro ao executar: {cmd}")
-        print(result.stderr)
+        if result.stdout.strip():
+            print(result.stdout)
+        if result.stderr.strip():
+            print(result.stderr)
         sys.exit(1)
     return result
 
@@ -172,8 +175,29 @@ def build_zip(version):
 
 def git_commit_push(version, description):
     """Commita todos os arquivos modificados e faz push."""
+
+    # Arquivos que NUNCA devem entrar em um commit — verificação de segurança
+    NEVER_COMMIT = [".github_config", "github.txt", "secrets.txt"]
+    for f in NEVER_COMMIT:
+        # Verificar se o git está rastreando o arquivo (tracked = perigo)
+        result = run(f"git ls-files {f}", check=False)
+        if result.stdout.strip():
+            print(f"\n❌ ABORTADO — '{f}' está sendo rastreado pelo git e contém credenciais.")
+            print(f"   Execute: git rm --cached {f}")
+            print(f"   Depois reescreva o histórico: git filter-branch --force --index-filter \"git rm --cached --ignore-unmatch {f}\" --prune-empty HEAD")
+            print(f"   E force o push: git push origin main --force")
+            print(f"   Por fim, revogue e renove o token em: https://github.com/settings/tokens")
+            sys.exit(1)
+
     run("git add .")
-    run(f'git commit -m "feat: v{version} — {description}"')
+
+    # Verificar se há algo para commitar
+    status = run("git status --porcelain", check=False)
+    if not status.stdout.strip():
+        print("   → Nada a commitar — arquivos já estão no histórico recente")
+    else:
+        run(f'git commit -m "feat: v{version} — {description}"')
+
     run("git push")
 
 
