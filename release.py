@@ -79,7 +79,8 @@ def load_config():
                 line = line.strip()
                 if "=" in line and not line.startswith("#"):
                     key, _, val = line.partition("=")
-                    config[key.strip()] = val.strip()
+                    val = val.strip().strip('"').strip("'")
+                    config[key.strip()] = val
 
     # Variáveis de ambiente sobrescrevem o arquivo
     for key in ("GITHUB_USER", "GITHUB_REPO", "GITHUB_TOKEN"):
@@ -120,24 +121,26 @@ def run(cmd, check=True):
 def build_zip(version):
     """
     Monta o arquivo .zip com os arquivos que o usuário precisa para usar o projeto.
+    Os HTMLs têm nomes fixos (sem versão no filename) — cada release substitui
+    o arquivo anterior automaticamente, sem deixar versões antigas na pasta.
     release.py e .gitignore são ferramentas do repositório — não entram no zip.
     """
     zip_name = f"notebooklm_claude_v{version}.zip"
 
-    # Lista fechada: APENAS estes arquivos entram no zip, nada mais.
-    # Para adicionar um arquivo novo, inclua aqui E em ALLOWED_IN_ZIP.
+    # Nomes fixos: o arquivo sempre se chama o mesmo, independente da versão
+    # A versão fica visível dentro do arquivo (título, badge, STUDIO_VERSION)
     files = [
-        (f"studio/notebooklm_studio_v{version}.html",    f"studio/notebooklm_studio_v{version}.html"),
-        (f"guia/guia_notebooklm_claude_v{version}.html", f"guia/guia_notebooklm_claude_v{version}.html"),
-        ("colab/servidor_colab.py",                       "colab/servidor_colab.py"),
-        ("README.md",                                     "README.md"),
-        ("CHANGELOG.md",                                  "CHANGELOG.md"),
+        ("studio/notebooklm_studio.html",    "studio/notebooklm_studio.html"),
+        ("guia/guia_notebooklm_claude.html",  "guia/guia_notebooklm_claude.html"),
+        ("colab/servidor_colab.py",           "colab/servidor_colab.py"),
+        ("README.md",                         "README.md"),
+        ("CHANGELOG.md",                      "CHANGELOG.md"),
     ]
 
-    # Allowlist de nomes dentro do zip — qualquer arquivo fora desta lista aborta o release
+    # Allowlist: qualquer arquivo fora desta lista aborta o release
     ALLOWED_IN_ZIP = {
-        f"studio/notebooklm_studio_v{version}.html",
-        f"guia/guia_notebooklm_claude_v{version}.html",
+        "studio/notebooklm_studio.html",
+        "guia/guia_notebooklm_claude.html",
         "colab/servidor_colab.py",
         "README.md",
         "CHANGELOG.md",
@@ -174,12 +177,16 @@ def build_zip(version):
 
 
 def git_commit_push(version, description):
-    """Commita todos os arquivos modificados e faz push."""
+    """
+    Commita os arquivos do projeto incluindo deleções (arquivos renomeados/removidos).
+    Usa git add -A nas pastas do projeto para capturar modificações E deleções.
+    Inclui release.py no commit quando ele tiver mudanças (atualização de STUDIO_VERSION etc.).
+    Nunca commita .github_config, github.txt ou secrets.txt.
+    """
 
     # Arquivos que NUNCA devem entrar em um commit — verificação de segurança
     NEVER_COMMIT = [".github_config", "github.txt", "secrets.txt"]
     for f in NEVER_COMMIT:
-        # Verificar se o git está rastreando o arquivo (tracked = perigo)
         result = run(f"git ls-files {f}", check=False)
         if result.stdout.strip():
             print(f"\n❌ ABORTADO — '{f}' está sendo rastreado pelo git e contém credenciais.")
@@ -189,14 +196,40 @@ def git_commit_push(version, description):
             print(f"   Por fim, revogue e renove o token em: https://github.com/settings/tokens")
             sys.exit(1)
 
-    run("git add .")
+    # git add -A nas pastas do projeto captura: novos arquivos, modificações E deleções
+    # Isso resolve o caso de arquivos antigos com versão no nome que foram removidos
+    for folder in ["studio", "guia", "colab"]:
+        if os.path.isdir(folder):
+            run(f'git add -A "{folder}"', check=False)
 
-    # Verificar se há algo para commitar
-    status = run("git status --porcelain", check=False)
-    if not status.stdout.strip():
-        print("   → Nada a commitar — arquivos já estão no histórico recente")
+    # Arquivos individuais na raiz
+    for f in ["README.md", "CHANGELOG.md"]:
+        run(f'git add "{f}"', check=False)
+
+    # release.py entra no commit quando tiver mudanças (ex: nova STUDIO_VERSION)
+    # .gitignore também, quando modificado
+    for f in ["release.py", ".gitignore"]:
+        status_f = run(f"git status --porcelain {f}", check=False)
+        if status_f.stdout.strip():
+            run(f'git add "{f}"', check=False)
+
+    # Verificar se há algo staged para commitar
+    staged = run("git status --porcelain", check=False)
+    if not staged.stdout.strip():
+        print("   → Nada a commitar — repositório já está atualizado")
     else:
-        run(f'git commit -m "feat: v{version} — {description}"')
+        run(f'git commit -m "release: v{version} — {description}"')
+
+    # Sincronizar com o remoto antes de fazer push — evita rejeição por divergência
+    print("   → Sincronizando com o repositório remoto...")
+    pull = run("git pull --rebase origin main", check=False)
+    if pull.returncode != 0:
+        print("\n❌ Erro ao sincronizar com o remoto:")
+        if pull.stdout.strip(): print(pull.stdout)
+        if pull.stderr.strip(): print(pull.stderr)
+        print("\nResolva os conflitos manualmente e execute: git rebase --continue")
+        print("Depois rode o release novamente.")
+        sys.exit(1)
 
     run("git push")
 
@@ -242,22 +275,74 @@ def upload_asset(upload_url, zip_path, token):
         sys.exit(1)
 
 
-def read_changelog_entry(version):
-    """Lê as notas da versão do CHANGELOG.md."""
+def get_last_published_version(github_user, github_repo, token):
+    """Consulta o GitHub para saber qual foi a última versão publicada."""
+    try:
+        url = f"https://api.github.com/repos/{github_user}/{github_repo}/releases/latest"
+        headers = {
+            "Authorization": f"token {token}",
+            "Accept": "application/vnd.github+json",
+        }
+        req = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(req) as resp:
+            data = json.loads(resp.read())
+            return data.get("tag_name", "").lstrip("v")
+    except Exception:
+        return None
+
+
+def compile_changelog(current_version, last_published_version):
+    """
+    Compila todas as entradas do CHANGELOG entre a última versão publicada
+    e a versão atual — inclui todas as versões internas intermediárias.
+    """
     if not os.path.exists("CHANGELOG.md"):
-        return f"Versão {version}"
+        return f"Versão {current_version}"
 
     with open("CHANGELOG.md", "r", encoding="utf-8") as f:
         content = f.read()
 
-    start = content.find(f"## v{version}")
-    if start == -1:
-        return f"Versão {version}"
+    # Extrair todos os blocos de versão presentes no CHANGELOG
+    import re
+    pattern = re.compile(r'^## v([\d.]+)', re.MULTILINE)
+    matches = list(pattern.finditer(content))
 
-    end = content.find("\n## ", start + 1)
-    block = content[start:end].strip() if end != -1 else content[start:].strip()
-    lines = block.split("\n")[1:]
-    return "\n".join(lines).strip()
+    if not matches:
+        return f"Versão {current_version}"
+
+    def ver_tuple(v):
+        try:
+            return tuple(int(x) for x in v.split('.'))
+        except Exception:
+            return (0,)
+
+    current_t = ver_tuple(current_version)
+    last_t    = ver_tuple(last_published_version) if last_published_version else (0,)
+
+    # Coletar blocos de versões que estão ENTRE last_published (exclusive) e current (inclusive)
+    entries = []
+    for i, m in enumerate(matches):
+        v = m.group(1)
+        v_t = ver_tuple(v)
+        if last_t < v_t <= current_t:
+            start = m.start()
+            end   = matches[i+1].start() if i+1 < len(matches) else len(content)
+            block = content[start:end].strip()
+            # Remove o cabeçalho "## vX.X" da primeira linha
+            lines = block.split('\n')[1:]
+            entries.append(f"### v{v}\n" + "\n".join(lines).strip())
+
+    if not entries:
+        # Fallback: retornar só a versão atual
+        start = content.find(f"## v{current_version}")
+        if start == -1:
+            return f"Versão {current_version}"
+        end = content.find("\n## ", start + 1)
+        block = content[start:end].strip() if end != -1 else content[start:].strip()
+        lines = block.split("\n")[1:]
+        return "\n".join(lines).strip()
+
+    return "\n\n".join(entries)
 
 
 def main():
@@ -290,8 +375,12 @@ def main():
     print("   → Push concluído")
 
     log("Criando a release no GitHub...")
-    notes = read_changelog_entry(version)
-    release_body = f"## O que mudou\n\n{notes}\n\n---\n\nBaixe o arquivo zip abaixo para usar o Studio e o Guia."
+    last_version = get_last_published_version(GITHUB_USER, GITHUB_REPO, GITHUB_TOKEN)
+    if last_version:
+        print(f"   → Última versão publicada: v{last_version}")
+    notes = compile_changelog(version, last_version)
+    intro = f"Versões incluídas neste release: v{last_version} → v{version}" if last_version else f"v{version}"
+    release_body = f"## {intro}\n\n{notes}\n\n---\n\nBaixe o arquivo zip abaixo para usar o Studio e o Guia."
 
     release = github_api(
         "POST",
