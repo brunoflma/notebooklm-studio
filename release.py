@@ -220,18 +220,9 @@ def git_commit_push(version, description):
     else:
         run(f'git commit -m "release: v{version} — {description}"')
 
-    # Sincronizar com o remoto antes de fazer push — evita rejeição por divergência
-    print("   → Sincronizando com o repositório remoto...")
-    pull = run("git pull --rebase origin main", check=False)
-    if pull.returncode != 0:
-        print("\n❌ Erro ao sincronizar com o remoto:")
-        if pull.stdout.strip(): print(pull.stdout)
-        if pull.stderr.strip(): print(pull.stderr)
-        print("\nResolva os conflitos manualmente e execute: git rebase --continue")
-        print("Depois rode o release novamente.")
-        sys.exit(1)
-
-    run("git push")
+    # force-with-lease: envia o estado local para o remoto sem tentar sincronizar históricos
+    # Correto para repositório de uso individual — o local é sempre a fonte da verdade
+    run("git push --force-with-lease")
 
 
 def github_api(method, path, data=None, token=None):
