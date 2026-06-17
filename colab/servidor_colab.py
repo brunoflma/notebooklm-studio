@@ -36,8 +36,8 @@ import subprocess, requests, os, time, json, datetime
 app = Flask(__name__)
 CORS(app, origins="*")
 
-AUTH_FILE   = '/content/storage_state.json'
-CONTENT_DIR = '/content/'
+AUTH_FILE   = os.environ.get('AUTH_FILE', '/content/storage_state.json')
+CONTENT_DIR = os.environ.get('CONTENT_DIR', '/content/')
 
 # ── Opção alternativa: carregar credenciais do Google Drive ────────────────
 # Útil para evitar reupload manual a cada sessão.
@@ -144,14 +144,34 @@ def get_logs():
     n = int(request.args.get('n', 50))
     if not os.path.exists(LOG_FILE):
         return jsonify({'logs': []})
-    with open(LOG_FILE, 'r', encoding='utf-8') as lf:
-        lines = [l.strip() for l in lf if l.strip()]
+
+    try:
+        # Uso do tail para maior eficiência em arquivos grandes.
+        # Buscamos um pouco mais de linhas (n*2) para compensar eventuais linhas vazias,
+        # garantindo que teremos pelo menos n entradas válidas se existirem.
+        result = subprocess.run(['tail', '-n', str(n * 2), LOG_FILE],
+                                capture_output=True, text=True, encoding='utf-8')
+        if result.returncode != 0:
+            return jsonify({'logs': []})
+        lines = result.stdout.splitlines()
+    except Exception:
+        # Fallback para leitura tradicional caso tail falhe
+        with open(LOG_FILE, 'r', encoding='utf-8') as lf:
+            lines = [l.strip() for l in lf if l.strip()]
+            lines = lines[-n:]
+
     entries = []
-    for line in lines[-n:]:
+    for line in reversed(lines):
+        line = line.strip()
+        if not line:
+            continue
         try:
             entries.append(json.loads(line))
+            if len(entries) >= n:
+                break
         except Exception:
             pass
+    entries.reverse()
     return jsonify({'logs': entries})
 
 
