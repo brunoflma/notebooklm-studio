@@ -32,6 +32,7 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from pyngrok import ngrok
 import subprocess, requests, os, time, json, datetime
+from collections import deque
 
 app = Flask(__name__)
 CORS(app, origins="*")
@@ -145,9 +146,9 @@ def get_logs():
     if not os.path.exists(LOG_FILE):
         return jsonify({'logs': []})
     with open(LOG_FILE, 'r', encoding='utf-8') as lf:
-        lines = [l.strip() for l in lf if l.strip()]
+        last_n_lines = deque((l.strip() for l in lf if l.strip()), maxlen=n)
     entries = []
-    for line in lines[-n:]:
+    for line in last_n_lines:
         try:
             entries.append(json.loads(line))
         except Exception:
