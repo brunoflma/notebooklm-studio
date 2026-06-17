@@ -58,6 +58,9 @@ if not os.path.exists(AUTH_FILE):
 
 print("✅ Credenciais encontradas.")
 
+with open(AUTH_FILE, 'r') as f:
+    AUTH_CONTENT = f.read().strip()
+
 
 # ── Função principal de execução com retry automático ────────────────────
 # Timeouts diferenciados por tipo de comando
@@ -80,11 +83,8 @@ def run_notebooklm(cmd, retries=3, delay=30):
     Executa um comando notebooklm-py com retry automático e timeout por tipo.
     Tenta até 3 vezes em caso de rate limit do Google (GENERATION_FAILED).
     """
-    with open(AUTH_FILE, 'r') as f:
-        auth_content = f.read().strip()
-
     env = os.environ.copy()
-    env['NOTEBOOKLM_AUTH_JSON'] = auth_content
+    env['NOTEBOOKLM_AUTH_JSON'] = AUTH_CONTENT
     timeout = get_timeout(cmd)
 
     for attempt in range(retries):
