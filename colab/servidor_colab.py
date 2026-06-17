@@ -117,8 +117,8 @@ def write_log(entry):
     try:
         with open(LOG_FILE, 'a', encoding='utf-8') as lf:
             lf.write(json.dumps(entry, ensure_ascii=False) + '\n')
-    except Exception:
-        pass
+    except Exception as e:
+        app.logger.error(f"Erro ao escrever log: {e}")
 
 
 @app.route('/execute', methods=['POST'])
@@ -150,7 +150,7 @@ def get_logs():
     for line in lines[-n:]:
         try:
             entries.append(json.loads(line))
-        except Exception:
+        except json.JSONDecodeError:
             pass
     return jsonify({'logs': entries})
 
@@ -200,7 +200,7 @@ try:
     ngrok_token = userdata.get('NGROK_TOKEN')
     if not ngrok_token:
         raise ValueError("Token vazio nos Secrets")
-except Exception:
+except (ImportError, AttributeError, ValueError):
     ngrok_token = 'SEU_TOKEN_AQUI'  # ← Opção B: cole seu token aqui
 
 # Validação antes de tentar conectar
@@ -226,7 +226,7 @@ def keep_alive():
         time.sleep(25 * 60)  # ping a cada 25 minutos
         try:
             requests.get(url_str + '/health', timeout=5)
-        except Exception:
+        except requests.RequestException:
             pass
 
 threading.Thread(target=keep_alive, daemon=True).start()
