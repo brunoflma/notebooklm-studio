@@ -549,6 +549,7 @@ code{font-family:monospace;font-size:11px;background:#1f1f1f;padding:1px 5px;bor
   <input type="file" id="hist-import-input" accept=".json" style="display:none" onchange="handleHistImport(event)">
 </div>
 
+<script src="utils.js"></script>
 <script>
 const esc = (s) => s ? String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m])) : '';
 const H={'Content-Type':'application/json','ngrok-skip-browser-warning':'true'};
@@ -1469,31 +1470,6 @@ async function showContext(){
     return;
   }
 
-  // ── Helpers de limpeza ──────────────────────────────────────────
-  // Remove linhas de tabela ASCII do CLI (┏ ┃ ┡ └ ━ etc.) e linhas em branco excessivas
-  function stripCliTables(text){
-    if(!text) return '';
-    return text
-      .split('\n')
-      .filter(l => !/^[\s]*[┏┗┡┘└├┤┬┴┼─━┃│╔╗╚╝╠╣╦╩╬═║]/.test(l))
-      .join('\n')
-      .replace(/\n{3,}/g, '\n\n')
-      .trim();
-  }
-
-  // Extrai apenas as linhas de conteúdo de uma tabela ASCII (sem bordas)
-  // Ex: "│ Title  │ Litigância │" → "Litigância"
-  function extractTableValues(text){
-    if(!text) return {};
-    const result = {};
-    text.split('\n').forEach(line => {
-      const cells = line.split('│').map(s => s.trim()).filter(Boolean);
-      if(cells.length === 2 && !/^[━─═]+$/.test(cells[0])){
-        result[cells[0].toLowerCase()] = cells[1];
-      }
-    });
-    return result;
-  }
 
   // Parse notebook info — extrair campos da tabela do status
   let notebookName = '(não identificado)';
@@ -1540,19 +1516,6 @@ async function showContext(){
   const SKIP_PREFIXES = ['list','use ','status','source list','artifact list','artifact wait','download ','generate '];
   const isSkippable = cmd => SKIP_PREFIXES.some(p => cmd === p.trim() || cmd.startsWith(p));
 
-  // Limpa a saída de um bloco: remove tabelas ASCII, cabeçalhos de continuação e linhas vazias excessivas
-  function cleanOutput(raw){
-    if(!raw) return '';
-    return raw
-      .split('\n')
-      // Remove linhas de borda de tabela e linhas só com espaços
-      .filter(l => !/^[\s]*[┏┗┡┘└├┤┬┴┼─━┃│╔╗╚╝╠╣╦╩╬═║]/.test(l))
-      // Remove linhas de sistema do CLI (Continuing conversation, Resumed conversation, Started:)
-      .filter(l => !/^(Continuing conversation|Resumed conversation|Started:|Matched:)/i.test(l.trim()))
-      .join('\n')
-      .replace(/\n{3,}/g, '\n\n')
-      .trim();
-  }
 
   let sessionEntries = [];
   const blocks = document.querySelectorAll('#output .block');
