@@ -1292,10 +1292,11 @@ function copyLine(btn, text){
   });
 }
 
-// Active TOC — offset dinâmico baseado na altura real do header sticky
+// Active TOC — Otimizado com IntersectionObserver para evitar layout thrashing no scroll
 const tocLinks = document.querySelectorAll('.toc a');
 const tocSections = Array.from(document.querySelectorAll('.section[id]'));
-let _tocRaf = null;
+const sectionStates = new Map();
+let _tocObserver = null;
 
 function getTocOffset() {
   // Mede a altura real do banner sticky em tempo real (cobre zoom e resize)
@@ -1303,20 +1304,16 @@ function getTocOffset() {
   return toc ? toc.getBoundingClientRect().bottom + 8 : 80;
 }
 
-function getActiveSection() {
-  const offset = getTocOffset();
-  let active = tocSections[0];
-  // Percorre todas as seções e guarda a última cujo topo já cruzou o ponto de referência.
-  // getBoundingClientRect().top é sempre relativo ao viewport, preciso em qualquer zoom.
-  for (const s of tocSections) {
-    if (s.getBoundingClientRect().top <= offset) active = s;
-  }
-  return active ? active.id : null;
-}
-
 function updateToc() {
-  _tocRaf = null;
-  const activeId = getActiveSection();
+  let activeId = tocSections[0].id;
+  // Encontra a última seção que está acima ou cruzando a linha de referência
+  for (const s of tocSections) {
+    const state = sectionStates.get(s.id);
+    if (state === 'above' || state === 'intersecting') {
+      activeId = s.id;
+    }
+  }
+
   tocLinks.forEach(a => {
     const isActive = a.getAttribute('href') === '#' + activeId;
     if (a.classList.contains('active') === isActive) return; // sem mudança, evita reflow
@@ -1340,15 +1337,40 @@ function updateToc() {
   });
 }
 
-function scheduleTocUpdate() {
-  if (_tocRaf) return; // já agendado neste frame
-  _tocRaf = requestAnimationFrame(updateToc);
+function initTocObserver() {
+  if (_tocObserver) _tocObserver.disconnect();
+  const offset = getTocOffset();
+
+  // rootMargin com topo negativo para deslocar a linha de detecção para o offset do header.
+  // Usamos um fundo negativo grande para garantir que seções que já passaram pelo topo
+  // continuem sendo detectadas como intersecting se ainda estiverem visíveis ou
+  // que possamos calcular sua posição relativa ao rootMargin.
+  _tocObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        sectionStates.set(entry.target.id, 'intersecting');
+      } else if (entry.boundingClientRect.top < offset) {
+        sectionStates.set(entry.target.id, 'above');
+      } else {
+        sectionStates.set(entry.target.id, 'below');
+      }
+    });
+    updateToc();
+  }, {
+    rootMargin: `-${offset}px 0px -${window.innerHeight - offset - 10}px 0px`,
+    threshold: 0
+  });
+
+  tocSections.forEach(s => _tocObserver.observe(s));
 }
 
-window.addEventListener('scroll', scheduleTocUpdate, { passive: true });
-window.addEventListener('resize', scheduleTocUpdate, { passive: true });
-document.addEventListener('DOMContentLoaded', updateToc);
-updateToc();
+// Inicializa e responde a mudanças de tamanho (que podem mudar o offset do header)
+window.addEventListener('resize', initTocObserver, { passive: true });
+document.addEventListener('DOMContentLoaded', initTocObserver);
+// Fallback inicial se o DOM já estiver pronto
+if (document.readyState === 'interactive' || document.readyState === 'complete') {
+  initTocObserver();
+}
 </script>
 </body>
 </html>
