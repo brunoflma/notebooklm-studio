@@ -1638,9 +1638,9 @@ window.addEventListener('load', function(){
       ].join('\n');
       const blob=new Blob([swCode],{type:'application/javascript'});
       const swUrl=URL.createObjectURL(blob);
-      navigator.serviceWorker.register(swUrl).catch(()=>{});
+      navigator.serviceWorker.register(swUrl).catch(err => console.warn('ServiceWorker registration failed:', err));
     }
-  }catch(e){ /* SW not supported or file:// */ }
+  }catch(e){ console.warn('ServiceWorker not supported or error:', e); }
 
   // Capture install prompt (works on http/https)
   window.addEventListener('beforeinstallprompt',function(e){
