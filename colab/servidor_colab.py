@@ -31,7 +31,7 @@
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from pyngrok import ngrok
-import subprocess, requests, os, time, json, datetime
+import subprocess, requests, os, time, json, datetime, shlex
 
 app = Flask(__name__)
 CORS(app, origins="*")
@@ -88,9 +88,11 @@ def run_notebooklm(cmd, retries=3, delay=30):
     timeout = get_timeout(cmd)
 
     for attempt in range(retries):
+        # Fix Command Injection: use shell=False and list of arguments
+        full_cmd = ['notebooklm'] + shlex.split(cmd)
         result = subprocess.run(
-            f'notebooklm {cmd}',
-            shell=True,
+            full_cmd,
+            shell=False,
             capture_output=True,
             text=True,
             timeout=timeout,
