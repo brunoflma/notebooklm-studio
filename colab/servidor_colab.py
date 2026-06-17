@@ -150,7 +150,7 @@ def get_logs():
     for line in lines[-n:]:
         try:
             entries.append(json.loads(line))
-        except Exception:
+        except json.JSONDecodeError:
             pass
     return jsonify({'logs': entries})
 
