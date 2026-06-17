@@ -660,15 +660,6 @@ async function _checkVersionUpdate(){
   }catch(e){/* silencioso — falha de rede não deve afetar o Studio */}
 }
 
-// _checkCredsOnConnect mantido como fallback para reconexões via keepalive
-async function _checkCredsOnConnect(){
-  try{
-    const r=await fetch(`${URL_BASE}/execute`,{method:'POST',headers:H,body:JSON.stringify({command:'list --json'})});
-    const d=await r.json();
-    checkForCredExpiry(d.stdout||'',d.stderr||'');
-  }catch(e){}
-}
-
 function showErr(msg){const e=document.getElementById('setup-err');e.textContent='⚠ '+msg;e.style.display='block';}
 
 function disconnect(){
