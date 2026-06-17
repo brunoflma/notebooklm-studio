@@ -1112,16 +1112,14 @@ function handleKey(e){
 }
 
 function copyAll(){
-  const blocks=document.querySelectorAll('.block-out,.block-err');
-  const cmds=document.querySelectorAll('.block-cmd');
-  let text='';
+  const parts=[];
   document.querySelectorAll('.block').forEach(b=>{
     const cmd=b.querySelector('.block-cmd');
     const out=b.querySelector('.block-out,.block-err');
-    if(cmd)text+=cmd.textContent+'\n';
-    if(out)text+=out.textContent+'\n\n';
+    if(cmd)parts.push(cmd.textContent+'\n');
+    if(out)parts.push(out.textContent+'\n\n');
   });
-  navigator.clipboard.writeText(text.trim()).then(()=>{
+  navigator.clipboard.writeText(parts.join('').trim()).then(()=>{
     const btn=document.getElementById('copy-all-btn');
     btn.textContent='✓ copiado!';
     setTimeout(()=>btn.textContent='📋 copiar tudo',1500);
