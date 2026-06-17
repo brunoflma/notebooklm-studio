@@ -550,6 +550,7 @@ code{font-family:monospace;font-size:11px;background:#1f1f1f;padding:1px 5px;bor
 </div>
 
 <script>
+const esc = (s) => s ? String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m])) : '';
 const H={'Content-Type':'application/json','ngrok-skip-browser-warning':'true'};
 const STUDIO_VERSION='2.16'; // versão atual — atualizar a cada release
 const GITHUB_RELEASES_URL='https://api.github.com/repos/brunoflma/notebooklm-studio/releases/latest';
@@ -651,7 +652,7 @@ async function _checkVersionUpdate(){
       const out=document.getElementById('output');
       const box=document.createElement('div');
       box.style.cssText='margin:4px 0;padding:10px 14px;background:#0f1e35;border:1px solid #1e4a7a;border-radius:8px;font-size:13px;color:#93c5fd;line-height:1.6;cursor:pointer';
-      box.innerHTML=`🔔 <strong style="color:#bfdbfe">Nova versão disponível: v${latest}</strong> — você está usando v${STUDIO_VERSION}. <a href="${url}" target="_blank" rel="noopener" style="color:#60a5fa;text-decoration:underline">Ver o que mudou →</a>`;
+      box.innerHTML=`🔔 <strong style="color:#bfdbfe">Nova versão disponível: v${esc(latest)}</strong> — você está usando v${STUDIO_VERSION}. <a href="${esc(url)}" target="_blank" rel="noopener" style="color:#60a5fa;text-decoration:underline">Ver o que mudou →</a>`;
       out.appendChild(box);
       sep();
     }
@@ -718,7 +719,7 @@ function showSpinner(cmd){
     <div style="flex:1;min-width:0">
       <div style="display:flex;align-items:center;gap:6px">
         <span style="color:#5bc4bb;font-size:12px">Executando</span>
-        <span class="spinner-cmd">notebooklm ${cmd}</span>
+        <span class="spinner-cmd">notebooklm ${esc(cmd)}</span>
         <span class="spinner-time" id="spin-timer">0s</span>
       </div>
       <div class="progress-bar-wrap"><div class="progress-bar"></div></div>
@@ -1010,10 +1011,10 @@ function triggerDownload(fileName, mimeType){
   const box = document.createElement('div');
   box.style.cssText = 'margin:6px 0;padding:12px 14px;background:#182a1e;border:1px solid #2a5c34;border-radius:8px;font-size:12px;line-height:1.8;color:#a3d9a8';
   box.innerHTML =
-    '✅ <strong style="color:#c3e8c8">Download iniciado</strong> — o arquivo <strong>'+baseName+'</strong> deve abrir em uma nova aba.<br>'+
+    '✅ <strong style="color:#c3e8c8">Download iniciado</strong> — o arquivo <strong>'+esc(baseName)+'</strong> deve abrir em uma nova aba.<br>'+
     '<span style="color:#7fbf85">Se nada aconteceu:</span> verifique se o navegador bloqueou o popup, ou baixe manualmente pelo painel de arquivos do Colab '+
     '(ícone 📁 na barra lateral → botão direito → <em>Fazer download</em>).<br>'+
-    '<span style="color:#555">URL direta: <a href="'+downloadUrl+'" target="_blank" style="color:#5bc4bb">'+downloadUrl+'</a></span>';
+    '<span style="color:#555">URL direta: <a href="'+esc(downloadUrl)+'" target="_blank" style="color:#5bc4bb">'+esc(downloadUrl)+'</a></span>';
   document.getElementById('output').appendChild(box);
   scroll();
 }
@@ -1298,7 +1299,7 @@ async function loadNbList(){
     _notebooks.forEach(nb=>{
       const btn=document.createElement('button');
       btn.className='nb-switch-item';
-      btn.innerHTML=`<span class="nb-title">${nb.title}</span><span class="nb-id">${nb.id.substring(0,8)}...</span>`;
+      btn.innerHTML=`<span class="nb-title">${esc(nb.title)}</span><span class="nb-id">${esc(nb.id.substring(0,8))}...</span>`;
       btn.onclick=async()=>{
         document.getElementById('nb-switcher').style.display='none';
         await run('use '+nb.id.substring(0,8));
@@ -1307,7 +1308,7 @@ async function loadNbList(){
       container.appendChild(btn);
     });
   }catch(e){
-    container.innerHTML='<div style="padding:10px 12px;font-size:11px;color:#f87171">Erro ao carregar: '+e.message+'</div>';
+    container.innerHTML='<div style="padding:10px 12px;font-size:11px;color:#f87171">Erro ao carregar: '+esc(e.message)+'</div>';
   }
 }
 
@@ -1694,7 +1695,7 @@ function renderPlaybooks(){
   _playbooks.forEach((pb,i)=>{
     const row=document.createElement('div');row.style.cssText='display:flex;align-items:center;padding:0 4px 0 0;gap:2px';
     const btn=document.createElement('button');btn.className='pal-pb';btn.style.flex='1';
-    btn.innerHTML='<span class="pb-name">'+pb.name+'</span><span class="pb-n">'+pb.cmds.length+'&#215;</span>';
+    btn.innerHTML='<span class="pb-name">'+esc(pb.name)+'</span><span class="pb-n">'+pb.cmds.length+'&#215;</span>';
     btn.title='Clique para executar: '+pb.cmds.join(' → ');btn.onclick=()=>runPlaybook(i);
     const editBtn=document.createElement('button');editBtn.className='pb-del';editBtn.title='Editar playbook';
     editBtn.innerHTML='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
@@ -1717,7 +1718,7 @@ function openSavePlaybook(){
   const box=document.createElement('div');box.id='pb-modal';
   box.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:500;display:flex;align-items:center;justify-content:center';
   box.onclick=function(e){if(e.target===box)closePbModal();};
-  const chks=r.length ? r.map((c,i)=>'<label style="display:flex;align-items:center;gap:8px;padding:4px 8px;cursor:pointer;font-size:12px;color:#888"><input type="checkbox" value="'+i+'" style="accent-color:#f59e0b"><span style="font-family:monospace">'+c.substring(0,55)+'</span></label>').join('') : '<div style="font-size:11px;color:#555;padding:4px 8px">Nenhum comando no histórico ainda.</div>';
+  const chks=r.length ? r.map((c,i)=>'<label style="display:flex;align-items:center;gap:8px;padding:4px 8px;cursor:pointer;font-size:12px;color:#888"><input type="checkbox" value="'+i+'" style="accent-color:#f59e0b"><span style="font-family:monospace">'+esc(c.substring(0,55))+'</span></label>').join('') : '<div style="font-size:11px;color:#555;padding:4px 8px">Nenhum comando no histórico ainda.</div>';
   box.innerHTML='<div style="background:#21212d;border:1px solid #363648;border-radius:12px;padding:22px;width:90%;max-width:500px;display:flex;flex-direction:column;gap:12px">'
     +'<div style="font-size:14px;font-weight:600;color:#e8e8e8">Novo Playbook</div>'
     +'<input id="pb-nm" placeholder="Nome do playbook" style="background:#15151e;border:1px solid #363648;border-radius:7px;color:#d4d4d4;font-size:14px;padding:9px 12px;outline:none;width:100%">'
@@ -1762,7 +1763,7 @@ function openEditPlaybook(idx){
     return cmds.map((c,i)=>
       '<div id="pb-edit-row-'+i+'" style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid #1e1e2a">'
       +'<span style="font-size:10px;color:#555;width:14px;flex-shrink:0">'+(i+1)+'</span>'
-      +'<input id="pb-edit-cmd-'+i+'" value="'+c.replace(/"/g,'&quot;')+'" style="flex:1;background:#15151e;border:1px solid #2a2a38;border-radius:5px;color:#d4d4d4;font-size:12px;font-family:monospace;padding:5px 8px;outline:none">'
+      +'<input id="pb-edit-cmd-'+i+'" value="'+esc(c)+'" style="flex:1;background:#15151e;border:1px solid #2a2a38;border-radius:5px;color:#d4d4d4;font-size:12px;font-family:monospace;padding:5px 8px;outline:none">'
       +'<button onclick="pbEditMoveUp('+i+')" title="Subir" style="background:none;border:none;color:#555;cursor:pointer;font-size:12px;padding:2px 4px">↑</button>'
       +'<button onclick="pbEditMoveDown('+i+')" title="Descer" style="background:none;border:none;color:#555;cursor:pointer;font-size:12px;padding:2px 4px">↓</button>'
       +'<button onclick="pbEditRemoveRow('+i+')" title="Remover" style="background:none;border:none;color:#f87171;cursor:pointer;font-size:12px;padding:2px 5px">✕</button>'
@@ -1773,7 +1774,7 @@ function openEditPlaybook(idx){
   box.innerHTML='<div style="background:#21212d;border:1px solid #363648;border-radius:12px;padding:22px;width:90%;max-width:520px;display:flex;flex-direction:column;gap:12px;max-height:90vh;overflow-y:auto">'
     +'<div style="font-size:14px;font-weight:600;color:#e8e8e8">Editar Playbook</div>'
     +'<label style="font-size:11px;color:#666">Nome</label>'
-    +'<input id="pb-edit-name" value="'+pb.name.replace(/"/g,'&quot;')+'" style="background:#15151e;border:1px solid #363648;border-radius:7px;color:#d4d4d4;font-size:14px;padding:9px 12px;outline:none;width:100%">'
+    +'<input id="pb-edit-name" value="'+esc(pb.name)+'" style="background:#15151e;border:1px solid #363648;border-radius:7px;color:#d4d4d4;font-size:14px;padding:9px 12px;outline:none;width:100%">'
     +'<label style="font-size:11px;color:#666">Comandos <span style="color:#555">(edite, reordene ou remova)</span></label>'
     +'<div id="pb-edit-rows" style="display:flex;flex-direction:column;gap:2px;max-height:220px;overflow-y:auto;padding:4px 0">'+buildCmdRows(pb.cmds)+'</div>'
     +'<div style="display:flex;gap:6px;align-items:center">'
@@ -1802,7 +1803,7 @@ function _pbEditRebuildRows(cmds){
   container.innerHTML=cmds.map((c,i)=>
     '<div id="pb-edit-row-'+i+'" style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid #1e1e2a">'
     +'<span style="font-size:10px;color:#555;width:14px;flex-shrink:0">'+(i+1)+'</span>'
-    +'<input id="pb-edit-cmd-'+i+'" value="'+c.replace(/"/g,'&quot;')+'" style="flex:1;background:#15151e;border:1px solid #2a2a38;border-radius:5px;color:#d4d4d4;font-size:12px;font-family:monospace;padding:5px 8px;outline:none">'
+    +'<input id="pb-edit-cmd-'+i+'" value="'+esc(c)+'" style="flex:1;background:#15151e;border:1px solid #2a2a38;border-radius:5px;color:#d4d4d4;font-size:12px;font-family:monospace;padding:5px 8px;outline:none">'
     +'<button onclick="pbEditMoveUp('+i+')" title="Subir" style="background:none;border:none;color:#555;cursor:pointer;font-size:12px;padding:2px 4px">↑</button>'
     +'<button onclick="pbEditMoveDown('+i+')" title="Descer" style="background:none;border:none;color:#555;cursor:pointer;font-size:12px;padding:2px 4px">↓</button>'
     +'<button onclick="pbEditRemoveRow('+i+')" title="Remover" style="background:none;border:none;color:#f87171;cursor:pointer;font-size:12px;padding:2px 5px">✕</button>'
@@ -1870,7 +1871,7 @@ function setDebugTab(t){
 }
 function renderDebug(){
   const c=document.getElementById('debug-content');
-  if(_dbTab==='raw'){c.innerHTML='<pre style="font-family:monospace;font-size:11px;color:#888;white-space:pre-wrap;padding:10px">'+JSON.stringify(_dbLog,null,2)+'</pre>';return;}
+  if(_dbTab==='raw'){c.innerHTML='<pre style="font-family:monospace;font-size:11px;color:#888;white-space:pre-wrap;padding:10px">'+esc(JSON.stringify(_dbLog,null,2))+'</pre>';return;}
   if(!_dbLog.length){c.innerHTML='<div style="padding:16px;color:#555;font-size:12px">Sem registros ainda.</div>';return;}
   c.innerHTML='';
   [..._dbLog].reverse().forEach(e=>{
@@ -1878,7 +1879,7 @@ function renderDebug(){
     const rc=e.rc===0?'<span class="de-rc de-ok">ok</span>':'<span class="de-rc de-err">rc '+e.rc+'</span>';
     const dur='<span class="de-rc de-dur">'+e.duration+'s</span>';
     const ts=e.ts?e.ts.substring(11,19):'';
-    el.innerHTML='<div class="de-head"><span class="de-cmd">$ notebooklm '+(e.cmd||'')+'</span>'+rc+dur+'<span class="de-ts">'+ts+'</span></div>';
+    el.innerHTML='<div class="de-head"><span class="de-cmd">$ notebooklm '+esc(e.cmd||'')+'</span>'+rc+dur+'<span class="de-ts">'+ts+'</span></div>';
     if(e.error){const r=document.createElement('div');r.className='de-raw';r.textContent=e.error;el.appendChild(r);}
     c.appendChild(el);
   });
