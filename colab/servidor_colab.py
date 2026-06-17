@@ -48,15 +48,6 @@ CONTENT_DIR = '/content/'
 # gdown.download(id=DRIVE_FILE_ID, output=AUTH_FILE, quiet=True)
 # print("✅ Credenciais carregadas do Google Drive")
 
-# ── Verificação de credenciais ────────────────────────────────────────────
-if not os.path.exists(AUTH_FILE):
-    raise FileNotFoundError(
-        f"\n\n❌ CREDENCIAIS NÃO ENCONTRADAS!\n"
-        f"Arquivo esperado em: {AUTH_FILE}\n"
-        f"Execute a Célula 2 para fazer o upload do storage_state.json."
-    )
-
-print("✅ Credenciais encontradas.")
 
 
 # ── Função principal de execução com retry automático ────────────────────
@@ -184,58 +175,69 @@ def save_history():
     return jsonify({'ok': True, 'path': path, 'count': len(data)})
 
 
-# ── Configuração do ngrok ─────────────────────────────────────────────────
-#
-# OPÇÃO A — Colab Secrets (recomendada, token não aparece no código):
-#   1. Clique no ícone 🔑 na barra lateral esquerda do Colab
-#   2. Clique em "Add new secret"
-#   3. Name: NGROK_TOKEN   |   Value: seu token do dashboard.ngrok.com
-#   4. Ative o toggle "Notebook access"
-#
-# OPÇÃO B — Direto no código (substitua SEU_TOKEN_AQUI pelo token real):
-#   ngrok_token = 'SEU_TOKEN_AQUI'
+if __name__ == '__main__':
+    # ── Verificação de credenciais ────────────────────────────────────────────
+    if not os.path.exists(AUTH_FILE):
+        raise FileNotFoundError(
+            f"\n\n❌ CREDENCIAIS NÃO ENCONTRADAS!\n"
+            f"Arquivo esperado em: {AUTH_FILE}\n"
+            f"Execute a Célula 2 para fazer o upload do storage_state.json."
+        )
 
-try:
-    from google.colab import userdata
-    ngrok_token = userdata.get('NGROK_TOKEN')
-    if not ngrok_token:
-        raise ValueError("Token vazio nos Secrets")
-except Exception:
-    ngrok_token = 'SEU_TOKEN_AQUI'  # ← Opção B: cole seu token aqui
+    print("✅ Credenciais encontradas.")
 
-# Validação antes de tentar conectar
-if ngrok_token == 'SEU_TOKEN_AQUI' or not ngrok_token:
-    raise ValueError(
-        "\n\n❌ TOKEN DO NGROK NÃO CONFIGURADO!\n"
-        "Configure via Colab Secrets (Opção A) ou\n"
-        "substitua SEU_TOKEN_AQUI pelo seu token real (Opção B).\n"
-        "Obtenha seu token em: https://dashboard.ngrok.com/get-started/your-authtoken"
-    )
+    # ── Configuração do ngrok ─────────────────────────────────────────────────
+    #
+    # OPÇÃO A — Colab Secrets (recomendada, token não aparece no código):
+    #   1. Clique no ícone 🔑 na barra lateral esquerda do Colab
+    #   2. Clique em "Add new secret"
+    #   3. Name: NGROK_TOKEN   |   Value: seu token do dashboard.ngrok.com
+    #   4. Ative o toggle "Notebook access"
+    #
+    # OPÇÃO B — Direto no código (substitua SEU_TOKEN_AQUI pelo token real):
+    #   ngrok_token = 'SEU_TOKEN_AQUI'
 
-ngrok.set_auth_token(ngrok_token)
-print("✅ Token ngrok configurado.")
+    try:
+        from google.colab import userdata
+        ngrok_token = userdata.get('NGROK_TOKEN')
+        if not ngrok_token:
+            raise ValueError("Token vazio nos Secrets")
+    except Exception:
+        ngrok_token = 'SEU_TOKEN_AQUI'  # ← Opção B: cole seu token aqui
 
-# ── Keep-alive: previne desconexão do Colab após 90 min ──────────────────
-import threading
+    # Validação antes de tentar conectar
+    if ngrok_token == 'SEU_TOKEN_AQUI' or not ngrok_token:
+        raise ValueError(
+            "\n\n❌ TOKEN DO NGROK NÃO CONFIGURADO!\n"
+            "Configure via Colab Secrets (Opção A) ou\n"
+            "substitua SEU_TOKEN_AQUI pelo seu token real (Opção B).\n"
+            "Obtenha seu token em: https://dashboard.ngrok.com/get-started/your-authtoken"
+        )
 
-url = ngrok.connect(5000)
-url_str = url.public_url  # URL limpa, sem o objeto NgrokTunnel
+    ngrok.set_auth_token(ngrok_token)
+    print("✅ Token ngrok configurado.")
 
-def keep_alive():
-    while True:
-        time.sleep(25 * 60)  # ping a cada 25 minutos
-        try:
-            requests.get(url_str + '/health', timeout=5)
-        except Exception:
-            pass
+    # ── Keep-alive: previne desconexão do Colab após 90 min ──────────────────
+    import threading
 
-threading.Thread(target=keep_alive, daemon=True).start()
+    url = ngrok.connect(5000)
+    url_str = url.public_url  # URL limpa, sem o objeto NgrokTunnel
 
-# ── Exibe a URL uma única vez ─────────────────────────────────────────────
-print(f"\n{'━'*50}")
-print(f"✅ Servidor ativo!")
-print(f"📡 URL para colar no Studio: {url_str}")
-print(f"🕑 Keep-alive ativo — ping a cada 25 min")
-print(f"{'━'*50}\n")
+    def keep_alive():
+        while True:
+            time.sleep(25 * 60)  # ping a cada 25 minutos
+            try:
+                requests.get(url_str + '/health', timeout=5)
+            except Exception:
+                pass
 
-app.run(port=5000)
+    threading.Thread(target=keep_alive, daemon=True).start()
+
+    # ── Exibe a URL uma única vez ─────────────────────────────────────────────
+    print(f"\n{'━'*50}")
+    print(f"✅ Servidor ativo!")
+    print(f"📡 URL para colar no Studio: {url_str}")
+    print(f"🕑 Keep-alive ativo — ping a cada 25 min")
+    print(f"{'━'*50}\n")
+
+    app.run(port=5000)
